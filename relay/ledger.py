@@ -4,8 +4,10 @@ Every real Groq call goes through ``BudgetedClient``:
   1. ``Ledger.reserve`` checks every cap that applies, counting calls still in flight. It refuses
      (raises ``BudgetExceeded``) before anything is sent if the call could break a cap.
   2. The call runs on ``relay.llm.LLMClient``.
-  3. ``Ledger.settle`` appends one line to ``results/ledger/groq_calls.jsonl`` (flushed and
-     fsynced). This happens for every call, including timeouts and cancellations.
+  3. ``Ledger.settle`` appends one line to ``results/ledger/groq_calls.jsonl`` and flushes it, so
+     it survives a crash of this process. This happens for every call, including timeouts and
+     cancellations. It is fsynced on close, not per line: an fsync on this machine's data disk
+     takes ~30-60 ms and would block the event loop, delaying the timestamps of calls in flight.
 
 Caps come from ``config/budget.toml`` as fractions of the documented daily allowance
 (``data/limits_documented.json``):
@@ -16,8 +18,8 @@ reset at any hour, and we don't yet know which one Groq uses.
 
 Charging is conservative until the probe tells us how Groq really counts:
   * connect error (the server was never reached): 0 requests, 0 tokens
-  * HTTP 429: 1 request, estimated prompt tokens. Assumes a rejected call isn't charged its
-    max_tokens; probe phase P2 checks this.
+  * HTTP 4xx (429 limit, 413 too large, 400 bad parameters): 1 request, estimated prompt tokens.
+    Assumes a rejected call isn't charged its max_tokens; the probe checks this.
   * anything else: 1 request, max(estimated prompt + max_tokens, reported total usage).
     Correct whether Groq charges max_tokens at admission or actual usage.
 A call without ``max_tokens`` is refused: unbounded output can't be reserved.
@@ -79,6 +81,10 @@ class Budget:
     caps: list[Cap]
     window_hours: float = 24.0
     min_remaining_requests_fraction: float | None = None
+    # Tokens the server's chat template adds that we can't see in the messages. Must over-estimate,
+    # so that a reservation is an upper bound on what a call can be charged. A measured per-model
+    # value can replace it (Ledger.set_prompt_overhead).
+    prompt_overhead_tokens: int = 16
 
 
 def load_budget(budget_path: Path = DEFAULT_BUDGET, documented_path: Path = DOCUMENTED) -> Budget:
@@ -91,15 +97,19 @@ def load_budget(budget_path: Path = DEFAULT_BUDGET, documented_path: Path = DOCU
                   for m in c["models"]}
         caps.append(Cap(c["name"], c.get("scope", "*"), models, c.get("total_requests")))
     floor = cfg.get("server_floor", {}).get("min_remaining_requests_fraction")
-    return Budget(caps, float(cfg.get("window_hours", 24)), floor)
+    return Budget(caps, float(cfg.get("window_hours", 24)), floor,
+                  int(cfg.get("prompt_overhead_tokens", 16)))
 
 
-def estimate_prompt_tokens(payload: dict[str, Any]) -> int:
-    """Over-estimate on purpose (~3 chars/token; English is ~4) plus per-message overhead.
-    Settlement uses reported usage whenever it is larger."""
+def prompt_chars(payload: dict[str, Any]) -> int:
+    return sum(len(m.get("content") or "") for m in payload.get("messages") or [] if isinstance(m, dict))
+
+
+def estimate_prompt_tokens(payload: dict[str, Any], overhead: int = 16) -> int:
+    """Over-estimate on purpose (~3 chars/token; English is ~4), plus 8 per message, plus the
+    chat template's hidden ``overhead``. Settlement uses reported usage whenever it is larger."""
     msgs = [m for m in payload.get("messages") or [] if isinstance(m, dict)]
-    chars = sum(len(m.get("content") or "") for m in msgs)
-    return math.ceil(chars / 3) + 8 * len(msgs) + 16
+    return math.ceil(prompt_chars(payload) / 3) + 8 * len(msgs) + overhead
 
 
 def max_output_tokens(payload: dict[str, Any]) -> int:
@@ -170,9 +180,13 @@ class Ledger:
         self.inflight: dict[int, Reservation] = {}
         self._ids = itertools.count(1)
         self.halted: str | None = None
+        self.prompt_overhead: dict[str, int] = {}   # measured per model; else the budget default
 
     # --------------------------------------------------------------- lifecycle
     def close(self) -> None:
+        if self.path.exists():
+            with self.path.open("a", encoding="utf-8") as f:
+                os.fsync(f.fileno())
         if self._lockfile is not None:
             _unlock(self._lockfile)
             self._lockfile = None
@@ -184,6 +198,34 @@ class Ledger:
         self.close()
 
     # --------------------------------------------------------------- accounting
+    def overhead_for(self, model: str) -> int:
+        return self.prompt_overhead.get(model, self.budget.prompt_overhead_tokens)
+
+    def set_prompt_overhead(self, model: str, tokens: int) -> None:
+        """Use a measured template overhead for ``model`` (the caller adds its own safety margin)."""
+        self.prompt_overhead[model] = int(tokens)
+
+    def estimate(self, payload: dict[str, Any]) -> int:
+        return estimate_prompt_tokens(payload, self.overhead_for(payload.get("model")))
+
+    def worst_charge(self, payload: dict[str, Any]) -> int:
+        """What reserving ``payload`` would hold: estimated prompt + max_tokens."""
+        return self.estimate(payload) + max_output_tokens(payload)
+
+    def headroom(self, scope: str, model: str) -> dict[str, int]:
+        """Smallest requests/tokens left for ``model`` across every cap that applies to ``scope``."""
+        req = tok = tot = 10 ** 12
+        for cap in self.budget.caps:
+            if not cap.applies(scope) or model not in cap.models:
+                continue
+            u = self.usage(cap)
+            mc = cap.models[model]
+            req = min(req, mc.requests - u["models"][model]["requests"])
+            tok = min(tok, mc.tokens - u["models"][model]["tokens"])
+            if cap.total_requests is not None:
+                tot = min(tot, cap.total_requests - u["total_requests"])
+        return {"requests": req, "tokens": tok, "total_requests": tot}
+
     def _in_window(self) -> list[dict[str, Any]]:
         cutoff = self.clock() - self.budget.window_hours * 3600
         return [e for e in self.entries if e["ts"] >= cutoff]
@@ -212,7 +254,7 @@ class Ledger:
         if self.halted:
             raise BudgetExceeded(f"ledger halted: {self.halted}")
         model = payload.get("model")
-        est = estimate_prompt_tokens(payload)
+        est = estimate_prompt_tokens(payload, self.overhead_for(model))
         mx = max_output_tokens(payload)
         need = est + mx
         applicable = [c for c in self.budget.caps if c.applies(scope)]
@@ -243,8 +285,9 @@ class Ledger:
         usage_total = (rec.usage or {}).get("total_tokens")
         if rec.outcome == CONNECT_ERROR:
             req, tok, basis = 0, 0, "never reached the server"
-        elif rec.status == 429:
-            req, tok, basis = 1, r.est_prompt_tokens, "429: prompt estimate only (assumption; probe P2 checks)"
+        elif rec.status is not None and 400 <= rec.status < 500:
+            # rejected before any generation (429 limit, 413 too large, 400 bad params)
+            req, tok, basis = 1, r.est_prompt_tokens, f"{rec.status}: rejected, prompt estimate only (assumption; probe P2/P3 check)"
         else:
             req = 1
             tok = max(r.reserved_tokens, int(usage_total or 0))
@@ -274,7 +317,6 @@ class Ledger:
         with self.path.open("a", encoding="utf-8", newline="\n") as f:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
             f.flush()
-            os.fsync(f.fileno())
         self.entries.append(entry)
         self._check_server_floor(rec)
         return entry

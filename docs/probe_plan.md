@@ -1,7 +1,7 @@
 # Probe plan: what Groq's free tier really does
 
-**Status: proposed. Nothing has been spent.** The ledger at `results/ledger/groq_calls.jsonl`
-does not exist yet.
+**Status: approved 2026-11-10 and implemented in `scripts/probe_groq.py`.** Changes made while
+implementing, each forced by a dry-run against the local fake, are listed in §4.
 
 **Models.** `openai/gpt-oss-20b`, `openai/gpt-oss-120b` (production) and `qwen/qwen3.8-27b`
 (preview).
@@ -147,9 +147,12 @@ which also samples different times of day. That spread matters more for the slow
 bigger single session would.
 
 **Where results go.**
-- `results/raw/probe/<utc>-probe.jsonl`: one line per call. Phase, ledger entry, full
-  `CallRecord` with every chunk time and header.
-- `scripts/analyze_probe.py` → `results/probe_findings.json` → Table 1. Committed.
+- `data/probe/probe_raw.jsonl` (append-only, real runs): one line per call with phase, exact
+  payload (prompt text, prompt chars, settings), ledger entry and full `CallRecord` (every chunk
+  time and header); plus `event` lines for waits, skips, refusals and decisions.
+- `scripts/analyze_probe.py` → `data/probe/limits_table.md` (Table 1), `data/probe/calibration.json`,
+  `data/probe/findings.md`.
+- Dry-runs: `data/probe/dryrun/<truth>/` with their own throwaway ledger.
 
 ---
 
@@ -174,3 +177,54 @@ bigger single session would.
 - **Long contexts, tool calling, other models, Batch API, audio limits (ASH/ASD).** None of these
   are in our pipeline.
 - **Time-of-day effects inside one session.** P6 is repeated on later days instead.
+
+---
+
+## 4. As implemented: changes from the proposal, and why
+
+Every change below came from running the whole probe against `relay/fake_groq.py`, a local fake
+whose behaviour we choose (bucket or window, admission or usage charging, per-model or pooled), and
+checking that `scripts/analyze_probe.py` recovers that behaviour (`--dry-run --truth ...`).
+
+- **No per-line fsync.** An fsync on the data disk takes about 30–60 ms, measured on this machine.
+  With two per call (ledger and raw log) it blocked the event loop and delayed the timestamps of
+  every call in flight: tiny calls measured about 2 s in the dry-run. The ledger and the raw log
+  now flush every line, which survives a crash of the process, and fsync on close.
+- **P1 polls follow a P6 draft call, not P2's call A.** When unused `max_tokens` are refunded at
+  the end of a call, A's 2,000-token hold is gone within a second and the polls see nothing to
+  refill. A draft's ~1.5K tokens are real usage, so that deficit can't be refunded away.
+  - 120b now polls at +1, 4 and 8 s, so that at least two intervals carry information.
+  - The analysis corrects each interval for the poll's own admission charge and for the refund or
+    usage charge of the call before it, using P2's measured rule.
+- **P3 burst: up to 40 requests per model, stopping after three 429s; recovery polls at +2, 4, 7,
+  11, 16, 22, 30, 40, 52 and 65 s, stopping after three successes in a row.**
+  - With a refilling bucket, a burst that takes several seconds refills a few requests on the way,
+    so 34 requests could miss the wall.
+  - The burst starts at second :15 of a minute. A wall-clock-minute window, a sliding 60 s window
+    and a bucket then recover at clearly different offsets.
+  - Allocation: ≤ 50 per gpt-oss model.
+- **The template overhead is measured, not assumed.** The ledger's prompt estimate adds a hidden
+  chat-template overhead, set to 128 tokens in `config/budget.toml` until it is measured.
+  - P0 measures each model's real overhead from `usage.prompt_tokens` and sets it, plus 8 tokens of
+    margin, for the rest of the run (logged as an event).
+  - A call whose real prompt exceeds the estimate is logged as `estimate_violation`.
+- **P3 is protected.** Before any earlier call, the runner checks that the caps still cover P3's
+  worst case. If they don't, that call is skipped and logged as `skip_protect_p3`. P6 routers run
+  last, so they absorb any shortfall.
+- **Every 4xx is charged its prompt estimate only.** That covers 429, 400 and 413; 413 "request
+  too large" is what an over-TPM request may get instead of a 429. The proposal only did this for
+  429, so a rejected P2-overflow call would have been charged its full 8.6K reservation.
+- **Pre-flight is printed twice: at the configured 128-token overhead and at 64.** The real run
+  proceeds if the plan fits at either. The ledger caps hold whatever the overhead turns out to be.
+  Only the flexible P6 router samples shrink.
+- **Concrete settings.** gpt-oss uses `reasoning_effort: low`. P0 also tries
+  `include_reasoning: false`. For qwen, P0 tries `none`, then `default` and `low` (both with
+  `reasoning_format: parsed`); the lowest accepted wins. This follows Groq's reasoning docs, read
+  2026-11-10.
+- **Realistic prompts.** Router prompts are a fixed ~420-character routing instruction plus one of
+  12 questions about the three papers. Draft prompts are an instruction plus a question plus 4
+  passages of about 1.1–1.3K characters, taken from `data/blocks.jsonl` by keyword overlap. The
+  nonce leads the first message, so no prefix cache can hit.
+- **Production-relevant latency split.** Every call opens a new TCP+TLS connection. The analysis
+  reports `connect_ms` separately, plus "after connect" times: what a kept-alive connection would
+  see.

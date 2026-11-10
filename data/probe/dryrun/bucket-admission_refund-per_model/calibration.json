@@ -1,0 +1,3738 @@
+{
+ "_generated_by": "scripts/analyze_probe.py",
+ "_raw": "data\\probe\\dryrun\\bucket-admission_refund-per_model\\probe_raw.jsonl",
+ "mode": "dry-run",
+ "runs": [
+  "20261110T135056Z-34be27"
+ ],
+ "calls": 167,
+ "models": {
+  "openai/gpt-oss-20b": {
+   "calls": 69,
+   "ok": 65,
+   "sequential_ok": 17,
+   "outcomes": {
+    "200:ok": 65,
+    "413:http_error": 1,
+    "429:rate_limited": 3
+   },
+   "connect_ms": {
+    "n": 65,
+    "p50": 0.8,
+    "p95": 4.0,
+    "max": 5.0,
+    "min": 0.3,
+    "p95_reliable": true
+   },
+   "ttfb": {
+    "_what": "headers_ms = time from call start (incl. new TCP+TLS connection) to response headers; server_ttfb_ms = the same minus connect_ms (what a kept-alive connection would see). All successful calls of this model, any size, any phase except P3 bursts and P4 k>1.",
+    "headers_ms": {
+     "n": 17,
+     "p50": 149.0,
+     "p95": 229.7,
+     "max": 229.7,
+     "min": 137.4,
+     "p95_reliable": false
+    },
+    "server_ttfb_ms": {
+     "n": 17,
+     "p50": 148.4,
+     "p95": 229.1,
+     "max": 229.1,
+     "min": 136.3,
+     "p95_reliable": false
+    }
+   },
+   "first_token_fit_vs_prompt_tokens": {
+    "_what": "OLS: first token (reasoning or visible) after connect, ms = intercept + slope * prompt_tokens",
+    "first_token": {
+     "n": 17,
+     "intercept": 140.672,
+     "slope": 0.078493,
+     "r2": 0.6384,
+     "abs_residual_p95": 50.31,
+     "x_range": [
+      83,
+      1085
+     ]
+    },
+    "first_visible": {
+     "n": 10,
+     "intercept": 168.251,
+     "slope": 0.083389,
+     "r2": 0.9032,
+     "abs_residual_p95": 22.33,
+     "x_range": [
+      83,
+      1085
+     ]
+    }
+   },
+   "by_size": {
+    "draft": {
+     "headers_ms": {
+      "n": 1,
+      "p50": 229.7,
+      "p95": 229.7,
+      "max": 229.7,
+      "min": 229.7,
+      "p95_reliable": false
+     },
+     "server_ttfb_ms": {
+      "n": 1,
+      "p50": 229.1,
+      "p95": 229.1,
+      "max": 229.1,
+      "min": 229.1,
+      "p95_reliable": false
+     },
+     "first_token_after_connect_ms": {
+      "n": 1,
+      "p50": 229.2,
+      "p95": 229.2,
+      "max": 229.2,
+      "min": 229.2,
+      "p95_reliable": false
+     },
+     "first_visible_after_connect_ms": {
+      "n": 1,
+      "p50": 260.5,
+      "p95": 260.5,
+      "max": 260.5,
+      "min": 260.5,
+      "p95_reliable": false
+     },
+     "total_ms": {
+      "n": 1,
+      "p50": 682.1,
+      "p95": 682.1,
+      "max": 682.1,
+      "min": 682.1,
+      "p95_reliable": false
+     },
+     "prompt_tokens": {
+      "n": 1,
+      "p50": 1085,
+      "p95": 1085,
+      "max": 1085,
+      "min": 1085,
+      "p95_reliable": false
+     },
+     "completion_tokens": {
+      "n": 1,
+      "p50": 262,
+      "p95": 262,
+      "max": 262,
+      "min": 262,
+      "p95_reliable": false
+     },
+     "finish_reason_length": 0
+    },
+    "p0": {
+     "headers_ms": {
+      "n": 2,
+      "p50": 145.4,
+      "p95": 145.9,
+      "max": 145.9,
+      "min": 145.4,
+      "p95_reliable": false
+     },
+     "server_ttfb_ms": {
+      "n": 2,
+      "p50": 144.6,
+      "p95": 145.1,
+      "max": 145.1,
+      "min": 144.6,
+      "p95_reliable": false
+     },
+     "first_token_after_connect_ms": {
+      "n": 2,
+      "p50": 144.8,
+      "p95": 197.5,
+      "max": 197.5,
+      "min": 144.8,
+      "p95_reliable": false
+     },
+     "first_visible_after_connect_ms": {
+      "n": 2,
+      "p50": 170.8,
+      "p95": 197.5,
+      "max": 197.5,
+      "min": 170.8,
+      "p95_reliable": false
+     },
+     "total_ms": {
+      "n": 2,
+      "p50": 172.2,
+      "p95": 198.4,
+      "max": 198.4,
+      "min": 172.2,
+      "p95_reliable": false
+     },
+     "prompt_tokens": {
+      "n": 2,
+      "p50": 83,
+      "p95": 83,
+      "max": 83,
+      "min": 83,
+      "p95_reliable": false
+     },
+     "completion_tokens": {
+      "n": 2,
+      "p50": 25,
+      "p95": 25,
+      "max": 25,
+      "min": 25,
+      "p95_reliable": false
+     },
+     "finish_reason_length": 0
+    },
+    "p2a": {
+     "headers_ms": {
+      "n": 1,
+      "p50": 146.9,
+      "p95": 146.9,
+      "max": 146.9,
+      "min": 146.9,
+      "p95_reliable": false
+     },
+     "server_ttfb_ms": {
+      "n": 1,
+      "p50": 145.9,
+      "p95": 145.9,
+      "max": 145.9,
+      "min": 145.9,
+      "p95_reliable": false
+     },
+     "first_token_after_connect_ms": {
+      "n": 1,
+      "p50": 145.9,
+      "p95": 145.9,
+      "max": 145.9,
+      "min": 145.9,
+      "p95_reliable": false
+     },
+     "first_visible_after_connect_ms": {
+      "n": 1,
+      "p50": 170.9,
+      "p95": 170.9,
+      "max": 170.9,
+      "min": 170.9,
+      "p95_reliable": false
+     },
+     "total_ms": {
+      "n": 1,
+      "p50": 172.4,
+      "p95": 172.4,
+      "max": 172.4,
+      "min": 172.4,
+      "p95_reliable": false
+     },
+     "prompt_tokens": {
+      "n": 1,
+      "p50": 83,
+      "p95": 83,
+      "max": 83,
+      "min": 83,
+      "p95_reliable": false
+     },
+     "completion_tokens": {
+      "n": 1,
+      "p50": 25,
+      "p95": 25,
+      "max": 25,
+      "min": 25,
+      "p95_reliable": false
+     },
+     "finish_reason_length": 0
+    },
+    "router": {
+     "headers_ms": {
+      "n": 6,
+      "p50": 151.7,
+      "p95": 153.3,
+      "max": 153.3,
+      "min": 149.0,
+      "p95_reliable": false
+     },
+     "server_ttfb_ms": {
+      "n": 6,
+      "p50": 151.2,
+      "p95": 152.9,
+      "max": 152.9,
+      "min": 148.4,
+      "p95_reliable": false
+     },
+     "first_token_after_connect_ms": {
+      "n": 6,
+      "p50": 151.3,
+      "p95": 152.9,
+      "max": 152.9,
+      "min": 148.7,
+      "p95_reliable": false
+     },
+     "first_visible_after_connect_ms": {
+      "n": 6,
+      "p50": 182.6,
+      "p95": 183.7,
+      "max": 183.7,
+      "min": 179.8,
+      "p95_reliable": false
+     },
+     "total_ms": {
+      "n": 6,
+      "p50": 183.3,
+      "p95": 184.6,
+      "max": 184.6,
+      "min": 180.9,
+      "p95_reliable": false
+     },
+     "prompt_tokens": {
+      "n": 6,
+      "p50": 197,
+      "p95": 202,
+      "max": 202,
+      "min": 194,
+      "p95_reliable": false
+     },
+     "completion_tokens": {
+      "n": 6,
+      "p50": 35,
+      "p95": 35,
+      "max": 35,
+      "min": 35,
+      "p95_reliable": false
+     },
+     "finish_reason_length": 0
+    },
+    "tiny": {
+     "headers_ms": {
+      "n": 7,
+      "p50": 142.0,
+      "p95": 159.8,
+      "max": 159.8,
+      "min": 137.4,
+      "p95_reliable": false
+     },
+     "server_ttfb_ms": {
+      "n": 7,
+      "p50": 141.5,
+      "p95": 159.1,
+      "max": 159.1,
+      "min": 136.3,
+      "p95_reliable": false
+     },
+     "first_token_after_connect_ms": {
+      "n": 7,
+      "p50": 141.8,
+      "p95": 159.6,
+      "max": 159.6,
+      "min": 136.3,
+      "p95_reliable": false
+     },
+     "first_visible_after_connect_ms": {
+      "n": 0
+     },
+     "total_ms": {
+      "n": 7,
+      "p50": 167.4,
+      "p95": 184.3,
+      "max": 184.3,
+      "min": 162.3,
+      "p95_reliable": false
+     },
+     "prompt_tokens": {
+      "n": 7,
+      "p50": 83,
+      "p95": 83,
+      "max": 83,
+      "min": 83,
+      "p95_reliable": false
+     },
+     "completion_tokens": {
+      "n": 7,
+      "p50": 16,
+      "p95": 16,
+      "max": 16,
+      "min": 16,
+      "p95_reliable": false
+     },
+     "finish_reason_length": 7
+    }
+   },
+   "tokens_per_s": {
+    "client_side": {
+     "n": 1,
+     "p50": 643.3,
+     "p95": 643.3,
+     "max": 643.3,
+     "min": 643.3,
+     "p95_reliable": false
+    },
+    "server_reported": {
+     "n": 17,
+     "p50": 899.3,
+     "p95": 900.0,
+     "max": 900.0,
+     "min": 898.9,
+     "p95_reliable": false
+    }
+   },
+   "chunk_gaps_ms": {
+    "n": 31,
+    "p50": 26.0,
+    "p95": 34.9,
+    "max": 39.0,
+    "min": 0.0,
+    "p95_reliable": true
+   },
+   "server_queue_time_s": {
+    "n": 17,
+    "p50": 0.01,
+    "p95": 0.01,
+    "max": 0.01,
+    "min": 0.01,
+    "p95_reliable": false
+   },
+   "prompt_token_estimate": {
+    "_what": "prompt_tokens reported by the server vs prompt characters; our ledger estimate is ceil(chars/3) + 8*messages + overhead, and must never be below the real count",
+    "one_message_fit": null,
+    "two_message_fit": {
+     "n": 21,
+     "intercept": 78.287,
+     "slope": 0.250053,
+     "r2": 1.0,
+     "abs_residual_p95": 0.31,
+     "x_range": [
+      436,
+      4026
+     ]
+    },
+    "estimate_over_actual": {
+     "n": 65,
+     "p50": 1.096,
+     "p95": 1.252,
+     "max": 1.783,
+     "min": 1.096,
+     "p95_reliable": true
+    },
+    "estimate_below_actual_calls": 0
+   },
+   "latency_vs_in_flight": [
+    {
+     "k": 1,
+     "calls": 1,
+     "ok": 1,
+     "non_200": [],
+     "headers_ms_p50": 152.4,
+     "server_ttfb_ms_p50": 152.1,
+     "first_token_after_connect_ms_p50": 152.2,
+     "total_ms_p50": 184.1,
+     "total_ms_max": 184.1,
+     "queue_time_s_p50": 0.01
+    },
+    {
+     "k": 2,
+     "calls": 2,
+     "ok": 2,
+     "non_200": [],
+     "headers_ms_p50": 146.8,
+     "server_ttfb_ms_p50": 145.9,
+     "first_token_after_connect_ms_p50": 145.9,
+     "total_ms_p50": 174.5,
+     "total_ms_max": 200.3,
+     "queue_time_s_p50": 0.01
+    },
+    {
+     "k": 4,
+     "calls": 4,
+     "ok": 4,
+     "non_200": [],
+     "headers_ms_p50": 187.9,
+     "server_ttfb_ms_p50": 185.9,
+     "first_token_after_connect_ms_p50": 186.3,
+     "total_ms_p50": 219.8,
+     "total_ms_max": 275.7,
+     "queue_time_s_p50": 0.05
+    },
+    {
+     "k": 8,
+     "calls": 8,
+     "ok": 8,
+     "non_200": [],
+     "headers_ms_p50": 261.1,
+     "server_ttfb_ms_p50": 257.70000000000005,
+     "first_token_after_connect_ms_p50": 257.90000000000003,
+     "total_ms_p50": 292.5,
+     "total_ms_max": 464.3,
+     "queue_time_s_p50": 0.13
+    }
+   ],
+   "limits_seen": {
+    "headers": {
+     "x-ratelimit-limit-requests": [
+      "1000"
+     ],
+     "x-ratelimit-limit-tokens": [
+      "8000"
+     ]
+    },
+    "from_error_bodies": {
+     "TPM": [
+      8000
+     ],
+     "RPM": [
+      30
+     ]
+    },
+    "documented": {
+     "rpm": 30,
+     "rpd": 1000,
+     "tpm": 8000,
+     "tpd": 200000
+    },
+    "error_responses": [
+     {
+      "phase": "P2-overflow",
+      "variant": "max_tokens_over_tpm",
+      "status": 413,
+      "retry_after": null,
+      "parsed": {
+       "what": "tokens per minute",
+       "short": "TPM",
+       "limit": 8000,
+       "requested": 8583,
+       "form": "request_too_large"
+      },
+      "type": "tokens",
+      "code": "rate_limit_exceeded"
+     },
+     {
+      "phase": "P3",
+      "variant": "burst",
+      "status": 429,
+      "retry_after": "1",
+      "parsed": {
+       "what": "requests per minute",
+       "short": "RPM",
+       "limit": 30,
+       "used": 29,
+       "requested": 1,
+       "try_again_in": "773ms",
+       "try_again_in_s": 0.773,
+       "form": "rate_limit_reached"
+      },
+      "type": "requests",
+      "code": "rate_limit_exceeded"
+     },
+     {
+      "phase": "P3",
+      "variant": "burst",
+      "status": 429,
+      "retry_after": "1",
+      "parsed": {
+       "what": "requests per minute",
+       "short": "RPM",
+       "limit": 30,
+       "used": 29,
+       "requested": 1,
+       "try_again_in": "770ms",
+       "try_again_in_s": 0.77,
+       "form": "rate_limit_reached"
+      },
+      "type": "requests",
+      "code": "rate_limit_exceeded"
+     },
+     {
+      "phase": "P3",
+      "variant": "burst",
+      "status": 429,
+      "retry_after": "1",
+      "parsed": {
+       "what": "requests per minute",
+       "short": "RPM",
+       "limit": 30,
+       "used": 29,
+       "requested": 1,
+       "try_again_in": "770ms",
+       "try_again_in_s": 0.77,
+       "form": "rate_limit_reached"
+      },
+      "type": "requests",
+      "code": "rate_limit_exceeded"
+     }
+    ]
+   },
+   "admission": {
+    "pairs": [
+     {
+      "run_id": "20261110T135056Z-34be27",
+      "limit_tokens": 8000,
+      "baseline": {
+       "call": "include_reasoning_false",
+       "remaining_tokens": "7577",
+       "reset_tokens": "3.17s",
+       "at": "2026-11-10T13:50:56.546+00:00"
+      },
+      "A": {
+       "max_tokens": 2000,
+       "prompt_tokens": 83,
+       "completion_tokens": 25,
+       "remaining_tokens": "5751",
+       "reset_tokens": "16.86s",
+       "at": "2026-11-10T13:50:56.745+00:00"
+      },
+      "seconds_between_baseline_and_A_admission": 0.2,
+      "drop_at_A_raw": 1826,
+      "expect_if_max_tokens_held": 1825.4,
+      "expect_if_usage": 81.4,
+      "expect_if_max_tokens_held_no_refill": 1852,
+      "expect_if_usage_no_refill": 108,
+      "verdict": "max_tokens reserved at admission",
+      "B": {
+       "remaining_tokens": "7651",
+       "at": "2026-11-10T13:50:56.913+00:00",
+       "seconds_after_A_admission": 0.168,
+       "rise_since_A": 1900,
+       "A_unused_max_tokens": 1975,
+       "B_own_charge_est": 99,
+       "refill_if_bucket": 22.4,
+       "refund_verdict": "unused max_tokens refunded when A finished"
+      }
+     }
+    ],
+    "overflow": [
+     {
+      "status": 413,
+      "max_tokens": 8500,
+      "body": "Request too large for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Requested 8583, please reduce your message size and try again.",
+      "parsed": {
+       "what": "tokens per minute",
+       "short": "TPM",
+       "limit": 8000,
+       "requested": 8583,
+       "form": "request_too_large"
+      },
+      "retry_after": null,
+      "headers_ms": 1.1,
+      "total_ms": 1.2,
+      "completion_tokens": null
+     }
+    ]
+   },
+   "token_accounting_fit": {
+    "pairs": [
+     {
+      "p": "P0/p0/main",
+      "q": "P0/p0/include_reasoning_false",
+      "max_tokens_p": 256,
+      "max_tokens_q": 256,
+      "remaining_p": 7661,
+      "remaining_q": 7577,
+      "dt_admission_s": 0.182,
+      "saturated_admission": false,
+      "res_usage_admission": -0.3,
+      "res_admission_admission": -0.3,
+      "dt_headers_s": 0.182,
+      "saturated_headers": false,
+      "res_usage_headers": -0.3,
+      "res_admission_headers": -0.3
+     },
+     {
+      "p": "P0/p0/include_reasoning_false",
+      "q": "P2/p2a/A",
+      "max_tokens_p": 256,
+      "max_tokens_q": 2000,
+      "remaining_p": 7577,
+      "remaining_q": 5751,
+      "dt_admission_s": 0.2,
+      "saturated_admission": false,
+      "res_usage_admission": -1744.6,
+      "res_admission_admission": -0.6,
+      "dt_headers_s": 0.2,
+      "saturated_headers": false,
+      "res_usage_headers": -1744.6,
+      "res_admission_headers": -0.6
+     },
+     {
+      "p": "P2/p2a/A",
+      "q": "P2/tiny/B",
+      "max_tokens_p": 2000,
+      "max_tokens_q": 16,
+      "remaining_p": 5751,
+      "remaining_q": 7651,
+      "dt_admission_s": 0.168,
+      "saturated_admission": false,
+      "res_usage_admission": 1985.6,
+      "res_admission_admission": 1.6,
+      "dt_headers_s": 0.168,
+      "saturated_headers": false,
+      "res_usage_headers": 1985.6,
+      "res_admission_headers": 1.6
+     },
+     {
+      "p": "P2/tiny/B",
+      "q": "P4/router/k1",
+      "max_tokens_p": 16,
+      "max_tokens_q": 200,
+      "remaining_p": 7651,
+      "remaining_q": 7602,
+      "dt_admission_s": 5.907,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 5.907,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P4/router/k1",
+      "q": "P4/router/k2",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 7602,
+      "remaining_q": 7613,
+      "dt_admission_s": 20.007,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 20.007,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P4/router/k2",
+      "q": "P4/router/k4",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 7215,
+      "remaining_q": 7602,
+      "dt_admission_s": 20.036,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 19.996,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P4/router/k4",
+      "q": "P4/router/k8",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 6415,
+      "remaining_q": 7599,
+      "dt_admission_s": 20.024,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 19.904,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P4/router/k8",
+      "q": "P6/draft/sequential",
+      "max_tokens_p": 200,
+      "max_tokens_q": 500,
+      "remaining_p": 4828,
+      "remaining_q": 4625,
+      "dt_admission_s": 0.543,
+      "saturated_admission": false,
+      "res_usage_admission": 844.5,
+      "res_admission_admission": 1144.5,
+      "dt_headers_s": 0.263,
+      "saturated_headers": false,
+      "res_usage_headers": 881.9,
+      "res_admission_headers": 1181.9
+     },
+     {
+      "p": "P6/draft/sequential",
+      "q": "P1/tiny/poll",
+      "max_tokens_p": 500,
+      "max_tokens_q": 16,
+      "remaining_p": 4625,
+      "remaining_q": 4989,
+      "dt_admission_s": 1.596,
+      "saturated_admission": false,
+      "res_usage_admission": 496.2,
+      "res_admission_admission": 12.2,
+      "dt_headers_s": 1.596,
+      "saturated_headers": false,
+      "res_usage_headers": 496.2,
+      "res_admission_headers": 12.2
+     },
+     {
+      "p": "P1/tiny/poll",
+      "q": "P1/tiny/poll",
+      "max_tokens_p": 16,
+      "max_tokens_q": 16,
+      "remaining_p": 4989,
+      "remaining_q": 5157,
+      "dt_admission_s": 2.011,
+      "saturated_admission": false,
+      "res_usage_admission": -1.1,
+      "res_admission_admission": -1.1,
+      "dt_headers_s": 2.011,
+      "saturated_headers": false,
+      "res_usage_headers": -1.1,
+      "res_admission_headers": -1.1
+     },
+     {
+      "p": "P1/tiny/poll",
+      "q": "P1/tiny/poll",
+      "max_tokens_p": 16,
+      "max_tokens_q": 16,
+      "remaining_p": 5157,
+      "remaining_q": 5457,
+      "dt_admission_s": 2.995,
+      "saturated_admission": false,
+      "res_usage_admission": -0.4,
+      "res_admission_admission": -0.4,
+      "dt_headers_s": 2.995,
+      "saturated_headers": false,
+      "res_usage_headers": -0.4,
+      "res_admission_headers": -0.4
+     },
+     {
+      "p": "P1/tiny/poll",
+      "q": "P1/tiny/poll",
+      "max_tokens_p": 16,
+      "max_tokens_q": 16,
+      "remaining_p": 5457,
+      "remaining_q": 5893,
+      "dt_admission_s": 4.003,
+      "saturated_admission": false,
+      "res_usage_admission": 1.2,
+      "res_admission_admission": 1.2,
+      "dt_headers_s": 4.003,
+      "saturated_headers": false,
+      "res_usage_headers": 1.2,
+      "res_admission_headers": 1.2
+     },
+     {
+      "p": "P1/tiny/poll",
+      "q": "P1/tiny/poll",
+      "max_tokens_p": 16,
+      "max_tokens_q": 16,
+      "remaining_p": 5893,
+      "remaining_q": 6460,
+      "dt_admission_s": 5.006,
+      "saturated_admission": false,
+      "res_usage_admission": -1.5,
+      "res_admission_admission": -1.5,
+      "dt_headers_s": 5.006,
+      "saturated_headers": false,
+      "res_usage_headers": -1.5,
+      "res_admission_headers": -1.5
+     },
+     {
+      "p": "P1/tiny/poll",
+      "q": "P1/tiny/poll",
+      "max_tokens_p": 16,
+      "max_tokens_q": 16,
+      "remaining_p": 6460,
+      "remaining_q": 7901,
+      "dt_admission_s": 15.01,
+      "saturated_admission": true,
+      "res_usage_admission": -16,
+      "res_admission_admission": 0,
+      "dt_headers_s": 15.01,
+      "saturated_headers": true,
+      "res_usage_headers": -16,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P1/tiny/poll",
+      "q": "P6/router/sequential",
+      "max_tokens_p": 16,
+      "max_tokens_q": 200,
+      "remaining_p": 7901,
+      "remaining_q": 7603,
+      "dt_admission_s": 27.829,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 27.829,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P6/router/sequential",
+      "q": "P6/router/sequential",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 7603,
+      "remaining_q": 7606,
+      "dt_admission_s": 9.005,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 9.005,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P6/router/sequential",
+      "q": "P6/router/sequential",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 7606,
+      "remaining_q": 7598,
+      "dt_admission_s": 9.025,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 9.025,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P6/router/sequential",
+      "q": "P6/router/sequential",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 7598,
+      "remaining_q": 7605,
+      "dt_admission_s": 9.023,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 9.023,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P6/router/sequential",
+      "q": "P6/router/sequential",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 7605,
+      "remaining_q": 7603,
+      "dt_admission_s": 9.007,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 9.007,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     }
+    ],
+    "fit": {
+     "usage@admission": {
+      "n_unsaturated": 9,
+      "median_abs_residual": 1.5,
+      "p90_abs_residual": 1985.6,
+      "max_abs_residual": 1985.6
+     },
+     "usage@headers": {
+      "n_unsaturated": 9,
+      "median_abs_residual": 1.5,
+      "p90_abs_residual": 1985.6,
+      "max_abs_residual": 1985.6
+     },
+     "admission@admission": {
+      "n_unsaturated": 9,
+      "median_abs_residual": 1.2,
+      "p90_abs_residual": 1144.5,
+      "max_abs_residual": 1144.5
+     },
+     "admission@headers": {
+      "n_unsaturated": 9,
+      "median_abs_residual": 1.2,
+      "p90_abs_residual": 1181.9,
+      "max_abs_residual": 1181.9
+     }
+    },
+    "best": "admission@admission",
+    "usage_residual_by_max_tokens_pair": {
+     "16->16": {
+      "n": 4,
+      "median": -1.1,
+      "min": -1.5,
+      "max": 1.2
+     },
+     "200->500": {
+      "n": 1,
+      "median": 844.5,
+      "min": 844.5,
+      "max": 844.5
+     },
+     "2000->16": {
+      "n": 1,
+      "median": 1985.6,
+      "min": 1985.6,
+      "max": 1985.6
+     },
+     "256->2000": {
+      "n": 1,
+      "median": -1744.6,
+      "min": -1744.6,
+      "max": -1744.6
+     },
+     "256->256": {
+      "n": 1,
+      "median": -0.3,
+      "min": -0.3,
+      "max": -0.3
+     },
+     "500->16": {
+      "n": 1,
+      "median": 496.2,
+      "min": 496.2,
+      "max": 496.2
+     }
+    }
+   },
+   "server_ttfb_vs_queue_time": {
+    "_what": "OLS: server_ttfb_ms = intercept + slope * queue_time_s (queue_time from x_groq.usage)",
+    "fit": null,
+    "queue_time_share_of_server_ttfb_p50": 0.0673854447439353
+   },
+   "reasoning_p0": [
+    {
+     "variant": "main",
+     "status": 200,
+     "settings": {
+      "max_tokens": 256,
+      "reasoning_effort": "low"
+     },
+     "reasoning_chars": 144,
+     "visible_text": "OK",
+     "completion_tokens": 25,
+     "completion_tokens_details": null,
+     "first_visible_after_connect_ms": 170.79999999999998,
+     "error": null
+    },
+    {
+     "variant": "include_reasoning_false",
+     "status": 200,
+     "settings": {
+      "max_tokens": 256,
+      "reasoning_effort": "low",
+      "include_reasoning": false
+     },
+     "reasoning_chars": 0,
+     "visible_text": "OK",
+     "completion_tokens": 25,
+     "completion_tokens_details": null,
+     "first_visible_after_connect_ms": 197.5,
+     "error": null
+    }
+   ]
+  },
+  "openai/gpt-oss-120b": {
+   "calls": 63,
+   "ok": 60,
+   "sequential_ok": 13,
+   "outcomes": {
+    "200:ok": 60,
+    "429:rate_limited": 3
+   },
+   "connect_ms": {
+    "n": 60,
+    "p50": 0.6,
+    "p95": 3.9,
+    "max": 4.4,
+    "min": 0.3,
+    "p95_reliable": true
+   },
+   "ttfb": {
+    "_what": "headers_ms = time from call start (incl. new TCP+TLS connection) to response headers; server_ttfb_ms = the same minus connect_ms (what a kept-alive connection would see). All successful calls of this model, any size, any phase except P3 bursts and P4 k>1.",
+    "headers_ms": {
+     "n": 13,
+     "p50": 238.8,
+     "p95": 425.1,
+     "max": 425.1,
+     "min": 224.4,
+     "p95_reliable": false
+    },
+    "server_ttfb_ms": {
+     "n": 13,
+     "p50": 238.5,
+     "p95": 424.6,
+     "max": 424.6,
+     "min": 223.8,
+     "p95_reliable": false
+    }
+   },
+   "first_token_fit_vs_prompt_tokens": {
+    "_what": "OLS: first token (reasoning or visible) after connect, ms = intercept + slope * prompt_tokens",
+    "first_token": {
+     "n": 13,
+     "intercept": 226.091,
+     "slope": 0.140607,
+     "r2": 0.8895,
+     "abs_residual_p95": 61.34,
+     "x_range": [
+      83,
+      1376
+     ]
+    },
+    "first_visible": {
+     "n": 9,
+     "intercept": 276.343,
+     "slope": 0.156505,
+     "r2": 0.9859,
+     "abs_residual_p95": 16.63,
+     "x_range": [
+      83,
+      1376
+     ]
+    }
+   },
+   "by_size": {
+    "draft": {
+     "headers_ms": {
+      "n": 2,
+      "p50": 354.5,
+      "p95": 425.1,
+      "max": 425.1,
+      "min": 354.5,
+      "p95_reliable": false
+     },
+     "server_ttfb_ms": {
+      "n": 2,
+      "p50": 354.0,
+      "p95": 424.6,
+      "max": 424.6,
+      "min": 354.0,
+      "p95_reliable": false
+     },
+     "first_token_after_connect_ms": {
+      "n": 2,
+      "p50": 354.1,
+      "p95": 424.7,
+      "max": 424.7,
+      "min": 354.1,
+      "p95_reliable": false
+     },
+     "first_visible_after_connect_ms": {
+      "n": 2,
+      "p50": 431.3,
+      "p95": 487.1,
+      "max": 487.1,
+      "min": 431.3,
+      "p95_reliable": false
+     },
+     "total_ms": {
+      "n": 2,
+      "p50": 1304.1,
+      "p95": 1314.2,
+      "max": 1314.2,
+      "min": 1304.1,
+      "p95_reliable": false
+     },
+     "prompt_tokens": {
+      "n": 2,
+      "p50": 939,
+      "p95": 1376,
+      "max": 1376,
+      "min": 939,
+      "p95_reliable": false
+     },
+     "completion_tokens": {
+      "n": 2,
+      "p50": 262,
+      "p95": 262,
+      "max": 262,
+      "min": 262,
+      "p95_reliable": false
+     },
+     "finish_reason_length": 0
+    },
+    "p0": {
+     "headers_ms": {
+      "n": 2,
+      "p50": 224.4,
+      "p95": 235.4,
+      "max": 235.4,
+      "min": 224.4,
+      "p95_reliable": false
+     },
+     "server_ttfb_ms": {
+      "n": 2,
+      "p50": 223.8,
+      "p95": 235.1,
+      "max": 235.1,
+      "min": 223.8,
+      "p95_reliable": false
+     },
+     "first_token_after_connect_ms": {
+      "n": 2,
+      "p50": 235.2,
+      "p95": 299.1,
+      "max": 299.1,
+      "min": 235.2,
+      "p95_reliable": false
+     },
+     "first_visible_after_connect_ms": {
+      "n": 2,
+      "p50": 288.7,
+      "p95": 299.1,
+      "max": 299.1,
+      "min": 288.7,
+      "p95_reliable": false
+     },
+     "total_ms": {
+      "n": 2,
+      "p50": 289.2,
+      "p95": 300.0,
+      "max": 300.0,
+      "min": 289.2,
+      "p95_reliable": false
+     },
+     "prompt_tokens": {
+      "n": 2,
+      "p50": 83,
+      "p95": 83,
+      "max": 83,
+      "min": 83,
+      "p95_reliable": false
+     },
+     "completion_tokens": {
+      "n": 2,
+      "p50": 25,
+      "p95": 25,
+      "max": 25,
+      "min": 25,
+      "p95_reliable": false
+     },
+     "finish_reason_length": 0
+    },
+    "p2a": {
+     "headers_ms": {
+      "n": 1,
+      "p50": 231.6,
+      "p95": 231.6,
+      "max": 231.6,
+      "min": 231.6,
+      "p95_reliable": false
+     },
+     "server_ttfb_ms": {
+      "n": 1,
+      "p50": 230.9,
+      "p95": 230.9,
+      "max": 230.9,
+      "min": 230.9,
+      "p95_reliable": false
+     },
+     "first_token_after_connect_ms": {
+      "n": 1,
+      "p50": 231.0,
+      "p95": 231.0,
+      "max": 231.0,
+      "min": 231.0,
+      "p95_reliable": false
+     },
+     "first_visible_after_connect_ms": {
+      "n": 1,
+      "p50": 284.8,
+      "p95": 284.8,
+      "max": 284.8,
+      "min": 284.8,
+      "p95_reliable": false
+     },
+     "total_ms": {
+      "n": 1,
+      "p50": 286.1,
+      "p95": 286.1,
+      "max": 286.1,
+      "min": 286.1,
+      "p95_reliable": false
+     },
+     "prompt_tokens": {
+      "n": 1,
+      "p50": 83,
+      "p95": 83,
+      "max": 83,
+      "min": 83,
+      "p95_reliable": false
+     },
+     "completion_tokens": {
+      "n": 1,
+      "p50": 25,
+      "p95": 25,
+      "max": 25,
+      "min": 25,
+      "p95_reliable": false
+     },
+     "finish_reason_length": 0
+    },
+    "router": {
+     "headers_ms": {
+      "n": 4,
+      "p50": 240.7,
+      "p95": 260.9,
+      "max": 260.9,
+      "min": 238.8,
+      "p95_reliable": false
+     },
+     "server_ttfb_ms": {
+      "n": 4,
+      "p50": 240.3,
+      "p95": 260.4,
+      "max": 260.4,
+      "min": 238.5,
+      "p95_reliable": false
+     },
+     "first_token_after_connect_ms": {
+      "n": 4,
+      "p50": 240.3,
+      "p95": 260.7,
+      "max": 260.7,
+      "min": 238.6,
+      "p95_reliable": false
+     },
+     "first_visible_after_connect_ms": {
+      "n": 4,
+      "p50": 303.0,
+      "p95": 317.8,
+      "max": 317.8,
+      "min": 290.7,
+      "p95_reliable": false
+     },
+     "total_ms": {
+      "n": 4,
+      "p50": 368.8,
+      "p95": 386.4,
+      "max": 386.4,
+      "min": 366.3,
+      "p95_reliable": false
+     },
+     "prompt_tokens": {
+      "n": 4,
+      "p50": 195,
+      "p95": 201,
+      "max": 201,
+      "min": 187,
+      "p95_reliable": false
+     },
+     "completion_tokens": {
+      "n": 4,
+      "p50": 35,
+      "p95": 35,
+      "max": 35,
+      "min": 35,
+      "p95_reliable": false
+     },
+     "finish_reason_length": 0
+    },
+    "tiny": {
+     "headers_ms": {
+      "n": 4,
+      "p50": 225.0,
+      "p95": 244.0,
+      "max": 244.0,
+      "min": 224.5,
+      "p95_reliable": false
+     },
+     "server_ttfb_ms": {
+      "n": 4,
+      "p50": 224.4,
+      "p95": 243.6,
+      "max": 243.6,
+      "min": 224.1,
+      "p95_reliable": false
+     },
+     "first_token_after_connect_ms": {
+      "n": 4,
+      "p50": 224.6,
+      "p95": 243.6,
+      "max": 243.6,
+      "min": 224.2,
+      "p95_reliable": false
+     },
+     "first_visible_after_connect_ms": {
+      "n": 0
+     },
+     "total_ms": {
+      "n": 4,
+      "p50": 265.9,
+      "p95": 276.9,
+      "max": 276.9,
+      "min": 265.2,
+      "p95_reliable": false
+     },
+     "prompt_tokens": {
+      "n": 4,
+      "p50": 83,
+      "p95": 83,
+      "max": 83,
+      "min": 83,
+      "p95_reliable": false
+     },
+     "completion_tokens": {
+      "n": 4,
+      "p50": 16,
+      "p95": 16,
+      "max": 16,
+      "min": 16,
+      "p95_reliable": false
+     },
+     "finish_reason_length": 4
+    }
+   },
+   "tokens_per_s": {
+    "client_side": {
+     "n": 8,
+     "p50": 370.8,
+     "p95": 467.3,
+     "max": 467.3,
+     "min": 280.8,
+     "p95_reliable": false
+    },
+    "server_reported": {
+     "n": 13,
+     "p50": 449.6,
+     "p95": 450.0,
+     "max": 450.0,
+     "min": 449.4,
+     "p95_reliable": false
+    }
+   },
+   "chunk_gaps_ms": {
+    "n": 84,
+    "p50": 31.2,
+    "p95": 42.3,
+    "max": 48.0,
+    "min": 0.0,
+    "p95_reliable": true
+   },
+   "server_queue_time_s": {
+    "n": 13,
+    "p50": 0.01,
+    "p95": 0.01,
+    "max": 0.01,
+    "min": 0.01,
+    "p95_reliable": false
+   },
+   "prompt_token_estimate": {
+    "_what": "prompt_tokens reported by the server vs prompt characters; our ledger estimate is ceil(chars/3) + 8*messages + overhead, and must never be below the real count",
+    "one_message_fit": null,
+    "two_message_fit": {
+     "n": 18,
+     "intercept": 78.309,
+     "slope": 0.250043,
+     "r2": 1.0,
+     "abs_residual_p95": 0.42,
+     "x_range": [
+      436,
+      5190
+     ]
+    },
+    "estimate_over_actual": {
+     "n": 60,
+     "p50": 1.096,
+     "p95": 1.315,
+     "max": 1.783,
+     "min": 1.096,
+     "p95_reliable": true
+    },
+    "estimate_below_actual_calls": 0
+   },
+   "latency_vs_in_flight": [
+    {
+     "k": 1,
+     "calls": 1,
+     "ok": 1,
+     "non_200": [],
+     "headers_ms_p50": 238.8,
+     "server_ttfb_ms_p50": 238.5,
+     "first_token_after_connect_ms_p50": 238.6,
+     "total_ms_p50": 368.8,
+     "total_ms_max": 368.8,
+     "queue_time_s_p50": 0.01
+    },
+    {
+     "k": 4,
+     "calls": 4,
+     "ok": 4,
+     "non_200": [],
+     "headers_ms_p50": 282.4,
+     "server_ttfb_ms_p50": 281.2,
+     "first_token_after_connect_ms_p50": 281.2,
+     "total_ms_p50": 388.1,
+     "total_ms_max": 472.0,
+     "queue_time_s_p50": 0.05
+    },
+    {
+     "k": 8,
+     "calls": 8,
+     "ok": 8,
+     "non_200": [],
+     "headers_ms_p50": 377.5,
+     "server_ttfb_ms_p50": 373.4,
+     "first_token_after_connect_ms_p50": 373.5,
+     "total_ms_p50": 482.9,
+     "total_ms_max": 616.7,
+     "queue_time_s_p50": 0.13
+    }
+   ],
+   "limits_seen": {
+    "headers": {
+     "x-ratelimit-limit-requests": [
+      "1000"
+     ],
+     "x-ratelimit-limit-tokens": [
+      "8000"
+     ]
+    },
+    "from_error_bodies": {
+     "RPM": [
+      30
+     ]
+    },
+    "documented": {
+     "rpm": 30,
+     "rpd": 1000,
+     "tpm": 8000,
+     "tpd": 200000
+    },
+    "error_responses": [
+     {
+      "phase": "P3",
+      "variant": "burst",
+      "status": 429,
+      "retry_after": "2",
+      "parsed": {
+       "what": "requests per minute",
+       "short": "RPM",
+       "limit": 30,
+       "used": 29,
+       "requested": 1,
+       "try_again_in": "1.8s",
+       "try_again_in_s": 1.8,
+       "form": "rate_limit_reached"
+      },
+      "type": "requests",
+      "code": "rate_limit_exceeded"
+     },
+     {
+      "phase": "P3",
+      "variant": "burst",
+      "status": 429,
+      "retry_after": "2",
+      "parsed": {
+       "what": "requests per minute",
+       "short": "RPM",
+       "limit": 30,
+       "used": 29,
+       "requested": 1,
+       "try_again_in": "1.8s",
+       "try_again_in_s": 1.8,
+       "form": "rate_limit_reached"
+      },
+      "type": "requests",
+      "code": "rate_limit_exceeded"
+     },
+     {
+      "phase": "P3",
+      "variant": "burst",
+      "status": 429,
+      "retry_after": "2",
+      "parsed": {
+       "what": "requests per minute",
+       "short": "RPM",
+       "limit": 30,
+       "used": 29,
+       "requested": 1,
+       "try_again_in": "1.8s",
+       "try_again_in_s": 1.8,
+       "form": "rate_limit_reached"
+      },
+      "type": "requests",
+      "code": "rate_limit_exceeded"
+     }
+    ]
+   },
+   "admission": {
+    "pairs": [
+     {
+      "run_id": "20261110T135056Z-34be27",
+      "limit_tokens": 8000,
+      "baseline": {
+       "call": "include_reasoning_false",
+       "remaining_tokens": "7591",
+       "reset_tokens": "3.06s",
+       "at": "2026-11-10T13:51:00.557+00:00"
+      },
+      "A": {
+       "max_tokens": 2000,
+       "prompt_tokens": 83,
+       "completion_tokens": 25,
+       "remaining_tokens": "5779",
+       "reset_tokens": "16.65s",
+       "at": "2026-11-10T13:51:00.864+00:00"
+      },
+      "seconds_between_baseline_and_A_admission": 0.307,
+      "drop_at_A_raw": 1812,
+      "expect_if_max_tokens_held": 1811.1,
+      "expect_if_usage": 67.1,
+      "expect_if_max_tokens_held_no_refill": 1852,
+      "expect_if_usage_no_refill": 108,
+      "verdict": "max_tokens reserved at admission",
+      "B": {
+       "remaining_tokens": "7694",
+       "at": "2026-11-10T13:51:01.145+00:00",
+       "seconds_after_A_admission": 0.281,
+       "rise_since_A": 1915,
+       "A_unused_max_tokens": 1975,
+       "B_own_charge_est": 99,
+       "refill_if_bucket": 37.4,
+       "refund_verdict": "unused max_tokens refunded when A finished"
+      }
+     }
+    ],
+    "overflow": []
+   },
+   "token_accounting_fit": {
+    "pairs": [
+     {
+      "p": "P0/p0/main",
+      "q": "P0/p0/include_reasoning_false",
+      "max_tokens_p": 256,
+      "max_tokens_q": 256,
+      "remaining_p": 7661,
+      "remaining_q": 7591,
+      "dt_admission_s": 0.28,
+      "saturated_admission": false,
+      "res_usage_admission": 0.6,
+      "res_admission_admission": 0.6,
+      "dt_headers_s": 0.28,
+      "saturated_headers": false,
+      "res_usage_headers": 0.6,
+      "res_admission_headers": 0.6
+     },
+     {
+      "p": "P0/p0/include_reasoning_false",
+      "q": "P2/p2a/A",
+      "max_tokens_p": 256,
+      "max_tokens_q": 2000,
+      "remaining_p": 7591,
+      "remaining_q": 5779,
+      "dt_admission_s": 0.307,
+      "saturated_admission": false,
+      "res_usage_admission": -1744.9,
+      "res_admission_admission": -0.9,
+      "dt_headers_s": 0.307,
+      "saturated_headers": false,
+      "res_usage_headers": -1744.9,
+      "res_admission_headers": -0.9
+     },
+     {
+      "p": "P2/p2a/A",
+      "q": "P2/tiny/B",
+      "max_tokens_p": 2000,
+      "max_tokens_q": 16,
+      "remaining_p": 5779,
+      "remaining_q": 7694,
+      "dt_admission_s": 0.281,
+      "saturated_admission": false,
+      "res_usage_admission": 1985.6,
+      "res_admission_admission": 1.6,
+      "dt_headers_s": 0.281,
+      "saturated_headers": false,
+      "res_usage_headers": 1985.6,
+      "res_admission_headers": 1.6
+     },
+     {
+      "p": "P2/tiny/B",
+      "q": "P4/router/k1",
+      "max_tokens_p": 16,
+      "max_tokens_q": 200,
+      "remaining_p": 7694,
+      "remaining_q": 7556,
+      "dt_admission_s": 1.947,
+      "saturated_admission": false,
+      "res_usage_admission": -186.6,
+      "res_admission_admission": -2.6,
+      "dt_headers_s": 1.947,
+      "saturated_headers": false,
+      "res_usage_headers": -186.6,
+      "res_admission_headers": -2.6
+     },
+     {
+      "p": "P4/router/k1",
+      "q": "P4/router/k4",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 7556,
+      "remaining_q": 7599,
+      "dt_admission_s": 20.041,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 20.041,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P4/router/k4",
+      "q": "P4/router/k8",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 6407,
+      "remaining_q": 7602,
+      "dt_admission_s": 20.104,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 19.984,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P4/router/k8",
+      "q": "P6/draft/sequential",
+      "max_tokens_p": 200,
+      "max_tokens_q": 500,
+      "remaining_p": 4841,
+      "remaining_q": 6124,
+      "dt_admission_s": 54.268,
+      "saturated_admission": true,
+      "res_usage_admission": -500,
+      "res_admission_admission": 0,
+      "dt_headers_s": 53.988,
+      "saturated_headers": true,
+      "res_usage_headers": -500,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P6/draft/sequential",
+      "q": "P1/tiny/poll",
+      "max_tokens_p": 500,
+      "max_tokens_q": 16,
+      "remaining_p": 6124,
+      "remaining_q": 6573,
+      "dt_admission_s": 2.136,
+      "saturated_admission": false,
+      "res_usage_admission": 509.2,
+      "res_admission_admission": 25.2,
+      "dt_headers_s": 2.136,
+      "saturated_headers": false,
+      "res_usage_headers": 509.2,
+      "res_admission_headers": 25.2
+     },
+     {
+      "p": "P1/tiny/poll",
+      "q": "P1/tiny/poll",
+      "max_tokens_p": 16,
+      "max_tokens_q": 16,
+      "remaining_p": 6573,
+      "remaining_q": 6874,
+      "dt_admission_s": 3.009,
+      "saturated_admission": false,
+      "res_usage_admission": -1.2,
+      "res_admission_admission": -1.2,
+      "dt_headers_s": 3.009,
+      "saturated_headers": false,
+      "res_usage_headers": -1.2,
+      "res_admission_headers": -1.2
+     },
+     {
+      "p": "P1/tiny/poll",
+      "q": "P1/tiny/poll",
+      "max_tokens_p": 16,
+      "max_tokens_q": 16,
+      "remaining_p": 6874,
+      "remaining_q": 7306,
+      "dt_admission_s": 3.968,
+      "saturated_admission": false,
+      "res_usage_admission": 1.9,
+      "res_admission_admission": 1.9,
+      "dt_headers_s": 3.968,
+      "saturated_headers": false,
+      "res_usage_headers": 1.9,
+      "res_admission_headers": 1.9
+     },
+     {
+      "p": "P1/tiny/poll",
+      "q": "P6/draft/sequential",
+      "max_tokens_p": 16,
+      "max_tokens_q": 500,
+      "remaining_p": 7306,
+      "remaining_q": 6561,
+      "dt_admission_s": 6.438,
+      "saturated_admission": true,
+      "res_usage_admission": -500,
+      "res_admission_admission": 0,
+      "dt_headers_s": 6.438,
+      "saturated_headers": true,
+      "res_usage_headers": -500,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P6/draft/sequential",
+      "q": "P6/router/sequential",
+      "max_tokens_p": 500,
+      "max_tokens_q": 200,
+      "remaining_p": 6561,
+      "remaining_q": 7613,
+      "dt_admission_s": 11.923,
+      "saturated_admission": false,
+      "res_usage_admission": -88.7,
+      "res_admission_admission": 0,
+      "dt_headers_s": 11.923,
+      "saturated_headers": false,
+      "res_usage_headers": -88.7,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P6/router/sequential",
+      "q": "P6/router/sequential",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 7613,
+      "remaining_q": 7599,
+      "dt_admission_s": 9.021,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 9.021,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P6/router/sequential",
+      "q": "P6/router/sequential",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 7599,
+      "remaining_q": 7602,
+      "dt_admission_s": 9.008,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 9.008,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     }
+    ],
+    "fit": {
+     "usage@admission": {
+      "n_unsaturated": 8,
+      "median_abs_residual": 88.7,
+      "p90_abs_residual": 1985.6,
+      "max_abs_residual": 1985.6
+     },
+     "usage@headers": {
+      "n_unsaturated": 8,
+      "median_abs_residual": 88.7,
+      "p90_abs_residual": 1985.6,
+      "max_abs_residual": 1985.6
+     },
+     "admission@admission": {
+      "n_unsaturated": 8,
+      "median_abs_residual": 1.2,
+      "p90_abs_residual": 25.2,
+      "max_abs_residual": 25.2
+     },
+     "admission@headers": {
+      "n_unsaturated": 8,
+      "median_abs_residual": 1.2,
+      "p90_abs_residual": 25.2,
+      "max_abs_residual": 25.2
+     }
+    },
+    "best": "admission@admission",
+    "usage_residual_by_max_tokens_pair": {
+     "16->16": {
+      "n": 2,
+      "median": -1.2,
+      "min": -1.2,
+      "max": 1.9
+     },
+     "16->200": {
+      "n": 1,
+      "median": -186.6,
+      "min": -186.6,
+      "max": -186.6
+     },
+     "2000->16": {
+      "n": 1,
+      "median": 1985.6,
+      "min": 1985.6,
+      "max": 1985.6
+     },
+     "256->2000": {
+      "n": 1,
+      "median": -1744.9,
+      "min": -1744.9,
+      "max": -1744.9
+     },
+     "256->256": {
+      "n": 1,
+      "median": 0.6,
+      "min": 0.6,
+      "max": 0.6
+     },
+     "500->16": {
+      "n": 1,
+      "median": 509.2,
+      "min": 509.2,
+      "max": 509.2
+     },
+     "500->200": {
+      "n": 1,
+      "median": -88.7,
+      "min": -88.7,
+      "max": -88.7
+     }
+    }
+   },
+   "server_ttfb_vs_queue_time": {
+    "_what": "OLS: server_ttfb_ms = intercept + slope * queue_time_s (queue_time from x_groq.usage)",
+    "fit": null,
+    "queue_time_share_of_server_ttfb_p50": 0.041928721174004195
+   },
+   "reasoning_p0": [
+    {
+     "variant": "main",
+     "status": 200,
+     "settings": {
+      "max_tokens": 256,
+      "reasoning_effort": "low"
+     },
+     "reasoning_chars": 144,
+     "visible_text": "OK",
+     "completion_tokens": 25,
+     "completion_tokens_details": null,
+     "first_visible_after_connect_ms": 288.7,
+     "error": null
+    },
+    {
+     "variant": "include_reasoning_false",
+     "status": 200,
+     "settings": {
+      "max_tokens": 256,
+      "reasoning_effort": "low",
+      "include_reasoning": false
+     },
+     "reasoning_chars": 0,
+     "visible_text": "OK",
+     "completion_tokens": 25,
+     "completion_tokens_details": null,
+     "first_visible_after_connect_ms": 299.09999999999997,
+     "error": null
+    }
+   ]
+  },
+  "qwen/qwen3.8-27b": {
+   "calls": 35,
+   "ok": 35,
+   "sequential_ok": 21,
+   "outcomes": {
+    "200:ok": 35
+   },
+   "connect_ms": {
+    "n": 35,
+    "p50": 0.6,
+    "p95": 2.0,
+    "max": 2.5,
+    "min": 0.4,
+    "p95_reliable": true
+   },
+   "ttfb": {
+    "_what": "headers_ms = time from call start (incl. new TCP+TLS connection) to response headers; server_ttfb_ms = the same minus connect_ms (what a kept-alive connection would see). All successful calls of this model, any size, any phase except P3 bursts and P4 k>1.",
+    "headers_ms": {
+     "n": 21,
+     "p50": 283.5,
+     "p95": 429.3,
+     "max": 433.6,
+     "min": 266.0,
+     "p95_reliable": true
+    },
+    "server_ttfb_ms": {
+     "n": 21,
+     "p50": 282.9,
+     "p95": 428.7,
+     "max": 433.1,
+     "min": 265.3,
+     "p95_reliable": true
+    }
+   },
+   "first_token_fit_vs_prompt_tokens": {
+    "_what": "OLS: first token (reasoning or visible) after connect, ms = intercept + slope * prompt_tokens",
+    "first_token": {
+     "n": 21,
+     "intercept": 268.696,
+     "slope": 0.118876,
+     "r2": 0.9842,
+     "abs_residual_p95": 10.44,
+     "x_range": [
+      27,
+      1375
+     ]
+    },
+    "first_visible": {
+     "n": 21,
+     "intercept": 276.655,
+     "slope": 0.110504,
+     "r2": 0.7312,
+     "abs_residual_p95": 14.48,
+     "x_range": [
+      27,
+      1375
+     ]
+    }
+   },
+   "by_size": {
+    "draft": {
+     "headers_ms": {
+      "n": 3,
+      "p50": 429.3,
+      "p95": 433.6,
+      "max": 433.6,
+      "min": 391.7,
+      "p95_reliable": false
+     },
+     "server_ttfb_ms": {
+      "n": 3,
+      "p50": 428.7,
+      "p95": 433.1,
+      "max": 433.1,
+      "min": 391.3,
+      "p95_reliable": false
+     },
+     "first_token_after_connect_ms": {
+      "n": 3,
+      "p50": 428.8,
+      "p95": 433.1,
+      "max": 433.1,
+      "min": 391.4,
+      "p95_reliable": false
+     },
+     "first_visible_after_connect_ms": {
+      "n": 3,
+      "p50": 428.8,
+      "p95": 433.1,
+      "max": 433.1,
+      "min": 391.4,
+      "p95_reliable": false
+     },
+     "total_ms": {
+      "n": 3,
+      "p50": 1476.5,
+      "p95": 1495.5,
+      "max": 1495.5,
+      "min": 1421.4,
+      "p95_reliable": false
+     },
+     "prompt_tokens": {
+      "n": 3,
+      "p50": 1328,
+      "p95": 1375,
+      "max": 1375,
+      "min": 1071,
+      "p95_reliable": false
+     },
+     "completion_tokens": {
+      "n": 3,
+      "p50": 238,
+      "p95": 238,
+      "max": 238,
+      "min": 238,
+      "p95_reliable": false
+     },
+     "finish_reason_length": 0
+    },
+    "p0": {
+     "headers_ms": {
+      "n": 3,
+      "p50": 278.0,
+      "p95": 279.3,
+      "max": 279.3,
+      "min": 266.6,
+      "p95_reliable": false
+     },
+     "server_ttfb_ms": {
+      "n": 3,
+      "p50": 277.3,
+      "p95": 278.6,
+      "max": 278.6,
+      "min": 266.0,
+      "p95_reliable": false
+     },
+     "first_token_after_connect_ms": {
+      "n": 3,
+      "p50": 277.4,
+      "p95": 278.7,
+      "max": 278.7,
+      "min": 266.5,
+      "p95_reliable": false
+     },
+     "first_visible_after_connect_ms": {
+      "n": 3,
+      "p50": 277.4,
+      "p95": 397.9,
+      "max": 397.9,
+      "min": 266.5,
+      "p95_reliable": false
+     },
+     "total_ms": {
+      "n": 3,
+      "p50": 278.4,
+      "p95": 398.9,
+      "max": 398.9,
+      "min": 267.4,
+      "p95_reliable": false
+     },
+     "prompt_tokens": {
+      "n": 3,
+      "p50": 27,
+      "p95": 27,
+      "max": 27,
+      "min": 27,
+      "p95_reliable": false
+     },
+     "completion_tokens": {
+      "n": 3,
+      "p50": 1,
+      "p95": 41,
+      "max": 41,
+      "min": 1,
+      "p95_reliable": false
+     },
+     "finish_reason_length": 0
+    },
+    "p2a": {
+     "headers_ms": {
+      "n": 1,
+      "p50": 266.0,
+      "p95": 266.0,
+      "max": 266.0,
+      "min": 266.0,
+      "p95_reliable": false
+     },
+     "server_ttfb_ms": {
+      "n": 1,
+      "p50": 265.3,
+      "p95": 265.3,
+      "max": 265.3,
+      "min": 265.3,
+      "p95_reliable": false
+     },
+     "first_token_after_connect_ms": {
+      "n": 1,
+      "p50": 265.4,
+      "p95": 265.4,
+      "max": 265.4,
+      "min": 265.4,
+      "p95_reliable": false
+     },
+     "first_visible_after_connect_ms": {
+      "n": 1,
+      "p50": 265.4,
+      "p95": 265.4,
+      "max": 265.4,
+      "min": 265.4,
+      "p95_reliable": false
+     },
+     "total_ms": {
+      "n": 1,
+      "p50": 266.7,
+      "p95": 266.7,
+      "max": 266.7,
+      "min": 266.7,
+      "p95_reliable": false
+     },
+     "prompt_tokens": {
+      "n": 1,
+      "p50": 27,
+      "p95": 27,
+      "max": 27,
+      "min": 27,
+      "p95_reliable": false
+     },
+     "completion_tokens": {
+      "n": 1,
+      "p50": 1,
+      "p95": 1,
+      "max": 1,
+      "min": 1,
+      "p95_reliable": false
+     },
+     "finish_reason_length": 0
+    },
+    "router": {
+     "headers_ms": {
+      "n": 13,
+      "p50": 288.0,
+      "p95": 298.9,
+      "max": 298.9,
+      "min": 277.5,
+      "p95_reliable": false
+     },
+     "server_ttfb_ms": {
+      "n": 13,
+      "p50": 287.3,
+      "p95": 298.3,
+      "max": 298.3,
+      "min": 277.1,
+      "p95_reliable": false
+     },
+     "first_token_after_connect_ms": {
+      "n": 13,
+      "p50": 287.3,
+      "p95": 298.3,
+      "max": 298.3,
+      "min": 277.2,
+      "p95_reliable": false
+     },
+     "first_visible_after_connect_ms": {
+      "n": 13,
+      "p50": 287.3,
+      "p95": 298.3,
+      "max": 298.3,
+      "min": 277.2,
+      "p95_reliable": false
+     },
+     "total_ms": {
+      "n": 13,
+      "p50": 348.8,
+      "p95": 370.6,
+      "max": 370.6,
+      "min": 330.9,
+      "p95_reliable": false
+     },
+     "prompt_tokens": {
+      "n": 13,
+      "p50": 139,
+      "p95": 146,
+      "max": 146,
+      "min": 136,
+      "p95_reliable": false
+     },
+     "completion_tokens": {
+      "n": 13,
+      "p50": 11,
+      "p95": 11,
+      "max": 11,
+      "min": 11,
+      "p95_reliable": false
+     },
+     "finish_reason_length": 0
+    },
+    "tiny": {
+     "headers_ms": {
+      "n": 1,
+      "p50": 266.9,
+      "p95": 266.9,
+      "max": 266.9,
+      "min": 266.9,
+      "p95_reliable": false
+     },
+     "server_ttfb_ms": {
+      "n": 1,
+      "p50": 266.3,
+      "p95": 266.3,
+      "max": 266.3,
+      "min": 266.3,
+      "p95_reliable": false
+     },
+     "first_token_after_connect_ms": {
+      "n": 1,
+      "p50": 266.4,
+      "p95": 266.4,
+      "max": 266.4,
+      "min": 266.4,
+      "p95_reliable": false
+     },
+     "first_visible_after_connect_ms": {
+      "n": 1,
+      "p50": 266.4,
+      "p95": 266.4,
+      "max": 266.4,
+      "min": 266.4,
+      "p95_reliable": false
+     },
+     "total_ms": {
+      "n": 1,
+      "p50": 267.3,
+      "p95": 267.3,
+      "max": 267.3,
+      "min": 267.3,
+      "p95_reliable": false
+     },
+     "prompt_tokens": {
+      "n": 1,
+      "p50": 27,
+      "p95": 27,
+      "max": 27,
+      "min": 27,
+      "p95_reliable": false
+     },
+     "completion_tokens": {
+      "n": 1,
+      "p50": 1,
+      "p95": 1,
+      "max": 1,
+      "min": 1,
+      "p95_reliable": false
+     },
+     "finish_reason_length": 0
+    }
+   },
+   "tokens_per_s": {
+    "client_side": {
+     "n": 4,
+     "p50": 234.0,
+     "p95": 344.0,
+     "max": 344.0,
+     "min": 230.0,
+     "p95_reliable": false
+    },
+    "server_reported": {
+     "n": 21,
+     "p50": 350.3,
+     "p95": 350.3,
+     "max": 350.3,
+     "min": 344.8,
+     "p95_reliable": true
+    }
+   },
+   "chunk_gaps_ms": {
+    "n": 118,
+    "p50": 31.2,
+    "p95": 44.5,
+    "max": 47.0,
+    "min": 0.0,
+    "p95_reliable": true
+   },
+   "server_queue_time_s": {
+    "n": 21,
+    "p50": 0.01,
+    "p95": 0.01,
+    "max": 0.01,
+    "min": 0.01,
+    "p95_reliable": true
+   },
+   "prompt_token_estimate": {
+    "_what": "prompt_tokens reported by the server vs prompt characters; our ledger estimate is ceil(chars/3) + 8*messages + overhead, and must never be below the real count",
+    "one_message_fit": null,
+    "two_message_fit": {
+     "n": 20,
+     "intercept": 22.347,
+     "slope": 0.249981,
+     "r2": 1.0,
+     "abs_residual_p95": 0.41,
+     "x_range": [
+      456,
+      5411
+     ]
+    },
+    "estimate_over_actual": {
+     "n": 35,
+     "p50": 1.343,
+     "p95": 5.481,
+     "max": 5.481,
+     "min": 1.296,
+     "p95_reliable": true
+    },
+    "estimate_below_actual_calls": 0
+   },
+   "latency_vs_in_flight": [
+    {
+     "k": 1,
+     "calls": 1,
+     "ok": 1,
+     "non_200": [],
+     "headers_ms_p50": 277.5,
+     "server_ttfb_ms_p50": 277.1,
+     "first_token_after_connect_ms_p50": 277.20000000000005,
+     "total_ms_p50": 335.5,
+     "total_ms_max": 335.5,
+     "queue_time_s_p50": 0.01
+    },
+    {
+     "k": 4,
+     "calls": 4,
+     "ok": 4,
+     "non_200": [],
+     "headers_ms_p50": 326.2,
+     "server_ttfb_ms_p50": 324.5,
+     "first_token_after_connect_ms_p50": 324.7,
+     "total_ms_p50": 391.4,
+     "total_ms_max": 452.5,
+     "queue_time_s_p50": 0.05
+    }
+   ],
+   "limits_seen": {
+    "headers": {
+     "x-ratelimit-limit-requests": [
+      "1000"
+     ],
+     "x-ratelimit-limit-tokens": [
+      "8000"
+     ]
+    },
+    "from_error_bodies": {},
+    "documented": {
+     "rpm": 30,
+     "rpd": 1000,
+     "tpm": 8000,
+     "tpd": 200000
+    },
+    "error_responses": []
+   },
+   "admission": {
+    "pairs": [
+     {
+      "run_id": "20261110T135056Z-34be27",
+      "limit_tokens": 8000,
+      "baseline": {
+       "call": "effort_low_parsed",
+       "remaining_tokens": "7717",
+       "reset_tokens": "2.12s",
+       "at": "2026-11-10T13:51:02.012+00:00"
+      },
+      "A": {
+       "max_tokens": 2000,
+       "prompt_tokens": 27,
+       "completion_tokens": 1,
+       "remaining_tokens": "5958",
+       "reset_tokens": "15.31s",
+       "at": "2026-11-10T13:51:02.399+00:00"
+      },
+      "seconds_between_baseline_and_A_admission": 0.387,
+      "drop_at_A_raw": 1759,
+      "expect_if_max_tokens_held": 1760.4,
+      "expect_if_usage": 16.4,
+      "expect_if_max_tokens_held_no_refill": 1812,
+      "expect_if_usage_no_refill": 68,
+      "verdict": "max_tokens reserved at admission",
+      "B": {
+       "remaining_tokens": "7949",
+       "at": "2026-11-10T13:51:02.667+00:00",
+       "seconds_after_A_admission": 0.268,
+       "rise_since_A": 1991,
+       "A_unused_max_tokens": 1999,
+       "B_own_charge_est": 43,
+       "refill_if_bucket": 35.7,
+       "refund_verdict": "unused max_tokens refunded when A finished"
+      }
+     }
+    ],
+    "overflow": []
+   },
+   "token_accounting_fit": {
+    "pairs": [
+     {
+      "p": "P0/p0/effort_none",
+      "q": "P0/p0/effort_default_parsed",
+      "max_tokens_p": 256,
+      "max_tokens_q": 256,
+      "remaining_p": 7717,
+      "remaining_q": 7717,
+      "dt_admission_s": 0.266,
+      "saturated_admission": false,
+      "res_usage_admission": -7.5,
+      "res_admission_admission": 0,
+      "dt_headers_s": 0.266,
+      "saturated_headers": false,
+      "res_usage_headers": -7.5,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P0/p0/effort_default_parsed",
+      "q": "P0/p0/effort_low_parsed",
+      "max_tokens_p": 256,
+      "max_tokens_q": 256,
+      "remaining_p": 7717,
+      "remaining_q": 7717,
+      "dt_admission_s": 0.282,
+      "saturated_admission": false,
+      "res_usage_admission": -9.5,
+      "res_admission_admission": 0,
+      "dt_headers_s": 0.282,
+      "saturated_headers": false,
+      "res_usage_headers": -9.5,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P0/p0/effort_low_parsed",
+      "q": "P2/p2a/A",
+      "max_tokens_p": 256,
+      "max_tokens_q": 2000,
+      "remaining_p": 7717,
+      "remaining_q": 5958,
+      "dt_admission_s": 0.387,
+      "saturated_admission": false,
+      "res_usage_admission": -1742.6,
+      "res_admission_admission": 1.4,
+      "dt_headers_s": 0.387,
+      "saturated_headers": false,
+      "res_usage_headers": -1742.6,
+      "res_admission_headers": 1.4
+     },
+     {
+      "p": "P2/p2a/A",
+      "q": "P2/tiny/B",
+      "max_tokens_p": 2000,
+      "max_tokens_q": 16,
+      "remaining_p": 5958,
+      "remaining_q": 7949,
+      "dt_admission_s": 0.268,
+      "saturated_admission": false,
+      "res_usage_admission": 1983.3,
+      "res_admission_admission": -0.7,
+      "dt_headers_s": 0.268,
+      "saturated_headers": false,
+      "res_usage_headers": 1983.3,
+      "res_admission_headers": -0.7
+     },
+     {
+      "p": "P2/tiny/B",
+      "q": "P4/router/k1",
+      "max_tokens_p": 16,
+      "max_tokens_q": 200,
+      "remaining_p": 7949,
+      "remaining_q": 7664,
+      "dt_admission_s": 0.833,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 0.833,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P4/router/k1",
+      "q": "P4/router/k4",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 7664,
+      "remaining_q": 7661,
+      "dt_admission_s": 20.152,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 20.152,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P4/router/k4",
+      "q": "P6/draft/sequential",
+      "max_tokens_p": 200,
+      "max_tokens_q": 500,
+      "remaining_p": 6641,
+      "remaining_q": 6125,
+      "dt_admission_s": 86.456,
+      "saturated_admission": true,
+      "res_usage_admission": -500,
+      "res_admission_admission": 0,
+      "dt_headers_s": 86.336,
+      "saturated_headers": true,
+      "res_usage_headers": -500,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P6/draft/sequential",
+      "q": "P6/draft/sequential",
+      "max_tokens_p": 500,
+      "max_tokens_q": 500,
+      "remaining_p": 6125,
+      "remaining_q": 5364,
+      "dt_admission_s": 6.042,
+      "saturated_admission": false,
+      "res_usage_admission": -0.6,
+      "res_admission_admission": -0.6,
+      "dt_headers_s": 6.042,
+      "saturated_headers": false,
+      "res_usage_headers": -0.6,
+      "res_admission_headers": -0.6
+     },
+     {
+      "p": "P6/draft/sequential",
+      "q": "P6/draft/sequential",
+      "max_tokens_p": 500,
+      "max_tokens_q": 500,
+      "remaining_p": 5364,
+      "remaining_q": 4455,
+      "dt_admission_s": 2.961,
+      "saturated_admission": false,
+      "res_usage_admission": 5.2,
+      "res_admission_admission": 5.2,
+      "dt_headers_s": 2.961,
+      "saturated_headers": false,
+      "res_usage_headers": 5.2,
+      "res_admission_headers": 5.2
+     },
+     {
+      "p": "P6/draft/sequential",
+      "q": "P6/router/sequential",
+      "max_tokens_p": 500,
+      "max_tokens_q": 200,
+      "remaining_p": 4455,
+      "remaining_q": 5576,
+      "dt_admission_s": 8.902,
+      "saturated_admission": false,
+      "res_usage_admission": 314.0,
+      "res_admission_admission": 14.0,
+      "dt_headers_s": 8.902,
+      "saturated_headers": false,
+      "res_usage_headers": 314.0,
+      "res_admission_headers": 14.0
+     },
+     {
+      "p": "P6/router/sequential",
+      "q": "P6/router/sequential",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 5576,
+      "remaining_q": 6631,
+      "dt_admission_s": 9.007,
+      "saturated_admission": false,
+      "res_usage_admission": 1.0,
+      "res_admission_admission": 1.0,
+      "dt_headers_s": 9.007,
+      "saturated_headers": false,
+      "res_usage_headers": 1.0,
+      "res_admission_headers": 1.0
+     },
+     {
+      "p": "P6/router/sequential",
+      "q": "P6/router/sequential",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 6631,
+      "remaining_q": 7663,
+      "dt_admission_s": 9.028,
+      "saturated_admission": false,
+      "res_usage_admission": -23.7,
+      "res_admission_admission": 0,
+      "dt_headers_s": 9.028,
+      "saturated_headers": false,
+      "res_usage_headers": -23.7,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P6/router/sequential",
+      "q": "P6/router/sequential",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 7663,
+      "remaining_q": 7664,
+      "dt_admission_s": 9.026,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 9.026,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P6/router/sequential",
+      "q": "P6/router/sequential",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 7664,
+      "remaining_q": 7658,
+      "dt_admission_s": 9.016,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 9.016,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P6/router/sequential",
+      "q": "P6/router/sequential",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 7658,
+      "remaining_q": 7655,
+      "dt_admission_s": 6.015,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 6.015,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P6/router/sequential",
+      "q": "P6/router/sequential",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 7655,
+      "remaining_q": 7654,
+      "dt_admission_s": 5.997,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 5.997,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P6/router/sequential",
+      "q": "P6/router/sequential",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 7654,
+      "remaining_q": 7658,
+      "dt_admission_s": 3.012,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 3.012,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P6/router/sequential",
+      "q": "P6/router/sequential",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 7658,
+      "remaining_q": 7663,
+      "dt_admission_s": 3.005,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 3.005,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P6/router/sequential",
+      "q": "P6/router/sequential",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 7663,
+      "remaining_q": 7661,
+      "dt_admission_s": 2.996,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 2.996,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P6/router/sequential",
+      "q": "P6/router/sequential",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 7661,
+      "remaining_q": 7657,
+      "dt_admission_s": 3.0,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 3.0,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     },
+     {
+      "p": "P6/router/sequential",
+      "q": "P6/router/sequential",
+      "max_tokens_p": 200,
+      "max_tokens_q": 200,
+      "remaining_p": 7657,
+      "remaining_q": 7664,
+      "dt_admission_s": 3.002,
+      "saturated_admission": true,
+      "res_usage_admission": -200,
+      "res_admission_admission": 0,
+      "dt_headers_s": 3.002,
+      "saturated_headers": true,
+      "res_usage_headers": -200,
+      "res_admission_headers": 0
+     }
+    ],
+    "fit": {
+     "usage@admission": {
+      "n_unsaturated": 9,
+      "median_abs_residual": 9.5,
+      "p90_abs_residual": 1983.3,
+      "max_abs_residual": 1983.3
+     },
+     "usage@headers": {
+      "n_unsaturated": 9,
+      "median_abs_residual": 9.5,
+      "p90_abs_residual": 1983.3,
+      "max_abs_residual": 1983.3
+     },
+     "admission@admission": {
+      "n_unsaturated": 9,
+      "median_abs_residual": 0.7,
+      "p90_abs_residual": 14.0,
+      "max_abs_residual": 14.0
+     },
+     "admission@headers": {
+      "n_unsaturated": 9,
+      "median_abs_residual": 0.7,
+      "p90_abs_residual": 14.0,
+      "max_abs_residual": 14.0
+     }
+    },
+    "best": "admission@admission",
+    "usage_residual_by_max_tokens_pair": {
+     "200->200": {
+      "n": 2,
+      "median": -23.7,
+      "min": -23.7,
+      "max": 1.0
+     },
+     "2000->16": {
+      "n": 1,
+      "median": 1983.3,
+      "min": 1983.3,
+      "max": 1983.3
+     },
+     "256->2000": {
+      "n": 1,
+      "median": -1742.6,
+      "min": -1742.6,
+      "max": -1742.6
+     },
+     "256->256": {
+      "n": 2,
+      "median": -9.5,
+      "min": -9.5,
+      "max": -7.5
+     },
+     "500->200": {
+      "n": 1,
+      "median": 314.0,
+      "min": 314.0,
+      "max": 314.0
+     },
+     "500->500": {
+      "n": 2,
+      "median": -0.6,
+      "min": -0.6,
+      "max": 5.2
+     }
+    }
+   },
+   "server_ttfb_vs_queue_time": {
+    "_what": "OLS: server_ttfb_ms = intercept + slope * queue_time_s (queue_time from x_groq.usage)",
+    "fit": null,
+    "queue_time_share_of_server_ttfb_p50": 0.03534817956875221
+   },
+   "reasoning_p0": [
+    {
+     "variant": "effort_none",
+     "status": 200,
+     "settings": {
+      "max_tokens": 256,
+      "reasoning_effort": "none"
+     },
+     "reasoning_chars": 0,
+     "visible_text": "OK",
+     "completion_tokens": 1,
+     "completion_tokens_details": null,
+     "first_visible_after_connect_ms": 277.40000000000003,
+     "error": null
+    },
+    {
+     "variant": "effort_default_parsed",
+     "status": 200,
+     "settings": {
+      "max_tokens": 256,
+      "reasoning_effort": "default",
+      "reasoning_format": "parsed"
+     },
+     "reasoning_chars": 0,
+     "visible_text": "OK",
+     "completion_tokens": 1,
+     "completion_tokens_details": null,
+     "first_visible_after_connect_ms": 266.5,
+     "error": null
+    },
+    {
+     "variant": "effort_low_parsed",
+     "status": 200,
+     "settings": {
+      "max_tokens": 256,
+      "reasoning_effort": "low",
+      "reasoning_format": "parsed"
+     },
+     "reasoning_chars": 240,
+     "visible_text": "OK",
+     "completion_tokens": 41,
+     "completion_tokens_details": null,
+     "first_visible_after_connect_ms": 397.90000000000003,
+     "error": null
+    }
+   ]
+  }
+ },
+ "tokens_window": {
+  "openai/gpt-oss-20b": [
+   {
+    "run_id": "20261110T135056Z-34be27",
+    "limit_tokens": 8000,
+    "bucket_refill_per_s_if_tpm_over_60": 133.33,
+    "charge_model_used": {
+     "admission_max_tokens": true,
+     "refund": true,
+     "from": "max_tokens reserved at admission"
+    },
+    "series": [
+     {
+      "t_admission": "2026-11-10T13:52:04.982+00:00",
+      "offset_s": 1.002,
+      "after": "P6 draft 5ce27a053cea46a8",
+      "queue_time_s": 0.01,
+      "remaining_tokens": 4989,
+      "reset_tokens": "22.58s",
+      "wall_second": 4.98
+     },
+     {
+      "t_admission": "2026-11-10T13:52:06.993+00:00",
+      "offset_s": 3.009,
+      "after": "P6 draft 5ce27a053cea46a8",
+      "queue_time_s": 0.01,
+      "remaining_tokens": 5157,
+      "reset_tokens": "21.32s",
+      "wall_second": 6.99
+     },
+     {
+      "t_admission": "2026-11-10T13:52:09.988+00:00",
+      "offset_s": 6.003,
+      "after": "P6 draft 5ce27a053cea46a8",
+      "queue_time_s": 0.01,
+      "remaining_tokens": 5457,
+      "reset_tokens": "19.07s",
+      "wall_second": 9.99
+     },
+     {
+      "t_admission": "2026-11-10T13:52:13.991+00:00",
+      "offset_s": 10.01,
+      "after": "P6 draft 5ce27a053cea46a8",
+      "queue_time_s": 0.01,
+      "remaining_tokens": 5893,
+      "reset_tokens": "15.8s",
+      "wall_second": 13.99
+     },
+     {
+      "t_admission": "2026-11-10T13:52:18.997+00:00",
+      "offset_s": 15.003,
+      "after": "P6 draft 5ce27a053cea46a8",
+      "queue_time_s": 0.01,
+      "remaining_tokens": 6460,
+      "reset_tokens": "11.55s",
+      "wall_second": 19.0
+     },
+     {
+      "t_admission": "2026-11-10T13:52:34.007+00:00",
+      "offset_s": 30.006,
+      "after": "P6 draft 5ce27a053cea46a8",
+      "queue_time_s": 0.01,
+      "remaining_tokens": 7901,
+      "reset_tokens": "742ms",
+      "wall_second": 34.01
+     }
+    ],
+    "intervals": [
+     {
+      "dt_s": 2.011,
+      "refill_est": 267,
+      "bucket_expect": 268.1,
+      "minute_boundary_crossed": false,
+      "corrections": {
+       "own_admission_q": 99,
+       "after_p_completed": 0
+      }
+     },
+     {
+      "dt_s": 2.995,
+      "refill_est": 399,
+      "bucket_expect": 399.4,
+      "minute_boundary_crossed": false,
+      "corrections": {
+       "own_admission_q": 99,
+       "after_p_completed": 0
+      }
+     },
+     {
+      "dt_s": 4.003,
+      "refill_est": 535,
+      "bucket_expect": 533.8,
+      "minute_boundary_crossed": false,
+      "corrections": {
+       "own_admission_q": 99,
+       "after_p_completed": 0
+      }
+     },
+     {
+      "dt_s": 5.006,
+      "refill_est": 666,
+      "bucket_expect": 667.5,
+      "minute_boundary_crossed": false,
+      "corrections": {
+       "own_admission_q": 99,
+       "after_p_completed": 0
+      }
+     }
+    ],
+    "median_refill_per_s": 133.13,
+    "reset_tokens_over_time_to_refill_at_tpm_per_60": {
+     "n": 63,
+     "p50": 1.0,
+     "p95": 1.001,
+     "max": 1.001,
+     "min": 0.997,
+     "p95_reliable": true
+    },
+    "verdict": "refilling bucket"
+   }
+  ],
+  "openai/gpt-oss-120b": [
+   {
+    "run_id": "20261110T135056Z-34be27",
+    "limit_tokens": 8000,
+    "bucket_refill_per_s_if_tpm_over_60": 133.33,
+    "charge_model_used": {
+     "admission_max_tokens": true,
+     "refund": true,
+     "from": "max_tokens reserved at admission"
+    },
+    "series": [
+     {
+      "t_admission": "2026-11-10T13:52:39.595+00:00",
+      "offset_s": 1.015,
+      "after": "P6 draft b986ca653fb3469e",
+      "queue_time_s": 0.01,
+      "remaining_tokens": 6573,
+      "reset_tokens": "10.7s",
+      "wall_second": 39.6
+     },
+     {
+      "t_admission": "2026-11-10T13:52:42.603+00:00",
+      "offset_s": 4.015,
+      "after": "P6 draft b986ca653fb3469e",
+      "queue_time_s": 0.01,
+      "remaining_tokens": 6874,
+      "reset_tokens": "8.44s",
+      "wall_second": 42.6
+     },
+     {
+      "t_admission": "2026-11-10T13:52:46.572+00:00",
+      "offset_s": 8.003,
+      "after": "P6 draft b986ca653fb3469e",
+      "queue_time_s": 0.01,
+      "remaining_tokens": 7306,
+      "reset_tokens": "5.2s",
+      "wall_second": 46.57
+     }
+    ],
+    "intervals": [
+     {
+      "dt_s": 3.009,
+      "refill_est": 400,
+      "bucket_expect": 401.2,
+      "minute_boundary_crossed": false,
+      "corrections": {
+       "own_admission_q": 99,
+       "after_p_completed": 0
+      }
+     },
+     {
+      "dt_s": 3.968,
+      "refill_est": 531,
+      "bucket_expect": 529.1,
+      "minute_boundary_crossed": false,
+      "corrections": {
+       "own_admission_q": 99,
+       "after_p_completed": 0
+      }
+     }
+    ],
+    "median_refill_per_s": 133.38,
+    "reset_tokens_over_time_to_refill_at_tpm_per_60": {
+     "n": 59,
+     "p50": 1.0,
+     "p95": 1.001,
+     "max": 1.001,
+     "min": 0.997,
+     "p95_reliable": true
+    },
+    "verdict": "refilling bucket"
+   }
+  ],
+  "qwen/qwen3.8-27b": null
+ },
+ "requests_window_and_pooling": [
+  {
+   "run_id": "20261110T135056Z-34be27",
+   "burst_start": "2026-11-10T13:56:15.005+00:00",
+   "per_model": {
+    "openai/gpt-oss-20b": {
+     "burst_calls": 34,
+     "ok_before_first_429": 31,
+     "ok_in_burst": 31,
+     "admitted_in_60s_before_burst": 0,
+     "statuses": [
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      429,
+      429,
+      429,
+      200,
+      200,
+      200
+     ],
+     "first_429": {
+      "at": "2026-11-10T13:56:18.233+00:00",
+      "s_after_burst_start": 3.228,
+      "retry_after": "1",
+      "reset_requests": "10h3m41.77s",
+      "remaining_requests": "901",
+      "remaining_tokens": "5361",
+      "body": "Rate limit reached for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 29, Requested 1. Please try again in 773ms. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing",
+      "parsed": {
+       "what": "requests per minute",
+       "short": "RPM",
+       "limit": 30,
+       "used": 29,
+       "requested": 1,
+       "try_again_in": "773ms",
+       "try_again_in_s": 0.773,
+       "form": "rate_limit_reached"
+      }
+     },
+     "recovery": [
+      {
+       "offset_s": 2.001,
+       "status": 200,
+       "wall": "2026-11-10T13:56:20.236+00:00",
+       "retry_after": null,
+       "try_again_in": null
+      },
+      {
+       "offset_s": 4.018,
+       "status": 200,
+       "wall": "2026-11-10T13:56:22.253+00:00",
+       "retry_after": null,
+       "try_again_in": null
+      },
+      {
+       "offset_s": 7.001,
+       "status": 200,
+       "wall": "2026-11-10T13:56:25.236+00:00",
+       "retry_after": null,
+       "try_again_in": null
+      }
+     ],
+     "first_recovery_success_s_after_first_429": 2.003,
+     "minute_boundary_between_429_and_recovery": false,
+     "first_recovery_success_s_after_burst_start": 5.231,
+     "retry_after_s": 1.0,
+     "try_again_in_s": 0.773,
+     "verdict": "refilling bucket (a request was readmitted within seconds)",
+     "remaining_requests_sequence": [
+      [
+       200,
+       931
+      ],
+      [
+       200,
+       930
+      ],
+      [
+       200,
+       929
+      ],
+      [
+       200,
+       928
+      ],
+      [
+       200,
+       927
+      ],
+      [
+       200,
+       926
+      ],
+      [
+       200,
+       925
+      ],
+      [
+       200,
+       924
+      ],
+      [
+       200,
+       922
+      ],
+      [
+       200,
+       923
+      ],
+      [
+       200,
+       921
+      ],
+      [
+       200,
+       920
+      ],
+      [
+       200,
+       918
+      ],
+      [
+       200,
+       919
+      ],
+      [
+       200,
+       917
+      ],
+      [
+       200,
+       916
+      ],
+      [
+       200,
+       914
+      ],
+      [
+       200,
+       915
+      ],
+      [
+       200,
+       913
+      ],
+      [
+       200,
+       912
+      ],
+      [
+       200,
+       911
+      ],
+      [
+       200,
+       910
+      ],
+      [
+       200,
+       909
+      ],
+      [
+       200,
+       908
+      ],
+      [
+       200,
+       907
+      ],
+      [
+       200,
+       906
+      ],
+      [
+       200,
+       905
+      ],
+      [
+       200,
+       904
+      ],
+      [
+       429,
+       901
+      ],
+      [
+       429,
+       901
+      ],
+      [
+       429,
+       901
+      ],
+      [
+       200,
+       902
+      ],
+      [
+       200,
+       903
+      ],
+      [
+       200,
+       901
+      ],
+      [
+       200,
+       900
+      ],
+      [
+       200,
+       899
+      ],
+      [
+       200,
+       898
+      ]
+     ]
+    },
+    "openai/gpt-oss-120b": {
+     "burst_calls": 35,
+     "ok_before_first_429": 32,
+     "ok_in_burst": 32,
+     "admitted_in_60s_before_burst": 0,
+     "statuses": [
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      429,
+      429,
+      429,
+      200,
+      200,
+      200
+     ],
+     "first_429": {
+      "at": "2026-11-10T13:56:19.206+00:00",
+      "s_after_burst_start": 4.201,
+      "retry_after": "2",
+      "reset_requests": "10h3m40.79s",
+      "remaining_requests": "906",
+      "remaining_tokens": "5392",
+      "body": "Rate limit reached for model `openai/gpt-oss-120b` in organization `org_REDACTED` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 29, Requested 1. Please try again in 1.8s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing",
+      "parsed": {
+       "what": "requests per minute",
+       "short": "RPM",
+       "limit": 30,
+       "used": 29,
+       "requested": 1,
+       "try_again_in": "1.8s",
+       "try_again_in_s": 1.8,
+       "form": "rate_limit_reached"
+      }
+     },
+     "recovery": [
+      {
+       "offset_s": 2.003,
+       "status": 200,
+       "wall": "2026-11-10T13:56:21.210+00:00",
+       "retry_after": null,
+       "try_again_in": null
+      },
+      {
+       "offset_s": 4.028,
+       "status": 200,
+       "wall": "2026-11-10T13:56:23.235+00:00",
+       "retry_after": null,
+       "try_again_in": null
+      },
+      {
+       "offset_s": 7.002,
+       "status": 200,
+       "wall": "2026-11-10T13:56:26.210+00:00",
+       "retry_after": null,
+       "try_again_in": null
+      }
+     ],
+     "first_recovery_success_s_after_first_429": 2.004,
+     "minute_boundary_between_429_and_recovery": false,
+     "first_recovery_success_s_after_burst_start": 6.206,
+     "retry_after_s": 2.0,
+     "try_again_in_s": 1.8,
+     "verdict": "refilling bucket (a request was readmitted within seconds)",
+     "remaining_requests_sequence": [
+      [
+       200,
+       937
+      ],
+      [
+       200,
+       936
+      ],
+      [
+       200,
+       935
+      ],
+      [
+       200,
+       934
+      ],
+      [
+       200,
+       933
+      ],
+      [
+       200,
+       932
+      ],
+      [
+       200,
+       931
+      ],
+      [
+       200,
+       930
+      ],
+      [
+       200,
+       929
+      ],
+      [
+       200,
+       928
+      ],
+      [
+       200,
+       927
+      ],
+      [
+       200,
+       926
+      ],
+      [
+       200,
+       924
+      ],
+      [
+       200,
+       925
+      ],
+      [
+       200,
+       923
+      ],
+      [
+       200,
+       922
+      ],
+      [
+       200,
+       921
+      ],
+      [
+       200,
+       920
+      ],
+      [
+       200,
+       919
+      ],
+      [
+       200,
+       918
+      ],
+      [
+       200,
+       917
+      ],
+      [
+       200,
+       916
+      ],
+      [
+       200,
+       915
+      ],
+      [
+       200,
+       914
+      ],
+      [
+       200,
+       913
+      ],
+      [
+       200,
+       912
+      ],
+      [
+       200,
+       911
+      ],
+      [
+       200,
+       910
+      ],
+      [
+       200,
+       909
+      ],
+      [
+       429,
+       906
+      ],
+      [
+       429,
+       906
+      ],
+      [
+       429,
+       906
+      ],
+      [
+       200,
+       908
+      ],
+      [
+       200,
+       907
+      ],
+      [
+       200,
+       906
+      ],
+      [
+       200,
+       905
+      ],
+      [
+       200,
+       904
+      ],
+      [
+       200,
+       903
+      ]
+     ]
+    },
+    "qwen/qwen3.8-27b": {
+     "burst_calls": 10,
+     "ok_before_first_429": 10,
+     "ok_in_burst": 10,
+     "admitted_in_60s_before_burst": 0,
+     "statuses": [
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200,
+      200
+     ],
+     "first_429": null,
+     "recovery": [],
+     "remaining_requests_sequence": [
+      [
+       200,
+       937
+      ],
+      [
+       200,
+       936
+      ],
+      [
+       200,
+       935
+      ],
+      [
+       200,
+       934
+      ],
+      [
+       200,
+       933
+      ],
+      [
+       200,
+       932
+      ],
+      [
+       200,
+       931
+      ],
+      [
+       200,
+       930
+      ],
+      [
+       200,
+       929
+      ],
+      [
+       200,
+       928
+      ]
+     ]
+    }
+   },
+   "pooling_verdict": "per model (each model hit its own wall; the bystander model was never refused)"
+  }
+ ],
+ "rpd_429_counting": [
+  {
+   "model": "openai/gpt-oss-20b",
+   "limit_requests": 1000,
+   "highest_remaining_seen": 962,
+   "lowest_remaining_seen": 898,
+   "lowest_seen_at": "2026-11-10T13:56:25.236+00:00",
+   "used_per_header": 102,
+   "our_200s": 65,
+   "our_429s": 3,
+   "our_other_responses": 1,
+   "expect_if_429_counted": 68,
+   "expect_if_not": 65,
+   "used_before_our_first_call": 37,
+   "remaining_on_429s_in_order": [
+    901,
+    901,
+    901
+   ],
+   "duplicate_values_among_successes": 0,
+   "header_count_minus_our_count": 37,
+   "verdict": "429s not counted (0 of 2 back-to-back 429 pairs showed a drop)"
+  },
+  {
+   "model": "openai/gpt-oss-120b",
+   "limit_requests": 1000,
+   "highest_remaining_seen": 962,
+   "lowest_remaining_seen": 903,
+   "lowest_seen_at": "2026-11-10T13:56:26.210+00:00",
+   "used_per_header": 97,
+   "our_200s": 60,
+   "our_429s": 3,
+   "our_other_responses": 0,
+   "expect_if_429_counted": 63,
+   "expect_if_not": 60,
+   "used_before_our_first_call": 37,
+   "remaining_on_429s_in_order": [
+    906,
+    906,
+    906
+   ],
+   "duplicate_values_among_successes": 0,
+   "header_count_minus_our_count": 37,
+   "verdict": "429s not counted (0 of 2 back-to-back 429 pairs showed a drop)"
+  },
+  {
+   "model": "qwen/qwen3.8-27b",
+   "limit_requests": 1000,
+   "highest_remaining_seen": 962,
+   "lowest_remaining_seen": 928,
+   "lowest_seen_at": "2026-11-10T13:56:19.440+00:00",
+   "used_per_header": 72,
+   "our_200s": 35,
+   "our_429s": 0,
+   "our_other_responses": 0,
+   "expect_if_429_counted": 35,
+   "expect_if_not": 35,
+   "used_before_our_first_call": 37,
+   "remaining_on_429s_in_order": [],
+   "duplicate_values_among_successes": 0,
+   "header_count_minus_our_count": 37,
+   "verdict": "no 429s for this model"
+  }
+ ],
+ "verdicts": {
+  "tokens_window": {
+   "openai/gpt-oss-20b": "refilling bucket",
+   "openai/gpt-oss-120b": "refilling bucket"
+  },
+  "requests_window": {
+   "openai/gpt-oss-20b": "refilling bucket (a request was readmitted within seconds)",
+   "openai/gpt-oss-120b": "refilling bucket (a request was readmitted within seconds)"
+  },
+  "admission": {
+   "openai/gpt-oss-20b": "max_tokens reserved at admission",
+   "openai/gpt-oss-120b": "max_tokens reserved at admission",
+   "qwen/qwen3.8-27b": "max_tokens reserved at admission"
+  },
+  "pooling": "per model (each model hit its own wall; the bystander model was never refused)",
+  "concurrency": {
+   "openai/gpt-oss-20b": "no limit up to k=8; server TTFB p50 x1.69 from k=1 to k=8",
+   "openai/gpt-oss-120b": "no limit up to k=8; server TTFB p50 x1.57 from k=1 to k=8",
+   "qwen/qwen3.8-27b": "no limit up to k=4; server TTFB p50 x1.17 from k=1 to k=4"
+  }
+ },
+ "contradictions_with_docs": [],
+ "dry_run_truth_check": [
+  "- PASS tokens_window gpt-oss-20b: expected bucket, got 'refilling bucket'",
+  "- PASS tokens_window gpt-oss-120b: expected bucket, got 'refilling bucket'",
+  "- PASS requests_window gpt-oss-20b: expected bucket, got 'refilling bucket (a request was readmitted within seconds)'",
+  "- PASS requests_window gpt-oss-120b: expected bucket, got 'refilling bucket (a request was readmitted within seconds)'",
+  "- PASS admission gpt-oss-20b: expected 'max_tokens', got 'max_tokens reserved at admission'",
+  "- PASS admission gpt-oss-120b: expected 'max_tokens', got 'max_tokens reserved at admission'",
+  "- PASS admission qwen3.8-27b: expected 'max_tokens', got 'max_tokens reserved at admission'",
+  "- PASS pooling: expected 'per model', got 'per model (each model hit its own wall; the bystander model was never refused)'"
+ ]
+}

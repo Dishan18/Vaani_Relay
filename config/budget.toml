@@ -4,6 +4,11 @@
 
 window_hours = 24
 
+# Hidden chat-template tokens per call, added to every prompt estimate so a reservation bounds the
+# charge. Deliberately high until measured: the probe's P0 measures each model's real overhead and
+# replaces this value for its own run (logged).
+prompt_overhead_tokens = 128
+
 # Halt every real call if the server says fewer than this fraction of a model's daily requests
 # remain. The key is shared, so this catches someone else draining it, or a wrong cap.
 [server_floor]

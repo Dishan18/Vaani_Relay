@@ -46,7 +46,7 @@ No code exists yet. Groq limits below are written as **hypotheses to measure**, 
   - `source` ∈ {real, stand-in}; `status` ∈ {ok, rate_limited, timeout, error};
     `answer_grade` ∈ {correct, wrong, refused_correctly, refused_wrongly}.
   - Proposed extra columns **appended after** the required ones (see G4/G5): `gave_up`, `degraded_level`, `queue_wait_ms`, `model`, `calls`.
-- `results/raw/probe/*.jsonl`: every probe call with full response headers, 429 bodies and timestamps.
+- `data/probe/probe_raw.jsonl`: every probe call with its exact payload, full response headers, 429 bodies and timestamps.
 - `results/raw/runs/<scenario>-<utc>.jsonl`: per-request span traces (queued / working / retry-wait, first token, each model call and tool call).
 - `results/raw/answers/*.jsonl`: full answer text and citations for every graded answer.
 - `results/ledger/groq_calls.jsonl`: every real Groq call made by anything, for budget accounting.
@@ -166,7 +166,8 @@ Vaani_Relay/
 ├── scripts/
 │   ├── fetch_papers.py        exact versions + sha256 manifest
 │   ├── build_index.py
-│   ├── probe_groq.py          R1 (real)
+│   ├── probe_groq.py          R1 (real; --dry-run vs relay/fake_groq.py)
+│   ├── analyze_probe.py       R1 -> data/probe/{limits_table.md,calibration.json,findings.md}
 │   ├── calibrate_standin.py   R1 raw → data/calibration.json
 │   ├── validate_standin.py    R2
 │   ├── run_scenario.py        R5–R9
@@ -307,17 +308,36 @@ retriever":
   errors, truncated streams, mid-stream error events, and think-tags split across chunks.
   Run: `.venv\Scripts\python -m unittest discover -s tests -t .`
 
-Windows facts found while testing. Both matter for the measurement design:
+Windows facts found while testing. All matter for the measurement design:
 - **Timer granularity.** asyncio timers run on `time.monotonic`, which ticks about every
   15.6 ms on Windows, so a timeout can fire up to one tick early. Recorded times use
   `perf_counter` and are unaffected. Never set timeouts finer than about 20 ms.
 - **Refused connections.** A refused TCP connect to localhost takes about 2 s on Windows
   (SYN retries). Stand-in failure modes should answer with HTTP errors, not by refusing
   connections, or the 2 s will pollute latency results.
+- **fsync blocks the event loop.** One `os.fsync` on the data disk takes about 30–60 ms. Done
+  per call it delayed the timestamps of every call in flight. The ledger and raw logs flush per
+  line and fsync on close.
 
 **Ledger + caps done** (`relay/ledger.py`, `config/budget.toml`, `relay/real.py`): rolling-24 h caps
 derived from `data/limits_documented.json`, reservation before send, conservative charging,
-server-floor halt for the shared key, one-process file lock, `--real` opt-in. Probe design:
-`docs/probe_plan.md` (awaiting approval; nothing spent).
+server-floor halt for the shared key, one-process file lock, `--real` opt-in. Every 4xx is
+charged its prompt estimate only. The hidden chat-template overhead is measured per model.
 
-Still open in M2: probe script, client-side limiter, stand-in v0, results.csv writer.
+**Probe done (R1)** (2026-11-10), as designed in `docs/probe_plan.md`; §4 there lists what changed
+while implementing.
+- **Scripts.** `scripts/probe_groq.py` runs it. `scripts/analyze_probe.py` writes
+  `data/probe/limits_table.md` (Table 1), `data/probe/calibration.json` and
+  `data/probe/findings.md`, which flags anything that contradicts the docs.
+- **Raw data.** `data/probe/probe_raw.jsonl`. The spend is in `results/ledger/groq_calls.jsonl`.
+- **Validation.** Before any real call, the whole probe ran against `relay/fake_groq.py` under
+  three chosen behaviours: bucket/admission/per-model, window/usage/pooled and
+  window/admission/per-model. The analysis recovered each one (`data/probe/dryrun/*/findings.md`,
+  "Dry-run check" section).
+- **What the findings feed (next).** The client-side limiter, the token counts each call
+  reserves, whether falling back to another model adds capacity, the in-flight cap, how a 429 is
+  read, and the latency targets and timeouts.
+- **Not settled.** p95 latency per call size needs P6 repeated on later days:
+  `probe_groq.py --real --phases P6`, which reuses the measured settings.
+
+Still open in M2: client-side limiter (built on the probe findings), stand-in v0, results.csv writer.
