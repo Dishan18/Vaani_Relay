@@ -25,8 +25,9 @@ results.csv: the brief's columns in order, then ours:
     byte-identical to a graded real answer). make_tables.py stops if a stand-in row carries a grade,
     and shows grading coverage for every scenario and source.
   * degraded rows (level > 0) are graded like any other and keep their degraded_level.
-  * superseded = 1 (eval scenarios only) when a later run answered the same (scenario, setting, drafter,
-    question); the
+  * superseded = 1 when a later run replaces this row: for the evals, a later answer to the same
+    (scenario, setting, drafter, question); for load runs, a later run of the same scenario and source
+    (the whole earlier run is superseded; the raw files stay, and the newer run's header says why); the
     tables use the latest one.
 """
 from __future__ import annotations
@@ -76,8 +77,15 @@ def main(argv: list[str] | None = None) -> int:
     rows = [r for d in raw_dirs if d.exists() for r in read_answers(d)]
     rows.sort(key=lambda r: (r["source"] != "real", r["start_time"], r["request_id"]))   # real first
     latest = {}
+    latest_run: dict[tuple, tuple] = {}              # load runs: (scenario, source) -> (first start, run_id)
     for r in rows:
         latest[(r["scenario"], r["setting"], r["drafter"], r["qid"])] = r["request_id"]
+        if not r["scenario"].startswith("eval:"):
+            k, v = (r["scenario"], r["source"]), (r["start_time"], r["run_id"])
+            cur = latest_run.get(k)
+            if cur is None or (r["run_id"] != cur[1] and v[0] > cur[0] and
+                               v[0] > max(x["start_time"] for x in rows if x["run_id"] == cur[1])):
+                latest_run[k] = v
     pieces_by_size: dict[int, dict] = {}
     out_rows, grades, unsure = [], [], []
     real_graded: dict[str, tuple[str, str, bool]] = {}      # answer_id -> (label, request_id, sure)
@@ -103,8 +111,10 @@ def main(argv: list[str] | None = None) -> int:
             g = {"answer_id": aid, "label": None, "sure": True, "reasons": [source],
                  "facts": [], "wrong_paper_citations": [], "borrowed": []}
         # only the evals answer each question once per setting; load runs repeat questions and every request counts
-        superseded = int(r["scenario"].startswith("eval:")
-                         and latest[(r["scenario"], r["setting"], r["drafter"], r["qid"])] != r["request_id"])
+        if r["scenario"].startswith("eval:"):
+            superseded = int(latest[(r["scenario"], r["setting"], r["drafter"], r["qid"])] != r["request_id"])
+        else:   # a load run is superseded as a whole by a later run of the same scenario and source
+            superseded = int(latest_run[(r["scenario"], r["source"])][1] != r["run_id"])
         rec = {"answer_id": g["answer_id"], "request_id": r["request_id"], "run_id": r["run_id"],
                "scenario": r["scenario"], "setting": r["setting"], "drafter": r["drafter"], "qid": r["qid"],
                "kind": reply["kind"], "degraded": bool(r.get("degraded")), "auto_label": g["label"], "sure": g["sure"],

@@ -13,7 +13,8 @@ fitted on the real probe), so the client code path is the same as for Groq: base
 http://127.0.0.1:<port>/openai/v1.
 
 Behaviour, and where each piece comes from
-  * Limits: per-model refilling buckets (RPM, TPM, RPD, and TPD), refilled continuously at
+  * Limits: per-model refilling buckets (RPM, TPM, RPD, TPD, and qwen's OTPM, which no header shows
+    and a real 429 revealed: output tokens only, holding min(max_tokens, 184) at admission), refilled continuously at
     capacity/period per second (probe findings Q1, Q3). Admission takes 1 request from RPM and RPD
     and prompt + min(max_tokens, hold_cap) tokens from TPM and TPD; at the end the hold is
     released down to the real completion (Q2). A 429 takes nothing (Q5).
@@ -81,7 +82,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 CALIBRATION = ROOT / "data" / "calibration.json"
 WHAT = {"RPM": "requests per minute", "RPD": "requests per day", "TPM": "tokens per minute",
-        "TPD": "tokens per day"}
+        "TPD": "tokens per day", "OTPM": "output tokens per minute", "ITPM": "input tokens per minute"}
 
 
 def fmt_duration(s: float) -> str:
@@ -159,6 +160,7 @@ class Model:
         self.name, self.cal = name, cal
         self.buckets = {k: Bucket(b["capacity"], b["period_s"], b["unit"], clock) for k, b in cal["buckets"].items()}
         self.hold_cap = float(cal.get("hold_cap") or 0.0)
+        self.out_hold_cap = float(cal.get("out_hold_cap") or self.hold_cap)
 
     def prompt_tokens(self, messages: list[dict]) -> int:
         f = self.cal.get("prompt_tokens_fit")
@@ -182,6 +184,13 @@ class Replay:
         self.draft: dict[tuple, str] = {}
         if raw_dir is None or not raw_dir.exists():
             return
+        cites: dict[int, dict[str, str]] = {}          # piece size -> pid -> citation (refusals list pids only)
+
+        def cite_of(size: int, pid: str) -> str | None:
+            if size not in cites:
+                from relay.retrieve import Retriever
+                cites[size] = {p.pid: p.cite() for p in Retriever.from_blocks(size).pieces}
+            return cites[size].get(pid)
         for p in sorted(raw_dir.glob("*.jsonl")):
             if p.name.endswith(".calls.jsonl"):
                 continue
@@ -203,10 +212,14 @@ class Replay:
                 if rep["kind"] == "answer" and rep.get("sources"):
                     self.draft[(q, tuple(s["cite"] for s in rep["sources"]))] = rep["text"]
                 elif rep["kind"] == "refusal" and rep["text"].startswith("The papers don't say"):
+                    # the drafter refused: key it by the sources it was shown, like any draft
                     rest = rep["text"][len("The papers don't say."):].strip()
                     pids = ((rep.get("checks") or {}).get("retrieval") or {}).get("pids")
-                    if pids:
-                        self.draft[(q, ("pids",) + tuple(pids))] = f"NOT_IN_PAPERS: {rest or 'not covered.'}"
+                    size = (o.get("setting_def") or {}).get("piece_chars")
+                    if pids and size:
+                        cs = tuple(cite_of(size, pid) for pid in pids)
+                        if all(cs):
+                            self.draft[(q, cs)] = f"NOT_IN_PAPERS: {rest or 'not covered.'}"
 
     def lookup(self, messages: list[dict]) -> str | None:
         sysmsg = messages[0].get("content") or "" if messages else ""
@@ -231,8 +244,10 @@ def placeholder(messages: list[dict]) -> str:
         return '{"unsupported": []}'
     m = re.search(r"\[S1\] \([^\n]*\)\n(.*?)(?:\n\n\[S2\] \(|\Z)", user, re.S)
     if m:
-        first = re.split(r"(?<=[.!?])\s+", m.group(1).replace("\n", " "))[0]
-        return f"{first} [S1]"
+        # a real sentence (not a paragraph label like "Metrics."), so the shape is a plausible answer
+        sents = re.split(r"(?<=[.!?])\s+", m.group(1).replace("\n", " "))
+        good = [s for s in sents if len(re.findall(r"[A-Za-z]{2,}", s)) >= 6]
+        return f"{(good or sents)[0]} [S1]"
     return "OK"
 
 
@@ -409,7 +424,9 @@ class StandIn:
         pt = m.prompt_tokens(msgs)
         mx = int(p.get("max_tokens") or p.get("max_completion_tokens") or 1024)
         hold = min(mx, m.hold_cap)
-        need = {n: (1.0 if b.unit == "requests" else float(pt + hold)) for n, b in m.buckets.items()}
+        out_hold = min(mx, m.out_hold_cap)
+        per_unit = {"requests": 1.0, "tokens": float(pt + hold), "input_tokens": float(pt), "output_tokens": float(out_hold)}
+        need = {n: per_unit.get(b.unit, float(pt + hold)) for n, b in m.buckets.items()}
         for n, b in m.buckets.items():
             if need[n] > b.capacity:
                 self.stats["413"] += 1
@@ -424,6 +441,7 @@ class StandIn:
         if waits[worst] > 0:
             self.stats["429"] += 1
             b = m.buckets[worst]
+            kind = "requests" if b.unit == "requests" else "tokens"
             used = max(0, round(b.capacity - b.sync()))
             w = waits[worst]
             body = {"error": {"message": (
@@ -431,7 +449,7 @@ class StandIn:
                 f"{WHAT.get(worst, worst)} ({worst}): Limit {b.capacity:.0f}, Used {used}, Requested {need[worst]:.0f}. "
                 f"Please try again in {fmt_duration(w)}. Need more tokens? Upgrade to Dev Tier today at "
                 "https://console.groq.com/settings/billing"),
-                "type": "requests" if b.unit == "requests" else "tokens", "code": "rate_limit_exceeded"}}
+                "type": kind, "code": "rate_limit_exceeded"}}
             hdrs = [("retry-after", str(max(1, math.ceil(w))))] + self._rate_headers(m, request_only=b.unit == "requests")
             await self._send(writer, 429, [("content-type", "application/json")] + hdrs, json.dumps(body).encode())
             return
@@ -450,6 +468,9 @@ class StandIn:
             for b in m.buckets.values():
                 if b.unit == "tokens":
                     b.give(hold)
+                    b.take(completion)
+                elif b.unit == "output_tokens":
+                    b.give(out_hold)
                     b.take(completion)
         try:
             ttfb = self.ttfb_s(m)

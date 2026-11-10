@@ -322,6 +322,49 @@ class AsyncTests(unittest.IsolatedAsyncioTestCase):
             await a.acquire()
 
 
+class OutputTokenLimitTests(unittest.TestCase):
+    """qwen's OTPM, found in the real drafter step (no header shows it)."""
+
+    def otpm_body(self, used=820, requested=184, wait="240ms"):
+        return body("output tokens per minute", "OTPM", 1000, used, requested, wait)
+
+    def test_parse_units(self):
+        self.assertEqual(parse_limit_body(self.otpm_body())["unit"], "output_tokens")
+        self.assertEqual(parse_limit_body(body("input tokens per minute", "ITPM", 5000, 1, 1, "1s"))["unit"],
+                         "input_tokens")
+
+    def test_learned_otpm_charges_output_only_and_never_blocks_a_long_prompt(self):
+        c = Clock()
+        lim = limiter(c, rpm=None, rpd=None)
+        g = lim.reserve(M, 400, 300, c() + 5)
+        lim.settle(g, rec(429, error_body=self.otpm_body(), outcome="rate_limited"))
+        st = lim.models[M]
+        self.assertEqual((st.buckets["OTPM"].unit, st.buckets["OTPM"].capacity, st.out_hold_cap),
+                         ("output_tokens", 1000.0, 184.0))
+        c.t += 60                                          # OTPM refills
+        g2 = lim.reserve(M, 1726, 1200, c() + 5)          # a long prompt: input doesn't count against OTPM
+        self.assertEqual(g2.wait_s, 0.0)
+        before = lim.levels(M)["OTPM"]
+        lim.settle(g2, rec(usage={"prompt_tokens": 1700, "completion_tokens": 250, "queue_time": 0.0}))
+        self.assertAlmostEqual(before - lim.levels(M)["OTPM"], 250 - 184, delta=1.0)   # hold -> real completion
+
+    def test_input_limit_charges_prompt_only(self):
+        c = Clock()
+        lim = limiter(c, rpm=None, rpd=None, tpm=None)
+        lim.models[M].buckets["ITPM"] = Bucket("ITPM", "input_tokens", 5000, 60.0, c(), 5000, "test")
+        g = lim.reserve(M, 1200, 1000, c() + 5)
+        self.assertAlmostEqual(5000 - lim.levels(M)["ITPM"], 1200, delta=1.0)
+        lim.release(g)
+
+    def test_from_probe_seeds_runtime_limits(self):
+        lim = Limiter.from_probe()
+        st = lim.models["qwen/qwen3.8-27b"]
+        if "OTPM" in st.buckets:                            # present once a real run has hit it
+            self.assertEqual(st.buckets["OTPM"].unit, "output_tokens")
+            self.assertIsNotNone(st.out_hold_cap)
+            self.assertEqual(lim.predict_wait("qwen/qwen3.8-27b", 1726, 1200), 0.0)
+
+
 class PredictWaitTests(unittest.TestCase):
     def test_predicts_like_reserve_and_commits_nothing(self):
         c = Clock()

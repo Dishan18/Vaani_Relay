@@ -78,8 +78,12 @@ from typing import Any, Callable
 ROOT = Path(__file__).resolve().parents[1]
 CALIBRATION = ROOT / "data" / "probe" / "calibration.json"
 PROBE_RAW = ROOT / "data" / "probe" / "probe_raw.jsonl"
+RUN_CALLS = ROOT / "results" / "raw" / "answers"      # later real runs: their 429 bodies name limits too
 
 REQUESTS, TOKENS = "requests", "tokens"
+# Limits on one side of the call only. Found in the real drafter step (2026-11-10): qwen returned
+# "output tokens per minute (OTPM): Limit 1000, Used 820, Requested 184" (no header shows it).
+INPUT_TOKENS, OUTPUT_TOKENS = "input_tokens", "output_tokens"
 EPS = 1e-6
 COMPACT_AFTER_S = 300.0     # events older than this are folded into the anchor; older headers ignored
 
@@ -122,7 +126,8 @@ def parse_limit_body(text: str | None) -> dict | None:
         return None
     d = m.groupdict()
     what = d["what"]
-    unit = TOKENS if "token" in what else REQUESTS if "request" in what else what
+    unit = (OUTPUT_TOKENS if "output token" in what else INPUT_TOKENS if "input token" in what
+            else TOKENS if "token" in what else REQUESTS if "request" in what else what)
     period = 60.0 if "minute" in what else 3600.0 if "hour" in what else 86400.0 if "day" in what else None
     if period is None:
         period = {"M": 60.0, "H": 3600.0, "D": 86400.0}.get(d["short"][-1:], 60.0)
@@ -231,7 +236,7 @@ class Event:
 @dataclass
 class Bucket:
     name: str              # "RPM", "TPM", "RPD", "TPD", ...
-    unit: str              # REQUESTS | TOKENS
+    unit: str              # REQUESTS | TOKENS (prompt + completion) | INPUT_TOKENS | OUTPUT_TOKENS
     capacity: float
     period_s: float
     anchor_t: float
@@ -262,6 +267,7 @@ class ModelState:
     buckets: dict[str, Bucket]
     admission_includes_max_tokens: bool = False     # Q2 says False; a token 429 can overturn it
     hold_cap: float | None = None                   # admission holds prompt + min(max_tokens, hold_cap)
+    out_hold_cap: float | None = None               # an output-token limit holds min(max_tokens, this) at admission
     hold_obs: deque = field(default_factory=lambda: deque(maxlen=50))
     inflight: dict = field(default_factory=dict)    # grant id -> Grant
     count_429: bool = False                         # Q5 says 429s don't count
@@ -280,6 +286,7 @@ class Grant:
         self.wait_s = 0.0
         self.settled = False
         self.hold = 0.0          # tokens held at admission beyond the prompt
+        self.out_hold = 0.0      # output tokens an output-token limit holds at admission
         self.alone = True        # no other call of this model in flight while this one was admitted
 
     def settle(self, rec, t_sent: float | None = None) -> None:
@@ -324,7 +331,7 @@ class Limiter:
     # ---------------------------------------------------------------- construction
     @classmethod
     def from_probe(cls, calibration: Path = CALIBRATION, raw: Path = PROBE_RAW,
-                   clock: Callable[[], float] = time.monotonic) -> "Limiter":
+                   clock: Callable[[], float] = time.monotonic, runs: Path | None = RUN_CALLS) -> "Limiter":
         """Buckets, charging rules and the estimator's seed, all from the probe's outputs."""
         cal = json.loads(calibration.read_text(encoding="utf-8"))
         verdicts = cal.get("verdicts", {})
@@ -389,7 +396,35 @@ class Limiter:
                     if u.get("completion_tokens") is not None:
                         lim._note_completion(o["model"], o["payload"].get("max_tokens"), u["completion_tokens"])
         lim.estimator.misses.clear()      # count misses from now on, not while seeding
+        lim._seed_from_runs(runs)
         return lim
+
+    def _seed_from_runs(self, runs: Path | None) -> None:
+        """Limits that real runs after the probe found in 429 bodies (e.g. qwen's OTPM, which no
+        header shows): a bucket the probe didn't know is created, full, with the body's capacity."""
+        if runs is None or not runs.exists():
+            return
+        now = self.now()
+        for p in sorted(runs.glob("*.calls.jsonl")):
+            for line in p.read_text(encoding="utf-8").splitlines():
+                if '"status": 429' not in line:
+                    continue
+                o = json.loads(line)
+                r = o.get("record") or {}
+                if r.get("source") != "real" or r.get("status") != 429:
+                    continue
+                info = parse_limit_body(r.get("error_body"))
+                st = self.models.get(r.get("model"))
+                if not info or st is None:
+                    continue
+                if info["short"] not in st.buckets:
+                    period = info["period_s"]
+                    st.buckets[info["short"]] = Bucket(info["short"], info["unit"], float(info["limit"]), period, now,
+                                                       float(info["limit"]), f"real run 429 body ({p.name})")
+                    self.findings_changed.append({"model": st.model, "change": f"{info['short']} seeded from a real-run 429",
+                                                  "limit": info["limit"], "period_s": period, "file": p.name})
+                if info["unit"] == OUTPUT_TOKENS:
+                    st.out_hold_cap = max(st.out_hold_cap or 0.0, float(info["requested"]))
 
     # ---------------------------------------------------------------- state helpers
     def _state(self, model: str) -> ModelState:
@@ -438,10 +473,19 @@ class Limiter:
             return float(max_tokens)
         return float(min(max_tokens, st.hold_cap or 0.0))
 
+    @staticmethod
+    def output_hold(st: ModelState, max_tokens: int) -> float:
+        """Output tokens an output-token limit (OTPM) holds at admission: Groq's "Requested" on an
+        OTPM 429 was 184 for max_tokens 300, so it is not max_tokens; learned from those bodies,
+        falling back to the total-token hold cap."""
+        cap = st.out_hold_cap if st.out_hold_cap is not None else (st.hold_cap or 0.0)
+        return float(min(max_tokens, cap))
+
     def _needs(self, st: ModelState, prompt_tokens: int, max_tokens: int) -> dict[str, float]:
         tok = prompt_tokens + self.admission_hold(st, max_tokens)
-        return {n: (1.0 if b.unit == REQUESTS else float(tok) if b.unit == TOKENS else 0.0)
-                for n, b in st.buckets.items()}
+        per_unit = {REQUESTS: 1.0, TOKENS: float(tok), INPUT_TOKENS: float(prompt_tokens),
+                    OUTPUT_TOKENS: self.output_hold(st, max_tokens)}
+        return {n: per_unit.get(b.unit, 0.0) for n, b in st.buckets.items()}
 
     def _expected_completion(self, model: str, max_tokens: int) -> float:
         d = self.completions.get((model, max_tokens))
@@ -471,8 +515,8 @@ class Limiter:
         lv = {n: b.level(st.events, now) for n, b in st.buckets.items()}
         held = sum(st.holds.values()) if with_holds else 0.0
         for n, b in st.buckets.items():
-            if b.unit == TOKENS:
-                lv[n] -= held
+            if b.unit in (TOKENS, OUTPUT_TOKENS):
+                lv[n] -= held          # completions still to come count against both
         t = now
         out = []
         for pt, mx in items:
@@ -486,7 +530,7 @@ class Limiter:
                         start, limiting = s, n
             for n, b in st.buckets.items():
                 lv[n] = min(b.capacity, lv[n] + b.rate * (start - t)) - need[n]
-                if with_holds and b.unit == TOKENS:
+                if with_holds and b.unit in (TOKENS, OUTPUT_TOKENS):
                     lv[n] -= self._hold(st.model, mx)
             t = start
             out.append((start, limiting))
@@ -502,9 +546,13 @@ class Limiter:
         hold = self.admission_hold(st, max_tokens)
         self._event(st, now, REQUESTS, 1.0, gid, "request")
         self._event(st, now, TOKENS, float(prompt_tokens + hold), gid, "prompt")
+        out_hold = self.output_hold(st, max_tokens)
+        self._event(st, now, INPUT_TOKENS, float(prompt_tokens), gid, "input")
+        self._event(st, now, OUTPUT_TOKENS, out_hold, gid, "output_hold")
         st.holds[gid] = self._hold(st.model, max_tokens)
         g = Grant(self, gid, st.model, prompt, prompt_tokens, max_tokens, now, waited)
         g.hold = hold
+        g.out_hold = out_hold
         g.alone = not st.inflight
         for other in st.inflight.values():
             other.alone = False
@@ -650,6 +698,8 @@ class Limiter:
             # its charge: Groq may already have admitted the call.
             adjust("request", 0.0)
             adjust("prompt", 0.0)
+            adjust("input", 0.0)
+            adjust("output_hold", 0.0)
         if status is not None and status >= 400:
             info = parse_limit_body(rec.error_body)
             if info:
@@ -660,6 +710,7 @@ class Limiter:
             ct = u.get("completion_tokens")
             if pt is not None:
                 adjust("prompt", float(pt) + g.hold)
+                adjust("input", float(pt))
                 if g.prompt is not None:
                     self.estimator.observe(g.model, g.prompt.chars, g.prompt.messages, int(pt), "usage")
             if ct is None:   # cut off without usage: guess from what arrived (cancelled-stream billing unmeasured)
@@ -668,6 +719,7 @@ class Limiter:
                 self._note_completion(g.model, g.max_tokens, int(ct))
             # release the admission hold down to the real completion (negative = tokens given back)
             self._event(st, now, TOKENS, float(ct) - g.hold, g.id, "completion")
+            self._event(st, now, OUTPUT_TOKENS, float(ct) - getattr(g, "out_hold", 0.0), g.id, "output_completion")
             rem = _int(rec.header("x-ratelimit-remaining-tokens"))
             if full_before and pt is not None and rem is not None and "TPM" in st.buckets:
                 self._learn_hold(st, g, st.buckets["TPM"].capacity - pt - rem)
@@ -749,6 +801,15 @@ class Limiter:
                     b.period_s = period
         if info.get("used") is not None and t >= b.anchor_t:
             self._anchor(st, b, t, float(info["limit"] - info["used"]), g.id)
+        if info["unit"] == OUTPUT_TOKENS:
+            # "Requested" on an output-token 429 is the output Groq holds for this call at admission
+            req = float(info["requested"])
+            if st.out_hold_cap is None or req > st.out_hold_cap:
+                self.findings_changed.append({"model": st.model, "change": f"{name} admission output hold learned",
+                                              "was": st.out_hold_cap, "now": req, "max_tokens": g.max_tokens})
+                st.out_hold_cap = req
+        if info["unit"] == INPUT_TOKENS and g.prompt is not None and info["requested"] > 0:
+            self.estimator.observe(st.model, g.prompt.chars, g.prompt.messages, info["requested"], "429 Requested")
         if info["unit"] == TOKENS and g.prompt is not None:
             # "Requested" is Groq's admission need for this call: prompt + hold
             req = info["requested"]

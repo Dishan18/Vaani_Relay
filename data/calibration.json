@@ -144,6 +144,7 @@
     }
    },
    "hold_cap": 200.0,
+   "out_hold_cap": null,
    "count_429_toward_rpd": false,
    "concurrency_limit": null,
    "latency_vs_in_flight": [
@@ -322,6 +323,7 @@
     }
    },
    "hold_cap": 200.0,
+   "out_hold_cap": null,
    "count_429_toward_rpd": false,
    "concurrency_limit": null,
    "latency_vs_in_flight": [
@@ -449,6 +451,12 @@
      "unit": "requests",
      "source": "measured (probe: x-ratelimit-limit-requests; period from reset-requests (86400 s))"
     },
+    "OTPM": {
+     "capacity": 1000.0,
+     "period_s": 60.0,
+     "unit": "output_tokens",
+     "source": "measured (real run 429 body (drafter-large-20261110.calls.jsonl))"
+    },
     "RPM": {
      "capacity": 30,
      "period_s": 60.0,
@@ -463,6 +471,7 @@
     }
    },
    "hold_cap": 200.0,
+   "out_hold_cap": 184.0,
    "count_429_toward_rpd": false,
    "concurrency_limit": null,
    "latency_vs_in_flight": [

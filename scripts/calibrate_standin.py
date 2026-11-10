@@ -12,7 +12,8 @@ documented-only or an assumption. standin/server.py reads nothing else.
   prompt      prompt_tokens = a + b*chars + c*messages, least squares on probe_raw 200s with the
               reasoning settings the pipeline uses (the central fit, not the limiter's upper bound)
   reasoning   reasoning_tokens observed on those calls (sampled empirically)
-  buckets     RPM/TPM/RPD from the probe (Limiter.from_probe); TPD and qwen's RPM documented only
+  buckets     RPM/TPM/RPD from the probe, plus limits later real runs found in 429 bodies (qwen's
+              OTPM, Limiter.from_probe); TPD and qwen's RPM documented only
   hold_cap    admission holds prompt + min(max_tokens, hold_cap) (findings Q2; Limiter.from_probe)
 """
 from __future__ import annotations
@@ -105,6 +106,7 @@ def main() -> int:
             "reasoning_tokens_samples": reasoning,
             "buckets": buckets,
             "hold_cap": st.hold_cap,
+            "out_hold_cap": st.out_hold_cap,       # output-token limits (qwen OTPM): from real-run 429 bodies
             "count_429_toward_rpd": False,
             "concurrency_limit": None,
             "latency_vs_in_flight": v.get("latency_vs_in_flight"),

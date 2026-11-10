@@ -1,0 +1,147 @@
+{
+ "_generated_by": "scripts/run_load.py",
+ "stamp": "20261110T181851Z",
+ "duration_s": 300.0,
+ "seed": 7,
+ "replay": {
+  "router": 18,
+  "drafts": 46
+ },
+ "scenarios": [
+  {
+   "scenario": "steady",
+   "requests": 24,
+   "outcomes": {
+    "answer": 18,
+    "passages": 6
+   },
+   "stand_in": {
+    "requests": 68,
+    "ok": 68,
+    "429": 0,
+    "503": 0,
+    "413": 0,
+    "stalls": 0,
+    "replay_hits": 31,
+    "replay_misses": 37
+   },
+   "wall_s": 292.4
+  },
+  {
+   "scenario": "burst",
+   "requests": 34,
+   "outcomes": {
+    "answer": 20,
+    "passages": 14
+   },
+   "stand_in": {
+    "requests": 56,
+    "ok": 54,
+    "429": 2,
+    "503": 0,
+    "413": 0,
+    "stalls": 0,
+    "replay_hits": 26,
+    "replay_misses": 28
+   },
+   "wall_s": 278.4
+  },
+  {
+   "scenario": "overload",
+   "requests": 78,
+   "outcomes": {
+    "passages": 37,
+    "answer": 27,
+    "gave_up": 14
+   },
+   "stand_in": {
+    "requests": 79,
+    "ok": 78,
+    "429": 0,
+    "503": 0,
+    "413": 0,
+    "stalls": 0,
+    "replay_hits": 40,
+    "replay_misses": 39
+   },
+   "wall_s": 324.8
+  },
+  {
+   "scenario": "overload_naive_retry",
+   "requests": 78,
+   "outcomes": {
+    "answer": 30,
+    "passages": 47,
+    "gave_up": 1
+   },
+   "stand_in": {
+    "requests": 611,
+    "ok": 127,
+    "429": 484,
+    "503": 0,
+    "413": 0,
+    "stalls": 0,
+    "replay_hits": 83,
+    "replay_misses": 44
+   },
+   "wall_s": 301.9
+  },
+  {
+   "scenario": "rpm_halved",
+   "requests": 36,
+   "outcomes": {
+    "passages": 10,
+    "answer": 26
+   },
+   "stand_in": {
+    "requests": 63,
+    "ok": 63,
+    "429": 0,
+    "503": 0,
+    "413": 0,
+    "stalls": 0,
+    "replay_hits": 26,
+    "replay_misses": 37
+   },
+   "wall_s": 299.9
+  },
+  {
+   "scenario": "daily_exhausted",
+   "requests": 14,
+   "outcomes": {
+    "passages": 14
+   },
+   "stand_in": {
+    "requests": 3,
+    "ok": 0,
+    "429": 3,
+    "503": 0,
+    "413": 0,
+    "stalls": 0,
+    "replay_hits": 0,
+    "replay_misses": 0
+   },
+   "wall_s": 277.4
+  },
+  {
+   "scenario": "chaos",
+   "requests": 27,
+   "outcomes": {
+    "passages": 6,
+    "answer": 19,
+    "gave_up": 2
+   },
+   "stand_in": {
+    "requests": 80,
+    "ok": 68,
+    "429": 0,
+    "503": 5,
+    "413": 0,
+    "stalls": 10,
+    "replay_hits": 36,
+    "replay_misses": 39
+   },
+   "wall_s": 299.0
+  }
+ ]
+}

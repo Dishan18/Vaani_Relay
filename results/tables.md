@@ -8,17 +8,39 @@ Drafter fixed (openai/gpt-oss-120b), verifier off; only retrieval changes.
 
 | setting | questions asked | correct and cited % | wrong % | correctly refused % | ungraded % | unsure | degraded | tokens per answer | TTFT p50 / p95 (ms) | total p50 / p95 (ms) | budget wait p50 (ms) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| large | 18 | 55.6 | 11.1 | 22.2 | 11.1 | 7 | 2 | 2066 | 11277 / 30962 | 11277 / 30962 | 10104 |
-| medium | 18 | 44.4 | 22.2 | 22.2 | 11.1 | 6 | 3 | 2372 | 12563 / 29223 | 12563 / 29223 | 11444 |
-| small (incomplete) | 4 | 100.0 | 0.0 | 0.0 | 0.0 | 2 | 0 | 2147 | 9896 / 22487 | 9896 / 22487 | 8183 |
+| large | 18 | 61.1 | 16.7 | 22.2 | 0.0 | 7 | 1 | 1948 | 4622 / 16558 | 4622 / 16558 | 3552 |
+| medium | 18 | 50.0 | 27.8 | 22.2 | 0.0 | 4 | 2 | 2212 | 12234 / 29223 | 12234 / 29223 | 11130 |
+| medium+rerank | 18 | 50.0 | 27.8 | 22.2 | 0.0 | 4 | 1 | 1769 | 8882 / 23195 | 8882 / 23195 | 7659 |
+| small | 18 | 27.8 | 50.0 | 22.2 | 0.0 | 9 | 2 | 1957 | 11146 / 26696 | 11146 / 26696 | 10010 |
+| small_lean (incomplete) | 11 | 36.4 | 54.5 | 9.1 | 0.0 | 5 | 1 | 1156 | 7105 / 19596 | 7105 / 19596 | 6390 |
 
-**Chosen setting so far: large.** best correct = 10 (complete settings only); within one of it (tie): large; cheapest tied: large (2066 tokens per answer); not eligible yet (incomplete): small.
+**Chosen setting so far: large.** best correct = 11 (complete settings only); within one of it (tie): large; cheapest tied: large (1948 tokens per answer); not eligible yet (incomplete): small_lean.
 
 Unsure or ungraded rows exist: the choice is provisional until they are checked (results/quality/unsure.md).
+
+## Drafters at setting large
+
+Same configuration for each (verifier off). Rows for the fixed drafter come from the retrieval sweep.
+
+| drafter | questions asked | correct and cited % | wrong % | correctly refused % | ungraded % | unsure | tokens per answer | total p50 / p95 (ms) | budget wait p50 (ms) | retries |
+|---|---|---|---|---|---|---|---|---|---|---|
+| openai/gpt-oss-120b | 18 | 61.1 | 16.7 | 22.2 | 0.0 | 7 | 1948 | 4622 / 16558 | 3552 | 0 |
+| openai/gpt-oss-20b | 18 | 44.4 | 33.3 | 22.2 | 0.0 | 7 | 2348 | 14422 / 36072 | 12354 | 1 |
+| qwen/qwen3.8-27b | 18 | 38.9 | 61.1 | 0.0 | 0.0 | 5 | 531 | 5 / 22058 | 0 | 0 |
+
+**First drafter: openai/gpt-oss-120b.** best correct = 11; within one of it (tie): openai/gpt-oss-120b; among those, fewest wrong then lowest total p50: openai/gpt-oss-120b.
 
 ## Grading coverage (every scenario and source)
 
 | scenario | source | rows | graded | not graded, by reason |
 |---|---|---|---|---|
-| eval:retrieval | real | 40 | 36 | not_graded:passages 4 |
+| burst | stand-in | 34 | 0 | not graded: stand-in 34 |
+| chaos | stand-in | 27 | 0 | not graded: stand-in 27 |
+| daily_exhausted | stand-in | 14 | 0 | not graded: stand-in 14 |
+| eval:drafter | real | 36 | 36 | - |
+| eval:retrieval | real | 83 | 83 | - |
+| overload | stand-in | 78 | 0 | not graded: stand-in 78 |
+| overload_naive_retry | stand-in | 78 | 0 | not graded: stand-in 78 |
+| rpm_halved | stand-in | 36 | 0 | not graded: stand-in 36 |
+| steady | stand-in | 24 | 0 | not graded: stand-in 24 |
 
