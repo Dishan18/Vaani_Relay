@@ -64,6 +64,32 @@ def answer_id(qid: str, reply: dict) -> str:
     return h.hexdigest()[:16]
 
 
+_SUP = str.maketrans("⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺", "0123456789-+")
+_SUB = str.maketrans("₀₁₂₃₄₅₆₇₈₉ₜ", "0123456789t")
+_HYPHENS = re.compile("[\u2010\u2011\u2012\u2013\u2014\u2212\u00ad]")
+_SPACES = re.compile("[\u00a0\u2009\u200a\u202f\u2002\u2003\u2007]")
+
+
+def normalize(text: str) -> str:
+    """What the model writes -> plain text the gold patterns can match (added after the first real
+    run, which used LaTeX, superscripts and non-breaking hyphens): unicode hyphens and spaces,
+    superscript/subscript digits (10¹⁹ -> 10^19), and inline LaTeX (\\(O(n^{2}\\,d)\\) -> O(n^2 d))."""
+    t = _HYPHENS.sub("-", _SPACES.sub(" ", text))
+    t = re.sub(r"([⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺]+)", lambda m: "^" + m.group(1).translate(_SUP), t)
+    t = t.translate(_SUB)
+    t = re.sub(r"\\[()\[\]]", " ", t)                          # \( \) \[ \]
+    t = re.sub(r"\\(?:text|mathrm|operatorname|mathbf|mathit)\{([^{}]*)\}", r"\1", t)
+    t = re.sub(r"\\frac\{([^{}]*)\}\{([^{}]*)\}", r"\1/\2", t)
+    t = re.sub(r"\\sqrt\{([^{}]*)\}", r"√\1", t)
+    t = re.sub(r"\\(?:cdot|times)\b", "·", t)
+    t = re.sub(r"\\(?:,|;|!|quad|qquad)", " ", t)
+    t = re.sub(r"\\(?:ge|geq)\b", "≥", t)
+    t = re.sub(r"\\(?:le|leq)\b", "≤", t)
+    t = re.sub(r"([\^_])\{([^{}]*)\}", r"\1\2", t)             # ^{2} -> ^2, _{t-1} -> _t-1
+    t = re.sub(r"\\([A-Za-z]+)", r"\1", t)                      # any other \command -> command
+    return re.sub(r"[ \t]+", " ", t)
+
+
 def _all(patterns: list[str], text: str) -> bool:
     return all(re.search(p, text, re.I) for p in patterns)
 
@@ -90,7 +116,7 @@ def _new_digits(text: str, question: str) -> list[str]:
 def grade(q: dict, reply: dict, pieces: dict[str, dict]) -> dict:
     """``reply``: Reply.to_dict() (kind, text, sources[{sid, pid, paper, block_ids}]).
     ``pieces``: pid -> {"text", "paper", "block_ids"} for the setting the reply was made with."""
-    kind, text = reply.get("kind"), reply.get("text") or ""
+    kind, text = reply.get("kind"), normalize(reply.get("text") or "")
     out = {"qid": q["qid"], "answer_id": answer_id(q["qid"], reply), "label": None, "sure": True,
            "reasons": [], "facts": [], "wrong_paper_citations": [], "borrowed": []}
     if kind not in ("answer", "refusal"):
@@ -138,7 +164,7 @@ def grade(q: dict, reply: dict, pieces: dict[str, dict]) -> dict:
     def piece_text(sid):
         src = sources.get(sid)
         p = pieces.get(src["pid"]) if src else None
-        return p["text"] if p else ""
+        return normalize(p["text"]) if p else ""
 
     def piece_blocks(sid):
         src = sources.get(sid)

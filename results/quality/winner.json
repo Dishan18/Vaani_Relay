@@ -1,0 +1,77 @@
+{
+ "_generated_by": "scripts/make_tables.py",
+ "setting": {
+  "chosen": "large",
+  "tied": [
+   "large"
+  ],
+  "best_correct": 10,
+  "why": "best correct = 10 (complete settings only); within one of it (tie): large; cheapest tied: large (2066 tokens per answer); not eligible yet (incomplete): small",
+  "provisional": true,
+  "stats": {
+   "large": {
+    "n": 18,
+    "correct": 10,
+    "wrong": 2,
+    "refused_wrongly": 0,
+    "refused_correctly": 4,
+    "ungraded": 2,
+    "unsure": 7,
+    "correct_pct": 55.55555555555556,
+    "wrong_pct": 11.11111111111111,
+    "refused_pct": 22.22222222222222,
+    "ungraded_pct": 11.11111111111111,
+    "tokens_per_answer": 2066.0555555555557,
+    "ttft_p50": 11276.8,
+    "ttft_p95": 30961.9,
+    "total_p50": 11276.8,
+    "total_p95": 30961.9,
+    "wait_p50": 10103.8,
+    "degraded": 2,
+    "retries": 0
+   },
+   "medium": {
+    "n": 18,
+    "correct": 8,
+    "wrong": 2,
+    "refused_wrongly": 2,
+    "refused_correctly": 4,
+    "ungraded": 2,
+    "unsure": 6,
+    "correct_pct": 44.44444444444444,
+    "wrong_pct": 22.22222222222222,
+    "refused_pct": 22.22222222222222,
+    "ungraded_pct": 11.11111111111111,
+    "tokens_per_answer": 2372.4444444444443,
+    "ttft_p50": 12563.2,
+    "ttft_p95": 29223.3,
+    "total_p50": 12563.2,
+    "total_p95": 29223.3,
+    "wait_p50": 11443.6,
+    "degraded": 3,
+    "retries": 1
+   },
+   "small": {
+    "n": 4,
+    "correct": 4,
+    "wrong": 0,
+    "refused_wrongly": 0,
+    "refused_correctly": 0,
+    "ungraded": 0,
+    "unsure": 2,
+    "correct_pct": 100.0,
+    "wrong_pct": 0.0,
+    "refused_pct": 0.0,
+    "ungraded_pct": 0.0,
+    "tokens_per_answer": 2147.25,
+    "ttft_p50": 9895.9,
+    "ttft_p95": 22487.0,
+    "total_p50": 9895.9,
+    "total_p95": 22487.0,
+    "wait_p50": 8183.4,
+    "degraded": 0,
+    "retries": 0
+   }
+  }
+ }
+}

@@ -15,7 +15,29 @@
     "openai/gpt-oss-20b": 1319,
     "qwen/qwen3.8-27b": 1315
    },
-   "router_prompt_mean": 257
+   "router_prompt_mean": 257,
+   "step2_cost": {
+    "expected": {
+     "openai/gpt-oss-120b": {
+      "requests": 22,
+      "tokens": 38282
+     },
+     "qwen/qwen3.8-27b": {
+      "requests": 18,
+      "tokens": 6793
+     }
+    },
+    "worst": {
+     "openai/gpt-oss-120b": {
+      "requests": 36,
+      "tokens": 90052
+     },
+     "qwen/qwen3.8-27b": {
+      "requests": 18,
+      "tokens": 10033
+     }
+    }
+   }
   },
   "medium": {
    "router": true,
@@ -25,7 +47,29 @@
     "openai/gpt-oss-20b": 1446,
     "qwen/qwen3.8-27b": 1446
    },
-   "router_prompt_mean": 257
+   "router_prompt_mean": 257,
+   "step2_cost": {
+    "expected": {
+     "openai/gpt-oss-120b": {
+      "requests": 22,
+      "tokens": 41095
+     },
+     "qwen/qwen3.8-27b": {
+      "requests": 18,
+      "tokens": 6793
+     }
+    },
+    "worst": {
+     "openai/gpt-oss-120b": {
+      "requests": 36,
+      "tokens": 94552
+     },
+     "qwen/qwen3.8-27b": {
+      "requests": 18,
+      "tokens": 10033
+     }
+    }
+   }
   },
   "large": {
    "router": true,
@@ -35,7 +79,29 @@
     "openai/gpt-oss-20b": 1492,
     "qwen/qwen3.8-27b": 1492
    },
-   "router_prompt_mean": 257
+   "router_prompt_mean": 257,
+   "step2_cost": {
+    "expected": {
+     "openai/gpt-oss-120b": {
+      "requests": 22,
+      "tokens": 42100
+     },
+     "qwen/qwen3.8-27b": {
+      "requests": 18,
+      "tokens": 6793
+     }
+    },
+    "worst": {
+     "openai/gpt-oss-120b": {
+      "requests": 36,
+      "tokens": 96160
+     },
+     "qwen/qwen3.8-27b": {
+      "requests": 18,
+      "tokens": 10033
+     }
+    }
+   }
   },
   "medium+rerank": {
    "router": true,
@@ -45,7 +111,29 @@
     "openai/gpt-oss-20b": 1207,
     "qwen/qwen3.8-27b": 1199
    },
-   "router_prompt_mean": 257
+   "router_prompt_mean": 257,
+   "step2_cost": {
+    "expected": {
+     "openai/gpt-oss-120b": {
+      "requests": 22,
+      "tokens": 35798
+     },
+     "qwen/qwen3.8-27b": {
+      "requests": 18,
+      "tokens": 6793
+     }
+    },
+    "worst": {
+     "openai/gpt-oss-120b": {
+      "requests": 36,
+      "tokens": 86076
+     },
+     "qwen/qwen3.8-27b": {
+      "requests": 18,
+      "tokens": 10033
+     }
+    }
+   }
   },
   "small_lean": {
    "router": false,
@@ -55,7 +143,21 @@
     "openai/gpt-oss-20b": 801,
     "qwen/qwen3.8-27b": 781
    },
-   "router_prompt_mean": 0
+   "router_prompt_mean": 0,
+   "step2_cost": {
+    "expected": {
+     "openai/gpt-oss-120b": {
+      "requests": 22,
+      "tokens": 26810
+     }
+    },
+    "worst": {
+     "openai/gpt-oss-120b": {
+      "requests": 36,
+      "tokens": 71696
+     }
+    }
+   }
   }
  },
  "assumptions": {

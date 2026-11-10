@@ -1,0 +1,165 @@
+{
+ "_generated_by": "scripts/trap_report.py",
+ "traps": {
+  "Q5": [
+   {
+    "setting": "large",
+    "drafter": "openai/gpt-oss-120b",
+    "label": "correct",
+    "router": {
+     "papers": [
+      "attention"
+     ],
+     "query": "Table 2 big model training cost FLOPs What training cost in FLOPs does Table 2 report for the big Transformer?",
+     "alt_query": "training computational cost FLOPs base and big transformer architecture What training cost in FLOPs does Table 2 report for the big Transformer?"
+    },
+    "gold_in_sources": "yes",
+    "borrowed": [],
+    "wrong_paper_sources": 0
+   },
+   {
+    "setting": "medium",
+    "drafter": "openai/gpt-oss-120b",
+    "label": "correct",
+    "router": {
+     "papers": [
+      "attention"
+     ],
+     "query": "Table 2 big training FLOPs What training cost in FLOPs does Table 2 report for the big Transformer?",
+     "alt_query": "big model compute cost floating point operations total parameters What training cost in FLOPs does Table 2 report for the big Transformer?"
+    },
+    "gold_in_sources": "yes",
+    "borrowed": [],
+    "wrong_paper_sources": 0
+   }
+  ],
+  "Q12": [
+   {
+    "setting": "large",
+    "drafter": "openai/gpt-oss-120b",
+    "label": "refused_correctly",
+    "router": {
+     "papers": [
+      "moshi"
+     ],
+     "query": "word error rate WER noisy Indian English telephone dialect robustness evaluation What is Moshi's word error rate on noisy Indian English telephone calls?",
+     "alt_query": "ASR performance accuracy accented speech channel noise robustness metrics What is Moshi's word error rate on noisy Indian English telephone calls?"
+    },
+    "gold_in_sources": "n/a",
+    "borrowed": [],
+    "wrong_paper_sources": 1
+   },
+   {
+    "setting": "medium",
+    "drafter": "openai/gpt-oss-120b",
+    "label": "refused_correctly",
+    "router": {
+     "papers": [
+      "moshi"
+     ],
+     "query": "word error rate noisy Indian English telephone What is Moshi's word error rate on noisy Indian English telephone calls?",
+     "alt_query": "WER speech recognition noise robustness non-native accent What is Moshi's word error rate on noisy Indian English telephone calls?"
+    },
+    "gold_in_sources": "n/a",
+    "borrowed": [],
+    "wrong_paper_sources": 0
+   }
+  ],
+  "Q13": [
+   {
+    "setting": "large",
+    "drafter": "openai/gpt-oss-120b",
+    "label": "wrong",
+    "router": {
+     "papers": [
+      "dynamic_chunking"
+     ],
+     "query": "encoder decoder networks resolution In H-Net, what do the encoder and decoder networks do, and at what resolution do they run?",
+     "alt_query": "feature extracting and reconstruction modules spatial scale In H-Net, what do the encoder and decoder networks do, and at what resolution do they run?"
+    },
+    "gold_in_sources": "yes",
+    "borrowed": [],
+    "wrong_paper_sources": 0
+   },
+   {
+    "setting": "medium",
+    "drafter": "openai/gpt-oss-120b",
+    "label": "correct",
+    "router": {
+     "papers": [
+      "dynamic_chunking"
+     ],
+     "query": "stacked encoder decoder semantic latent tokens temporal frequency resolution In H-Net, what do the encoder and decoder networks do, and at what resolution do they run?",
+     "alt_query": "supervised encoder decoder networks representing features at multiple granularities hierarchical levels hnet architecture In H-Net, what do the encoder and decoder networks do, and at what resolution do they run?"
+    },
+    "gold_in_sources": "yes",
+    "borrowed": [],
+    "wrong_paper_sources": 0
+   }
+  ],
+  "Q14": [
+   {
+    "setting": "large",
+    "drafter": "openai/gpt-oss-120b",
+    "label": "wrong",
+    "router": {
+     "papers": [
+      "dynamic_chunking"
+     ],
+     "query": "dynamic chunking boundary prediction Byte Stream Byte Length Chunking Model How does H-Net decide where to cut the byte stream into pieces?",
+     "alt_query": "variable length segmentation soft decisions sequence segmentation context windows Transformer H-Net How does H-Net decide where to cut the byte stream into pieces?"
+    },
+    "gold_in_sources": "no",
+    "borrowed": [],
+    "wrong_paper_sources": 0
+   },
+   {
+    "setting": "medium",
+    "drafter": "openai/gpt-oss-120b",
+    "label": "refused_wrongly",
+    "router": {
+     "papers": [
+      "dynamic_chunking"
+     ],
+     "query": "dynamic chunking byte stream segmentation boundary detection How does H-Net decide where to cut the byte stream into pieces?",
+     "alt_query": "H-Net adaptive chunk size determination sequence splitting How does H-Net decide where to cut the byte stream into pieces?"
+    },
+    "gold_in_sources": "not shown (refusal)",
+    "borrowed": [],
+    "wrong_paper_sources": 0
+   }
+  ],
+  "Q17": [
+   {
+    "setting": "large",
+    "drafter": "openai/gpt-oss-120b",
+    "label": "refused_correctly",
+    "router": {
+     "papers": [
+      "dynamic_chunking"
+     ],
+     "query": "p95 latency throughput 1000 concurrent requests serving benchmark What is H-Net's p95 latency serving 1,000 simultaneous requests?",
+     "alt_query": "average inference time high load parallel execution performance metrics What is H-Net's p95 latency serving 1,000 simultaneous requests?"
+    },
+    "gold_in_sources": "n/a",
+    "borrowed": [],
+    "wrong_paper_sources": 0
+   },
+   {
+    "setting": "medium",
+    "drafter": "openai/gpt-oss-120b",
+    "label": "refused_correctly",
+    "router": {
+     "papers": [
+      "dynamic_chunking"
+     ],
+     "query": "H-Net p95 latency concurrent requests What is H-Net's p95 latency serving 1,000 simultaneous requests?",
+     "alt_query": "95th percentile response time high throughput server load What is H-Net's p95 latency serving 1,000 simultaneous requests?"
+    },
+    "gold_in_sources": "n/a",
+    "borrowed": [],
+    "wrong_paper_sources": 2
+   }
+  ]
+ }
+}

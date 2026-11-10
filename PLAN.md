@@ -400,3 +400,30 @@ redraft) -> send (buffered: released only after the checks, so first token = rel
   refusals, 429 fallback, internal failure, and one run over HTTP against `relay/fake_groq.py`).
 - **Not yet measured:** answer quality and real latency (R3/R4 need real calls), the drafter
   preference (120b first is an assumption), the verifier's value for its cost.
+
+---
+
+## 11. Stand-in (C4) and the first real quality run (M6 part 1)
+
+**Stand-in** (`standin/server.py`, parameters in `data/calibration.json` from
+`scripts/calibrate_standin.py`): OpenAI-compatible streaming server with the probe's per-model
+buckets, x-ratelimit headers, Groq's exact 429 wording, retry-after sized to the request, lognormal
+TTFB per model, measured tokens/s, and runtime switches (503 rate, 8 s stalls, slow-under-load,
+halved limits, exhausted daily budget). Its docstring ends with "where the stand-in is least like
+Groq". Tests: `tests/test_standin.py`.
+- **answer_grade for stand-in rows** (decided 2026-11-10): the grader never grades stand-in text. A
+  stand-in row gets a grade only when its answer is byte-identical to a graded real answer (same
+  answer id), as `grade_source = replay:<real request>`; otherwise `not_graded:stand-in`.
+  `make_tables.py` stops on a stand-in grade without a replay source, shows the ungraded share in
+  every quality table, and lists grading coverage for every scenario and source.
+
+**Retrieval sweep part 1** (real, 120b drafting, verifier off): large and medium complete, small
+4/18 (stopped by the ledger stop rule). Tables: `results/tables.md`; unsure grades:
+`results/quality/unsure.md`; traps: `results/quality/traps.md`; budget: `results/quality/budget_plan.md`.
+- **Grader v2.** v1 missed LaTeX, superscripts and non-breaking hyphens in real answers; v2
+  normalises text and widens four patterns. Every changed grade: `results/quality/grade_changes_v1_v2.md`
+  (v1 kept in `results/quality/history/`).
+- **Found, not yet fixed (decisions pending):** the citation gate doesn't read gpt-oss's
+  `【S#】` citations (all 4 passages-only replies); the ledger charges max(estimate + max_tokens,
+  usage), about 2x real usage, which contradicts findings Q2; the decide gate scores evidence
+  against the question's own words, which turns a vocabulary mismatch (Q14) into a refusal.

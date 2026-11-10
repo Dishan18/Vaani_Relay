@@ -1,0 +1,496 @@
+{
+ "_generated_by": "scripts/calibrate_standin.py",
+ "_inputs": [
+  "data\\probe\\calibration.json",
+  "data\\probe\\probe_raw.jsonl",
+  "data\\limits_documented.json"
+ ],
+ "findings": {
+  "limits": "refilling buckets per model (findings Q1, Q3)",
+  "admission": "prompt + min(max_tokens, hold_cap) held at admission, released to usage at the end (Q2)",
+  "429": "not counted toward RPD (Q5); RPM visible only in 429 bodies; retry-after = ceil(wait)",
+  "concurrency": "no limit found up to 8 in flight",
+  "load": "no consistent slowdown with in-flight calls up to 8 (latency_vs_in_flight)"
+ },
+ "models": {
+  "openai/gpt-oss-20b": {
+   "settings": {
+    "reasoning_effort": "low"
+   },
+   "ttfb_ms": {
+    "dist": "lognormal",
+    "mu": 6.27965,
+    "sigma": 0.6928,
+    "p50_target": 533.6,
+    "p95_target": 1667.7,
+    "n": 17,
+    "source": "measured: data/probe/calibration.json ttfb.server_ttfb_ms"
+   },
+   "queue_fit": {
+    "intercept_ms": 129.411,
+    "slope_ms_per_s": 1006.905356,
+    "r2": 0.9987,
+    "source": "measured: server_ttfb_vs_queue_time"
+   },
+   "decode": {
+    "tokens_per_s": 907.9,
+    "n": 17,
+    "chars_per_token": 2.84,
+    "source": "measured: tokens_per_s.server_reported p50; chars/token from probe_raw"
+   },
+   "chunk_gap_ms": {
+    "p50": 1.1,
+    "p95": 2.4,
+    "max": 12.0,
+    "n": 386
+   },
+   "prompt_tokens_fit": {
+    "a": 49.566,
+    "b_per_char": 0.21771,
+    "c_per_message": 26.442,
+    "n": 64,
+    "source": "least squares on probe_raw 200s with these settings"
+   },
+   "reasoning_tokens_samples": [
+    5,
+    5,
+    5,
+    5,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    9,
+    9,
+    9,
+    9,
+    10,
+    10,
+    10,
+    10,
+    13,
+    14,
+    14,
+    14,
+    14,
+    17,
+    21,
+    22,
+    22,
+    23,
+    27,
+    27,
+    29,
+    33,
+    34,
+    36,
+    37,
+    37,
+    55,
+    56,
+    57,
+    75,
+    115
+   ],
+   "buckets": {
+    "TPM": {
+     "capacity": 8000.0,
+     "period_s": 60.0,
+     "unit": "tokens",
+     "source": "measured (probe: x-ratelimit-limit-tokens; period 60 s x reset ratio 1.0)"
+    },
+    "RPD": {
+     "capacity": 1000.0,
+     "period_s": 86400.0,
+     "unit": "requests",
+     "source": "measured (probe: x-ratelimit-limit-requests; period from reset-requests (86400 s))"
+    },
+    "RPM": {
+     "capacity": 30.0,
+     "period_s": 60.0,
+     "unit": "requests",
+     "source": "measured (probe: 429 body Limit 30, try again in 2s)"
+    },
+    "TPD": {
+     "capacity": 200000,
+     "period_s": 86400.0,
+     "unit": "tokens",
+     "source": "documented only (no header shows TPD; never hit)"
+    }
+   },
+   "hold_cap": 200.0,
+   "count_429_toward_rpd": false,
+   "concurrency_limit": null,
+   "latency_vs_in_flight": [
+    {
+     "k": 1,
+     "calls": 1,
+     "ok": 1,
+     "non_200": [],
+     "headers_ms_p50": 996.3,
+     "server_ttfb_ms_p50": 906.4,
+     "first_token_after_connect_ms_p50": 922.7,
+     "total_ms_p50": 1049.5,
+     "total_ms_max": 1049.5,
+     "queue_time_s_p50": 0.767578371
+    },
+    {
+     "k": 2,
+     "calls": 2,
+     "ok": 2,
+     "non_200": [],
+     "headers_ms_p50": 595.1,
+     "server_ttfb_ms_p50": 506.20000000000005,
+     "first_token_after_connect_ms_p50": 519.7,
+     "total_ms_p50": 665.4,
+     "total_ms_max": 707.8,
+     "queue_time_s_p50": 0.368160386
+    },
+    {
+     "k": 4,
+     "calls": 4,
+     "ok": 4,
+     "non_200": [],
+     "headers_ms_p50": 482.2,
+     "server_ttfb_ms_p50": 384.5,
+     "first_token_after_connect_ms_p50": 396.1,
+     "total_ms_p50": 536.9,
+     "total_ms_max": 1374.0,
+     "queue_time_s_p50": 0.243032428
+    },
+    {
+     "k": 8,
+     "calls": 8,
+     "ok": 8,
+     "non_200": [],
+     "headers_ms_p50": 1040.4,
+     "server_ttfb_ms_p50": 948.0000000000001,
+     "first_token_after_connect_ms_p50": 961.6,
+     "total_ms_p50": 1080.8,
+     "total_ms_max": 2366.6,
+     "queue_time_s_p50": 0.809041564
+    }
+   ]
+  },
+  "openai/gpt-oss-120b": {
+   "settings": {
+    "reasoning_effort": "low"
+   },
+   "ttfb_ms": {
+    "dist": "lognormal",
+    "mu": 7.03015,
+    "sigma": 1.09294,
+    "p50_target": 1130.2,
+    "p95_target": 6821.8,
+    "n": 13,
+    "source": "measured: data/probe/calibration.json ttfb.server_ttfb_ms"
+   },
+   "queue_fit": {
+    "intercept_ms": 147.055,
+    "slope_ms_per_s": 992.672654,
+    "r2": 0.9999,
+    "source": "measured: server_ttfb_vs_queue_time"
+   },
+   "decode": {
+    "tokens_per_s": 472.8,
+    "n": 13,
+    "chars_per_token": 3.137,
+    "source": "measured: tokens_per_s.server_reported p50; chars/token from probe_raw"
+   },
+   "chunk_gap_ms": {
+    "p50": 2.1,
+    "p95": 2.7,
+    "max": 15.6,
+    "n": 722
+   },
+   "prompt_tokens_fit": {
+    "a": 47.694,
+    "b_per_char": 0.21582,
+    "c_per_message": 28.328,
+    "n": 58,
+    "source": "least squares on probe_raw 200s with these settings"
+   },
+   "reasoning_tokens_samples": [
+    6,
+    7,
+    7,
+    7,
+    7,
+    7,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    10,
+    13,
+    13,
+    15,
+    16,
+    19,
+    21,
+    22,
+    24,
+    25,
+    26,
+    29,
+    31,
+    38,
+    55,
+    100,
+    119,
+    177
+   ],
+   "buckets": {
+    "TPM": {
+     "capacity": 8000.0,
+     "period_s": 60.0,
+     "unit": "tokens",
+     "source": "measured (probe: x-ratelimit-limit-tokens; period 60 s x reset ratio 1.0)"
+    },
+    "RPD": {
+     "capacity": 1000.0,
+     "period_s": 86400.0,
+     "unit": "requests",
+     "source": "measured (probe: x-ratelimit-limit-requests; period from reset-requests (86400 s))"
+    },
+    "RPM": {
+     "capacity": 30.0,
+     "period_s": 60.0,
+     "unit": "requests",
+     "source": "measured (probe: 429 body Limit 30, try again in 2s)"
+    },
+    "TPD": {
+     "capacity": 200000,
+     "period_s": 86400.0,
+     "unit": "tokens",
+     "source": "documented only (no header shows TPD; never hit)"
+    }
+   },
+   "hold_cap": 200.0,
+   "count_429_toward_rpd": false,
+   "concurrency_limit": null,
+   "latency_vs_in_flight": [
+    {
+     "k": 1,
+     "calls": 1,
+     "ok": 1,
+     "non_200": [],
+     "headers_ms_p50": 605.7,
+     "server_ttfb_ms_p50": 511.6,
+     "first_token_after_connect_ms_p50": 526.6,
+     "total_ms_p50": 685.9,
+     "total_ms_max": 685.9,
+     "queue_time_s_p50": 0.370570649
+    },
+    {
+     "k": 4,
+     "calls": 4,
+     "ok": 4,
+     "non_200": [],
+     "headers_ms_p50": 396.1,
+     "server_ttfb_ms_p50": 299.8,
+     "first_token_after_connect_ms_p50": 313.59999999999997,
+     "total_ms_p50": 732.1,
+     "total_ms_max": 825.3,
+     "queue_time_s_p50": 0.159622247
+    },
+    {
+     "k": 8,
+     "calls": 8,
+     "ok": 8,
+     "non_200": [],
+     "headers_ms_p50": 524.2,
+     "server_ttfb_ms_p50": 417.40000000000003,
+     "first_token_after_connect_ms_p50": 479.3,
+     "total_ms_p50": 679.3,
+     "total_ms_max": 1214.9,
+     "queue_time_s_p50": 0.282840207
+    }
+   ]
+  },
+  "qwen/qwen3.8-27b": {
+   "settings": {
+    "reasoning_effort": "none"
+   },
+   "ttfb_ms": {
+    "dist": "lognormal",
+    "mu": 5.25541,
+    "sigma": 0.25093,
+    "p50_target": 191.6,
+    "p95_target": 289.5,
+    "n": 21,
+    "source": "measured: data/probe/calibration.json ttfb.server_ttfb_ms"
+   },
+   "queue_fit": {
+    "intercept_ms": 133.459,
+    "slope_ms_per_s": 934.633277,
+    "r2": 0.6571,
+    "source": "measured: server_ttfb_vs_queue_time"
+   },
+   "decode": {
+    "tokens_per_s": 508.6,
+    "n": 21,
+    "chars_per_token": 3.62,
+    "source": "measured: tokens_per_s.server_reported p50; chars/token from probe_raw"
+   },
+   "chunk_gap_ms": {
+    "p50": 2.0,
+    "p95": 2.7,
+    "max": 5.5,
+    "n": 742
+   },
+   "prompt_tokens_fit": {
+    "a": -24.788,
+    "b_per_char": 0.22049,
+    "c_per_message": 43.763,
+    "n": 33,
+    "source": "least squares on probe_raw 200s with these settings"
+   },
+   "reasoning_tokens_samples": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "buckets": {
+    "TPM": {
+     "capacity": 8000.0,
+     "period_s": 60.0,
+     "unit": "tokens",
+     "source": "measured (probe: x-ratelimit-limit-tokens; period 60 s x reset ratio 1.0)"
+    },
+    "RPD": {
+     "capacity": 1000.0,
+     "period_s": 86400.0,
+     "unit": "requests",
+     "source": "measured (probe: x-ratelimit-limit-requests; period from reset-requests (86400 s))"
+    },
+    "RPM": {
+     "capacity": 30,
+     "period_s": 60.0,
+     "unit": "requests",
+     "source": "documented only (the probe never hit this model's RPM)"
+    },
+    "TPD": {
+     "capacity": 200000,
+     "period_s": 86400.0,
+     "unit": "tokens",
+     "source": "documented only (no header shows TPD; never hit)"
+    }
+   },
+   "hold_cap": 200.0,
+   "count_429_toward_rpd": false,
+   "concurrency_limit": null,
+   "latency_vs_in_flight": [
+    {
+     "k": 1,
+     "calls": 1,
+     "ok": 1,
+     "non_200": [],
+     "headers_ms_p50": 285.9,
+     "server_ttfb_ms_p50": 192.59999999999997,
+     "first_token_after_connect_ms_p50": 205.59999999999997,
+     "total_ms_p50": 361.9,
+     "total_ms_max": 361.9,
+     "queue_time_s_p50": 0.050280253
+    },
+    {
+     "k": 4,
+     "calls": 4,
+     "ok": 4,
+     "non_200": [],
+     "headers_ms_p50": 285.7,
+     "server_ttfb_ms_p50": 192.39999999999998,
+     "first_token_after_connect_ms_p50": 203.89999999999998,
+     "total_ms_p50": 337.3,
+     "total_ms_max": 370.2,
+     "queue_time_s_p50": 0.052291915
+    }
+   ]
+  }
+ }
+}

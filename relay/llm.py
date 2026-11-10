@@ -43,7 +43,8 @@ from urllib.parse import urlsplit
 
 USER_AGENT = "relay-llm-client/0.1"
 ORG_ID = re.compile(r"org_[A-Za-z0-9]+")
-KEPT_HEADERS = ("x-request-id", "date", "content-type", "server", "via", "cf-ray", "x-groq-region")
+KEPT_HEADERS = ("x-request-id", "date", "content-type", "server", "via", "cf-ray", "x-groq-region",
+                "x-standin-replay")   # the stand-in says whether it replayed a recorded real reply
 
 OK = "ok"
 RATE_LIMITED = "rate_limited"

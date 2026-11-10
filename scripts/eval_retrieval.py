@@ -301,6 +301,10 @@ def estimate(settings: list[str], step2_drafter: str, step3_drafters: list[str])
                       "expected_fits": e["tokens"] <= h["tokens"] and e["requests"] <= h["requests"],
                       "worst_fits": w["tokens"] <= h["tokens"] and w["requests"] <= h["requests"],
                       "minutes_at_tpm_expected": round(e["tokens"] / tpm, 1)}
+    for name in settings:
+        per_setting[name]["step2_cost"] = {
+            k: {m: {"requests": round(v["requests"]), "tokens": round(v["tokens"])}
+                for m, v in cost(name, step2_drafter, k == "worst").items()} for k in ("expected", "worst")}
     for s in per_setting.values():
         s.pop("rows")
     return {"_generated_by": "scripts/eval_retrieval.py estimate", "scope": EVAL_SCOPE,

@@ -1,0 +1,198 @@
+{
+ "_generated_by": "scripts/budget_plan.py",
+ "now": "2026-11-10 18:02 UTC",
+ "accounting": {
+  "groq": "real usage vs refilling daily bucket (tokens: assumed)",
+  "ledger": "max(est+max_tokens, usage), rolling 24 h"
+ },
+ "ledger_overcharge_note": "jobs' ledger cost assumed 2.0x real usage (measured ratio for 120b drafts in part 1)",
+ "measured_costs": {
+  "by_setting": {
+   "large": {
+    "understand:qwen/qwen3.8-27b": {
+     "calls_per_request": 1.0,
+     "tokens_per_call": 267.9,
+     "tokens_per_request": 267.9
+    },
+    "draft:openai/gpt-oss-120b": {
+     "calls_per_request": 1.056,
+     "tokens_per_call": 1703.5,
+     "tokens_per_request": 1798.1
+    }
+   },
+   "medium": {
+    "understand:qwen/qwen3.8-27b": {
+     "calls_per_request": 1.0,
+     "tokens_per_call": 277.9,
+     "tokens_per_request": 277.9
+    },
+    "draft:openai/gpt-oss-120b": {
+     "calls_per_request": 1.278,
+     "tokens_per_call": 1639.2,
+     "tokens_per_request": 2094.5
+    }
+   },
+   "small": {
+    "understand:qwen/qwen3.8-27b": {
+     "calls_per_request": 1.0,
+     "tokens_per_call": 273.8,
+     "tokens_per_request": 273.8
+    },
+    "draft:openai/gpt-oss-120b": {
+     "calls_per_request": 1.25,
+     "tokens_per_call": 1498.8,
+     "tokens_per_request": 1873.5
+    }
+   }
+  },
+  "requests": {
+   "large": 18,
+   "medium": 18,
+   "small": 4
+  }
+ },
+ "models": {
+  "openai/gpt-oss-120b": {
+   "groq_tokens_available_now": 104153,
+   "groq_requests_available_now": 863,
+   "groq_tokens_refill_per_h": 7500,
+   "groq_full_again_in_h": 10.1,
+   "groq_actual_used_24h": 88766,
+   "ledger_charged_24h": 174059,
+   "ledger_tokens_available_now": 5941,
+   "ledger_last_spend_returns_at": "2026-11-11 17:57 UTC",
+   "cap_tokens": 180000.0,
+   "cap_requests": 900.0
+  },
+  "openai/gpt-oss-20b": {
+   "groq_tokens_available_now": 180000,
+   "groq_requests_available_now": 900,
+   "groq_tokens_refill_per_h": 7500,
+   "groq_full_again_in_h": 0.0,
+   "groq_actual_used_24h": 10762,
+   "ledger_charged_24h": 18700,
+   "ledger_tokens_available_now": 161300,
+   "ledger_last_spend_returns_at": "2026-11-11 14:03 UTC",
+   "cap_tokens": 180000.0,
+   "cap_requests": 900.0
+  },
+  "qwen/qwen3.8-27b": {
+   "groq_tokens_available_now": 170795,
+   "groq_requests_available_now": 869,
+   "groq_tokens_refill_per_h": 7500,
+   "groq_full_again_in_h": 1.2,
+   "groq_actual_used_24h": 18524,
+   "ledger_charged_24h": 46178,
+   "ledger_tokens_available_now": 133822,
+   "ledger_last_spend_returns_at": "2026-11-11 17:57 UTC",
+   "cap_tokens": 180000.0,
+   "cap_requests": 900.0
+  }
+ },
+ "jobs": [
+  {
+   "job": "sweep part 1 remainder: small (14 questions)",
+   "requests": {
+    "openai/gpt-oss-120b": 14,
+    "qwen/qwen3.8-27b": 14
+   },
+   "tokens": {
+    "openai/gpt-oss-120b": 22757,
+    "qwen/qwen3.8-27b": 3751
+   },
+   "priority": 0,
+   "start_groq": "11-10 18:02 UTC",
+   "start_ledger": "11-11 17:52 UTC",
+   "fits_groq": true,
+   "fits_ledger_now": false
+  },
+  {
+   "job": "sweep part 2: medium+rerank",
+   "requests": {
+    "openai/gpt-oss-120b": 18,
+    "qwen/qwen3.8-27b": 18
+   },
+   "tokens": {
+    "openai/gpt-oss-120b": 27249,
+    "qwen/qwen3.8-27b": 4822
+   },
+   "priority": 1,
+   "start_groq": "11-10 18:07 UTC",
+   "start_ledger": "11-11 17:57 UTC",
+   "fits_groq": true,
+   "fits_ledger_now": false
+  },
+  {
+   "job": "sweep part 2: small_lean",
+   "requests": {
+    "openai/gpt-oss-120b": 18
+   },
+   "tokens": {
+    "openai/gpt-oss-120b": 19957
+   },
+   "priority": 1,
+   "start_groq": "11-10 18:12 UTC",
+   "start_ledger": "11-11 18:02 UTC",
+   "fits_groq": true,
+   "fits_ledger_now": false
+  },
+  {
+   "job": "drafter step: winner with 20b and qwen",
+   "requests": {
+    "openai/gpt-oss-20b": 18,
+    "qwen/qwen3.8-27b": 54
+   },
+   "tokens": {
+    "openai/gpt-oss-20b": 32750,
+    "qwen/qwen3.8-27b": 42394
+   },
+   "priority": 2,
+   "start_groq": "11-10 18:17 UTC",
+   "start_ledger": "not within 24 h",
+   "fits_groq": true,
+   "fits_ledger_now": false
+  },
+  {
+   "job": "real_steady (2 requests/min for 15 min)",
+   "requests": {
+    "openai/gpt-oss-120b": 30,
+    "qwen/qwen3.8-27b": 60
+   },
+   "tokens": {
+    "openai/gpt-oss-120b": 53943,
+    "qwen/qwen3.8-27b": 51191
+   },
+   "priority": 3,
+   "start_groq": "11-10 20:43 UTC",
+   "start_ledger": "not within 24 h",
+   "fits_groq": true,
+   "fits_ledger_now": false
+  },
+  {
+   "job": "real_burst (20 requests within 10 s (inside RPM 30))",
+   "requests": {
+    "openai/gpt-oss-120b": 20,
+    "qwen/qwen3.8-27b": 40
+   },
+   "tokens": {
+    "openai/gpt-oss-120b": 35962,
+    "qwen/qwen3.8-27b": 34128
+   },
+   "priority": 3,
+   "start_groq": "11-11 01:29 UTC",
+   "start_ledger": "not within 24 h",
+   "fits_groq": true,
+   "fits_ledger_now": false
+  }
+ ],
+ "load_assumptions": {
+  "real_steady": {
+   "requests": 30,
+   "how": "2 requests/min for 15 min"
+  },
+  "real_burst": {
+   "requests": 20,
+   "how": "20 requests within 10 s (inside RPM 30)"
+  }
+ }
+}
