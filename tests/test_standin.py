@@ -168,7 +168,7 @@ class SwitchTests(unittest.TestCase):
         self.assertEqual(a.status, 503)
         self.assertEqual(st["switches"]["stall_rate"], 1.0)
         self.assertEqual(b.status, 200)
-        self.assertGreaterEqual(b.headers_ms, 400)
+        self.assertGreaterEqual(b.headers_ms, 400 - 20)   # Windows timers can fire up to one ~15.6 ms tick early
 
     def test_slow_under_load(self):
         s = StandIn(CAL, Switches(slow_under_load=True, load_alpha=0.5), seed=11)

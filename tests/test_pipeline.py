@@ -176,9 +176,15 @@ class LadderTests(unittest.TestCase):
         self.assertRegex(r.text, r"retry in \d+ s")
 
 
+def cfg_retry(**ladder):
+    """The retry policy is off in config/pipeline.toml (iterate round 4 didn't keep it); test it switched on."""
+    c = cfg(**ladder)
+    c["retry"] = {"enabled": True, "max_per_step": 1, "global_budget_fraction": 0.10, "window_s": 60.0,
+                  "best_effort_steps": ["understand", "verify"]}
+    return c
+
+
 class RetryPolicyTests(unittest.TestCase):
-    def rpd_429(self, model):
-        return 429, ""
 
     def test_at_most_one_retry_per_step_on_another_model(self):
         def script(step, model, payload):
@@ -186,7 +192,7 @@ class RetryPolicyTests(unittest.TestCase):
                 return 503, ""
             return default_script(step, model, payload)
         chat = ScriptedChat(script)
-        r = run(Pipeline(chat, make_limiter(), RETRIEVER, cfg()).answer(QUESTION))
+        r = run(Pipeline(chat, make_limiter(), RETRIEVER, cfg_retry()).answer(QUESTION))
         drafts = [c for c in chat.calls if c[0] == "draft"]
         self.assertEqual(drafts, [("draft", Q120), ("draft", Q20)])          # 1 retry, different model
         self.assertEqual(r.kind, "passages")
@@ -205,7 +211,7 @@ class RetryPolicyTests(unittest.TestCase):
                     r.usage, r.text = None, ""
                 return r
         chat = DailyChat(default_script)
-        r = run(Pipeline(chat, make_limiter(), RETRIEVER, cfg()).answer(QUESTION))
+        r = run(Pipeline(chat, make_limiter(), RETRIEVER, cfg_retry()).answer(QUESTION))
         self.assertEqual([c for c in chat.calls if c[0] == "draft"], [("draft", Q120)])
         self.assertIn("daily-limit", r.notice)
 
@@ -215,7 +221,7 @@ class RetryPolicyTests(unittest.TestCase):
                 return 503, ""
             return default_script(step, model, payload)
         chat = ScriptedChat(script)
-        r = run(Pipeline(chat, make_limiter(), RETRIEVER, cfg()).answer(QUESTION))
+        r = run(Pipeline(chat, make_limiter(), RETRIEVER, cfg_retry()).answer(QUESTION))
         self.assertEqual([c for c in chat.calls if c[0] == "understand"], [("understand", QW)])
         self.assertEqual(r.kind, "answer")                                    # heuristic query, still answered
 
