@@ -1,0 +1,125 @@
+{
+  "generated_by": "scripts/extract_papers.py",
+  "counts": {
+    "accent_fixed": 66,
+    "big_operator_glyph_mapped": 3,
+    "bracket_space_fixed": 59,
+    "digit_word_merge_fixed": 13,
+    "figure_form_chars_dropped:attention": 1212,
+    "figure_form_chars_dropped:dynamic_chunking": 6588,
+    "figure_form_chars_dropped:moshi": 4293,
+    "font_change_space_inserted": 9,
+    "gap_space_inserted": 21,
+    "header_footer_removed": 185,
+    "hyphen_kept": 51,
+    "hyphenation_joined": 179,
+    "kerning_split_fixed": 139,
+    "math_accent_fixed": 30,
+    "math_alnum_normalized": 363,
+    "stamp_ok:attention": 1,
+    "stamp_ok:dynamic_chunking": 1,
+    "stamp_ok:moshi": 1,
+    "supsub_marked": 631,
+    "table_fragment_merged": 54
+  },
+  "examples": {
+    "accent_fixed": [
+      "´ e",
+      "´ e",
+      "´ e",
+      "´ e",
+      "´ e"
+    ],
+    "big_operator_glyph_mapped": [
+      " P",
+      "˝",
+      " ˝"
+    ],
+    "digit_word_merge_fixed": [
+      "6identical",
+      "1kbps",
+      "5kbps",
+      "3kbps",
+      "5kbps"
+    ],
+    "font_change_space_inserted": [
+      " k < n|does not connec",
+      "ly combine such|acoustic",
+      "tep, we train a|fastText",
+      "free generation|from differ-",
+      "e issue is that|the codec is no"
+    ],
+    "gap_space_inserted": [
+      "warmup|_",
+      "CoRR|, abs/2303.0103",
+      "TTS mode|. Each column r",
+      "M|), and decoder ",
+      "≤|𝑠"
+    ],
+    "header_footer_removed": [
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ],
+    "hyphen_kept": [
+      "English-to",
+      "sequence-aligned",
+      "sequence-aligned",
+      "position-wise",
+      "multi-plicative"
+    ],
+    "hyphenation_joined": [
+      "transduc-|tion -> transduction",
+      "transfor-|mation -> transformation",
+      "convolu-|tional -> convolutional",
+      "Convolu-|tional -> convolutional",
+      "im-|age -> image"
+    ],
+    "kerning_split_fixed": [
+      "V olume",
+      "T ext",
+      "T ext",
+      "T ext",
+      "T ext"
+    ],
+    "math_accent_fixed": [
+      "Vˆ",
+      "o ˆ",
+      "o ˆ",
+      "xˆ",
+      "z ˆ"
+    ],
+    "math_alnum_normalized": [
+      "as compressing every𝑘 inputs are not dat",
+      "Figure 1: (left) Architectural overview ",
+      "This recursive design allows H-Net to sc",
+      "using superscripts: encoder networks asE",
+      "M residing only at the final stage𝑠 =𝑆. "
+    ],
+    "stamp_ok:attention": [
+      "arXiv:1706.03762v7  [cs.CL]  2 Aug 2023"
+    ],
+    "stamp_ok:dynamic_chunking": [
+      "arXiv:2507.07955v2  [cs.LG]  15 Jul 2025"
+    ],
+    "stamp_ok:moshi": [
+      "arXiv:2410.00037v1  [eess.AS]  17 Sep 2024"
+    ],
+    "supsub_marked": [
+      "Ashish Vaswani^∗",
+      "Noam Shazeer^∗",
+      "Niki Parmar^∗",
+      "Jakob Uszkoreit^∗",
+      "Llion Jones^∗"
+    ],
+    "table_fragment_merged": [
+      "BLEU Training Cost (FLOPs)",
+      "Model",
+      "(A)",
+      "(C)",
+      "(D)"
+    ]
+  }
+}

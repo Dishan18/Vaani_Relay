@@ -99,7 +99,7 @@ No code exists yet. Groq limits below are written as **hypotheses to measure**, 
 | G14 | "Per-minute limit halved" can't be done to the real service. | Use the stand-in config, or our own limiter at half the measured RPM/TPM in front of the real service. Label which. |
 | G15 | Real **daily exhaustion** costs the rest of that day's budget, and the recovery time depends on whether the daily window is fixed or rolling, which is unknown. | Do it as the last real action of a day. Observe recovery the next morning. If it's too expensive, report "not measured" and fall back on header-derived values with low confidence. |
 | G16 | "Use Groq's free tier", but limits are **per model**. Is spending a second model's quota for degraded answers legitimate routing or a "trick to get around its limits"? | **Decision needed from you** (D1). Default: one primary model; a smaller model only as a disclosed degradation step. |
-| G17 | "Cite where in the papers" doesn't fix the granularity (page? section? quote?). | Paper + section (+ page if parsing from PDF), plus the chunk id. Decide after seeing what the source formats give us (M1). |
+| G17 | "Cite where in the papers" doesn't fix the granularity (page? section? quote?). | **Decided (M1):** arXiv id with version + page + section heading (appendix flagged) + block id, e.g. `1706.03762v7 p.8 §6.1`. The PDFs give pages and bold headings reliably, and blocks never span a page. |
 | G18 | Groq probably offers no embeddings endpoint (hypothesis), and rule 4 limits dependencies. | BM25 in pure Python is the baseline. Any re-ranking is lexical or LLM-based, and LLM re-ranking costs budget. That's a real quality-vs-cost axis for Table 3. |
 | G19 | "Keep the raw results for both" plus "one file named results.csv": one file, or one per source? | One `results.csv` with a `source` column covering every run. Per-run raw traces stay separately. |
 | G20 | A row is "one row per request", but a request makes several model calls. | One row per **user request**. `tokens_*` sum every call including retries. `retries` counts model-call retries within the request. Probe calls get rows with `scenario=probe`. |
@@ -198,7 +198,7 @@ Vaani_Relay/
 | Package | Why we need it | Stdlib alternative and why not |
 |---|---|---|
 | `aiohttp` | Async HTTP **client** (streaming SSE from Groq) **and server** (stand-in) in one dependency; works on Windows' Proactor loop | asyncio streams + `ssl` would mean hand-writing HTTP/1.1, chunked encoding and TLS handling. Too much risk for no gain. |
-| `pypdf` *(only if needed)* | Text plus page numbers from PDFs for page-level citations | Only added if M1 shows arXiv HTML/LaTeX sources aren't usable for all three papers |
+| `pypdf==7.0.0` *(added in M1)* | The brief names PDF versions. Its text visitor gives each run's font, size and position. Without those, `2.3·10^19` flattens to `1019`, `d_model` to `dmodel`, and headings and running headers can't be told from body text. | No stdlib PDF parser. arXiv HTML doesn't exist for all three versions, and LaTeX source would need its own parser and loses page numbers for citations. |
 
 Everything else is stdlib: `tomllib`, `csv`, `json`, `statistics`, `asyncio`, `unittest`, `hashlib`, `re`. No numpy or pandas; percentiles are computed with an explicit nearest-rank function so reviewers can reproduce them.
 
@@ -217,7 +217,7 @@ Everything else is stdlib: `tomllib`, `csv`, `json`, `statistics`, `asyncio`, `u
 | M | Day | What | Real budget |
 |---|---|---|---|
 | M0 | 11-10 | Repo, `CLAUDE.md`, `PLAN.md`, `.gitignore`, remote | 0 |
-| M1 | 11-10 | Fetch papers at exact versions (+sha256); inspect PDF vs HTML vs LaTeX; choose parser and citation granularity (G17); chunker + BM25; offline retrieval sanity checks | 0 |
+| M1 | 11-10 | Fetch papers at exact versions (+sha256); inspect PDF vs HTML vs LaTeX; choose parser and citation granularity (G17); chunker + BM25; offline retrieval sanity checks. **M1a done:** `fetch_papers.py`, `extract_papers.py`, `audit_blocks.py` (see §8). **M1b next:** chunker + BM25. | 0 |
 | M2 | 11-10 | Streaming client, ledger, hard cap, limiter; stand-in v0 with placeholder parameters; trace spans; results.csv writer | 0 |
 | M3 | 11-10 / 11-11 | Record documented limits as hypotheses → **probe (R1)**: latency sample, size sweep, RPM burst to 429, recovery, concurrency steps. **Measurement-first gate: no ladder thresholds, timeouts or retry policy get fixed before this.** | ≤ 15% |
 | M4 | 11-11 | Calibrate stand-in from R1; validate (R2) with quantile comparison; write down where it differs | 0 |
@@ -239,3 +239,44 @@ If M3 shows the daily budget is smaller than expected, the first things to shrin
 - **D2** (G9, G10): Vaani heading placement OK? Do tables count toward the 2 pages?
 - **D3**: confirm the deadline is 2026-11-14.
 - **D4**: you'll write the evaluation questions and the human-only sections (Vaani feedback, "what I learned", assistant section). I'll draft candidates only if you ask.
+
+---
+
+## 8. Library extraction (M1a): what the PDFs taught us
+
+Pipeline: `scripts/fetch_papers.py` → `data/papers/MANIFEST.json` (versions checked against the
+arXiv API, sha256-pinned) → `scripts/extract_papers.py` → `data/blocks.jsonl` (+
+`data/blocks_extract_stats.json`) → `scripts/audit_blocks.py` → `data/blocks_audit.json`.
+The audit exits non-zero while any extractor bug it can detect remains. All counts live in
+`data/blocks_audit.json`; none are copied here (rule 3).
+
+Decisions that came from looking at the PDFs, not from assumptions:
+- **Positioned runs, not `extract_text()`.** Plain extraction flattens super- and subscripts, so
+  exponents in Attention Table 2 turn into wrong numbers. Runs are grouped into lines in
+  **content-stream order**. Sorting by y interleaved the side-by-side captions in
+  dynamic_chunking.
+- **Embedded figures are skipped.** Their text comes with figure-local coordinates and private
+  glyph encodings (`4UBHF` = "Stage") and was leaking into headings. Consequence for retrieval:
+  anything stated only inside a figure is unanswerable and must be refused.
+- **Every vocabulary-based fix is checked against the papers' own words.** This covers
+  hyphenation, kerning (`T ext`) and digit-word merges, so suspended hyphens in the source
+  ("content- and context- dependent") stay as written.
+- **TeX big-operator fonts get a mapping.** They have no Unicode map: CMEX `P` and txexs
+  `U+02DD` are ∑.
+- **Each block carries extra fields beyond the requested schema.** `kind` is one of
+  body/heading/caption/table/footnote/reference/front_matter, and `in_appendix` marks appendix
+  text. The retriever needs both.
+
+Future retrieval bugs the extractor can't fix (counts in `blocks_audit.json →
+future_retrieval_bugs`). These seed write-up §7, "How this library will mislead a naive
+retriever":
+1. **Table cells lose their column.** A row with an empty cell no longer says which column a
+   number belongs to. Keep each table, its caption and its header rows in one chunk. Never read
+   a value off a ragged row.
+2. **Bibliography entries match questions by title words.** Exclude `kind=reference` by default.
+3. **Figure-only facts are gone.** Captions are their own blocks and must be attached to their
+   table or figure.
+4. **Paragraphs split at page breaks.** The chunker joins same-section body blocks across a page
+   break and cites both pages.
+5. **Some glyphs have no Unicode mapping, and inline footnote or citation markers remain.**
+   These are harmless for retrieval, but an answer must not invent a symbol.

@@ -1,0 +1,3 @@
+# Every dependency is justified in PLAN.md section 5. Install into .venv:
+#   python -m venv .venv ; .venv\Scripts\python -m pip install -r requirements.txt
+pypdf==7.0.0  # PDF text runs with font, size and position (superscripts, headings, headers/footers)

@@ -1,0 +1,535 @@
+{
+  "generated_by": "scripts/audit_blocks.py",
+  "inputs": {
+    "blocks.jsonl_sha256": "3e1424d6d1b11c33c09e70134d81288270a5fd904515a672f99c706f076b1d69",
+    "extract_stats": "data/blocks_extract_stats.json"
+  },
+  "blocks_total": 1171,
+  "blocks_by_paper_and_kind": {
+    "attention": {
+      "body": 85,
+      "caption": 9,
+      "footnote": 4,
+      "front_matter": 10,
+      "heading": 25,
+      "reference": 40,
+      "table": 2
+    },
+    "dynamic_chunking": {
+      "body": 339,
+      "caption": 25,
+      "footnote": 9,
+      "front_matter": 4,
+      "heading": 37,
+      "reference": 116,
+      "table": 5
+    },
+    "moshi": {
+      "body": 239,
+      "caption": 31,
+      "footnote": 13,
+      "front_matter": 3,
+      "heading": 38,
+      "reference": 117,
+      "table": 20
+    }
+  },
+  "version_stamp_checked": {
+    "attention": 1,
+    "dynamic_chunking": 1,
+    "moshi": 1
+  },
+  "status_summary": {
+    "tables": "future_retrieval_bug",
+    "sub_superscripts": "fixed",
+    "captions": "future_retrieval_bug",
+    "footnotes": "future_retrieval_bug",
+    "references": "future_retrieval_bug",
+    "kerning_splits": "fixed",
+    "accents_and_ligatures": "fixed",
+    "unmapped_glyphs": "future_retrieval_bug",
+    "hyphenation": "fixed",
+    "headers_footers": "fixed",
+    "figure_text": "fixed",
+    "page_breaks": "future_retrieval_bug"
+  },
+  "future_retrieval_bugs": [
+    {
+      "class": "tables",
+      "issue": "rows_with_missing_cells_column_alignment_lost",
+      "count": 62,
+      "note": "Rows keep their line structure and exponents (10^19), but the PDF text layer joins cells with single spaces, so a row with an empty cell ('ByteNet [18] 23.75') no longer says which column the number belongs to. Not recoverable without glyph-level column analysis. Retrieval: keep each table in one chunk together with its caption and header rows, and have the answer step refuse to read a value off a ragged row."
+    },
+    {
+      "class": "captions",
+      "issue": "table_without_caption_on_same_page",
+      "count": 2,
+      "note": "Captions are their own blocks (kind=caption). Text drawn inside embedded figures is dropped on purpose (counted in fixed_in_extractor): it had figure-local coordinates and private glyph encodings ('4UBHF' for 'Stage'). Consequence: anything only stated inside a figure is not retrievable, so questions about figure contents must be refused unless the caption or body says it. Chunking must attach captions to the table/figure they describe."
+    },
+    {
+      "class": "footnotes",
+      "issue": "footnote_marker_in_body_text",
+      "count": 42,
+      "note": "Footnotes are separate blocks (kind=footnote) with the page's markers. The marker in the sentence ('Alexa^1') stays, so the sentence and its footnote (often a URL) end up in different chunks. Retrieval: low priority; markers are harmless tokens."
+    },
+    {
+      "class": "references",
+      "issue": "reference_blocks_that_can_match_queries",
+      "count": 273,
+      "note": "Every bibliography entry is its own block (kind=reference). Their titles share words with real questions ('attention', 'chunking', 'speech'), so a naive retriever returns them as evidence. Retrieval: exclude kind=reference by default. Numeric markers like [13] carry no meaning without the bibliography."
+    },
+    {
+      "class": "references",
+      "issue": "numeric_citation_markers_in_body",
+      "count": 58,
+      "note": "Every bibliography entry is its own block (kind=reference). Their titles share words with real questions ('attention', 'chunking', 'speech'), so a naive retriever returns them as evidence. Retrieval: exclude kind=reference by default. Numeric markers like [13] carry no meaning without the bibliography."
+    },
+    {
+      "class": "unmapped_glyphs",
+      "issue": "replacement_or_private_use_chars",
+      "count": 5,
+      "note": "Glyphs with no Unicode mapping in the PDF font (e.g. arrows in 'tokenization�LM�detokenization'). The character is unknowable from the text layer. Harmless for retrieval of surrounding words; an answer quoting the span must not invent the symbol."
+    },
+    {
+      "class": "page_breaks",
+      "issue": "paragraph_split_across_pages",
+      "count": 11,
+      "note": "Blocks never span pages, so that every block has one page to cite. A paragraph that runs onto the next page becomes two blocks, each half a sentence at the seam. The chunker should join consecutive body blocks of the same section across a page break and cite both pages."
+    }
+  ],
+  "classes": {
+    "tables": {
+      "status": "future_retrieval_bug",
+      "fixed_in_extractor": {
+        "table_fragment_merged": 54
+      },
+      "remaining": {
+        "rows_with_missing_cells_column_alignment_lost": {
+          "count": 62,
+          "by_paper": {
+            "attention": 18,
+            "moshi": 38,
+            "dynamic_chunking": 6
+          },
+          "type": "retrieval_bug",
+          "examples": [
+            {
+              "block_id": "attention-p08-b002",
+              "snippet": "ByteNet [18] 23.75"
+            },
+            {
+              "block_id": "attention-p08-b002",
+              "snippet": "Deep-Att + PosUnk [39] 39.2 1.0 · 10^20"
+            },
+            {
+              "block_id": "attention-p08-b002",
+              "snippet": "Deep-Att + PosUnk Ensemble [39] 40.4 8.0 · 10^20"
+            },
+            {
+              "block_id": "attention-p08-b002",
+              "snippet": "Transformer (base model) 27.3 38.1 3.3 · 10^18"
+            },
+            {
+              "block_id": "attention-p08-b002",
+              "snippet": "Transformer (big) 28.4 41.8 2.3 · 10^19"
+            },
+            {
+              "block_id": "attention-p09-b002",
+              "snippet": "base 6 512 2048 8 64 64 0.1 0.1 100K 4.92 25.8 65"
+            }
+          ]
+        },
+        "table_rows_classified_as_body": {
+          "count": 0,
+          "by_paper": {},
+          "type": "extractor_bug",
+          "examples": []
+        }
+      },
+      "note": "Rows keep their line structure and exponents (10^19), but the PDF text layer joins cells with single spaces, so a row with an empty cell ('ByteNet [18] 23.75') no longer says which column the number belongs to. Not recoverable without glyph-level column analysis. Retrieval: keep each table in one chunk together with its caption and header rows, and have the answer step refuse to read a value off a ragged row."
+    },
+    "sub_superscripts": {
+      "status": "fixed",
+      "fixed_in_extractor": {
+        "supsub_marked": 631,
+        "math_alnum_normalized": 363
+      },
+      "remaining": {
+        "flattened_exponents": {
+          "count": 0,
+          "by_paper": {},
+          "type": "extractor_bug",
+          "examples": []
+        },
+        "subscript_flattened_elsewhere": {
+          "count": 0,
+          "by_paper": {},
+          "type": "extractor_bug",
+          "examples": []
+        },
+        "math_alphanumeric_unicode": {
+          "count": 0,
+          "by_paper": {},
+          "type": "extractor_bug",
+          "examples": []
+        }
+      },
+      "note": "Smaller runs above/below the baseline are written ^x / _x (10^19, d_model, P_drop). Display equations still come out as linear text with ^/_ markers; that is readable for an LLM but BM25 will not match 'dmodel' against 'd_model' unless the tokenizer splits on '_' and '^' (it should)."
+    },
+    "captions": {
+      "status": "future_retrieval_bug",
+      "fixed_in_extractor": {
+        "figure_form_chars_dropped:attention": 1212,
+        "figure_form_chars_dropped:dynamic_chunking": 6588,
+        "figure_form_chars_dropped:moshi": 4293
+      },
+      "remaining": {
+        "caption_text_inside_body_block": {
+          "count": 0,
+          "by_paper": {},
+          "type": "extractor_bug",
+          "examples": []
+        },
+        "table_without_caption_on_same_page": {
+          "count": 2,
+          "by_paper": {
+            "moshi": 2
+          },
+          "type": "retrieval_bug",
+          "examples": [
+            {
+              "block_id": "moshi-p13-b008",
+              "snippet": "(\nsoftmax(l_s,1) ≈ P [V_s,1|V_0, . . . , V_s−1]\nsoftmax(l_s,k) ≈ P [V_s,k|V_0, . . . , V_s−1, V_s,1, . . . V_s,k−1] if k"
+            },
+            {
+              "block_id": "moshi-p36-b003",
+              "snippet": "Category Moshi GPT-3.5 GPT-4 Llama 2 Alpaca Vicuna Falcon Mistral Mixtral Zephyr OLMo\nOverall Safety Score 83.05 96.95 9"
+            }
+          ]
+        }
+      },
+      "note": "Captions are their own blocks (kind=caption). Text drawn inside embedded figures is dropped on purpose (counted in fixed_in_extractor): it had figure-local coordinates and private glyph encodings ('4UBHF' for 'Stage'). Consequence: anything only stated inside a figure is not retrievable, so questions about figure contents must be refused unless the caption or body says it. Chunking must attach captions to the table/figure they describe."
+    },
+    "footnotes": {
+      "status": "future_retrieval_bug",
+      "fixed_in_extractor": {},
+      "remaining": {
+        "footnote_text_inside_body_block": {
+          "count": 0,
+          "by_paper": {},
+          "type": "extractor_bug",
+          "examples": []
+        },
+        "footnote_marker_in_body_text": {
+          "count": 42,
+          "by_paper": {
+            "attention": 4,
+            "moshi": 13,
+            "dynamic_chunking": 25
+          },
+          "type": "retrieval_bug",
+          "examples": [
+            {
+              "block_id": "attention-p04-b013",
+              "snippet": "into regions where it has extremely small gradients^4. To counteract this effect, we scale the dot prod"
+            },
+            {
+              "block_id": "attention-p06-b002",
+              "snippet": "l Maximum Path Length Operations Self-Attention O(n^2 · d) O(1) O(1) Recurrent O(n · d^2) O(n) O(n) Con"
+            },
+            {
+              "block_id": "attention-p07-b012",
+              "snippet": "lrate = d^−_model^0.5 · min(step_num^−0.5, step_num · warmup_steps^−1"
+            },
+            {
+              "block_id": "attention-p08-b010",
+              "snippet": "ingle-precision floating-point capacity of each GPU^5."
+            },
+            {
+              "block_id": "moshi-p02-b002",
+              "snippet": "terface to early conversational systems, from Alexa^1 to Siri^2 and Google Assistant.^3 In this context"
+            },
+            {
+              "block_id": "moshi-p02-b002",
+              "snippet": " early conversational systems, from Alexa^1 to Siri^2 and Google Assistant.^3 In this context, a “wake "
+            }
+          ]
+        }
+      },
+      "note": "Footnotes are separate blocks (kind=footnote) with the page's markers. The marker in the sentence ('Alexa^1') stays, so the sentence and its footnote (often a URL) end up in different chunks. Retrieval: low priority; markers are harmless tokens."
+    },
+    "references": {
+      "status": "future_retrieval_bug",
+      "fixed_in_extractor": {},
+      "remaining": {
+        "bibliography_text_classified_as_body": {
+          "count": 0,
+          "by_paper": {},
+          "type": "extractor_bug",
+          "examples": []
+        },
+        "reference_blocks_that_can_match_queries": {
+          "count": 273,
+          "by_paper": {
+            "attention": 40,
+            "moshi": 117,
+            "dynamic_chunking": 116
+          },
+          "type": "retrieval_bug",
+          "examples": [
+            {
+              "block_id": "attention-p10-b013",
+              "snippet": "[1] Jimmy Lei Ba, Jamie Ryan Kiros, and Geoffrey E Hinton. Layer normalization. arXiv preprint arXiv"
+            },
+            {
+              "block_id": "attention-p10-b014",
+              "snippet": "[2] Dzmitry Bahdanau, Kyunghyun Cho, and Yoshua Bengio. Neural machine translation by jointly learni"
+            },
+            {
+              "block_id": "attention-p10-b015",
+              "snippet": "[3] Denny Britz, Anna Goldie, Minh-Thang Luong, and Quoc V . Le. Massive exploration of neural machi"
+            },
+            {
+              "block_id": "attention-p10-b016",
+              "snippet": "[4] Jianpeng Cheng, Li Dong, and Mirella Lapata. Long short-term memory-networks for machine reading"
+            },
+            {
+              "block_id": "attention-p11-b001",
+              "snippet": "[5] Kyunghyun Cho, Bart van Merrienboer, Caglar Gulcehre, Fethi Bougares, Holger Schwenk, and Yoshua"
+            },
+            {
+              "block_id": "attention-p11-b002",
+              "snippet": "[6] Francois Chollet. Xception: Deep learning with depthwise separable convolutions. arXiv preprint "
+            }
+          ]
+        },
+        "numeric_citation_markers_in_body": {
+          "count": 58,
+          "by_paper": {
+            "attention": 55,
+            "moshi": 1,
+            "dynamic_chunking": 2
+          },
+          "type": "retrieval_bug",
+          "examples": [
+            {
+              "block_id": "attention-p02-b002",
+              "snippet": "Recurrent neural networks, long short-term memory [13] and gated recurrent [7] neural networks in partic"
+            },
+            {
+              "block_id": "attention-p02-b002",
+              "snippet": ", long short-term memory [13] and gated recurrent [7] neural networks in particular, have been firmly e"
+            },
+            {
+              "block_id": "attention-p02-b002",
+              "snippet": "such as language modeling and machine translation [35, 2, 5]. Numerous efforts have since continued to push th"
+            },
+            {
+              "block_id": "attention-p02-b002",
+              "snippet": "language models and encoder-decoder architectures [38, 24, 15]."
+            },
+            {
+              "block_id": "attention-p02-b003",
+              "snippet": "utational efficiency through factorization tricks [21] and conditional computation [32], while also impr"
+            },
+            {
+              "block_id": "attention-p02-b003",
+              "snippet": "orization tricks [21] and conditional computation [32], while also improving model performance in case o"
+            }
+          ]
+        }
+      },
+      "note": "Every bibliography entry is its own block (kind=reference). Their titles share words with real questions ('attention', 'chunking', 'speech'), so a naive retriever returns them as evidence. Retrieval: exclude kind=reference by default. Numeric markers like [13] carry no meaning without the bibliography."
+    },
+    "kerning_splits": {
+      "status": "fixed",
+      "fixed_in_extractor": {
+        "kerning_split_fixed": 139,
+        "digit_word_merge_fixed": 13,
+        "gap_space_inserted": 21,
+        "font_change_space_inserted": 9,
+        "bracket_space_fixed": 59
+      },
+      "remaining": {
+        "split_capital_kerning": {
+          "count": 0,
+          "by_paper": {},
+          "type": "extractor_bug",
+          "examples": []
+        },
+        "glued_words": {
+          "count": 0,
+          "by_paper": {},
+          "type": "extractor_bug",
+          "examples": []
+        },
+        "missing_space_after_period": {
+          "count": 0,
+          "by_paper": {},
+          "type": "extractor_bug",
+          "examples": []
+        },
+        "letter_spaced_text": {
+          "count": 0,
+          "by_paper": {},
+          "type": "extractor_bug",
+          "examples": []
+        }
+      },
+      "note": "'T ext' -> 'Text' and '6identical' -> '6 identical' are joined/split only when the papers' own vocabulary confirms the result; side-by-side runs get a space when the estimated gap is large."
+    },
+    "accents_and_ligatures": {
+      "status": "fixed",
+      "fixed_in_extractor": {
+        "accent_fixed": 66,
+        "math_accent_fixed": 30,
+        "ligature_fixed": 0
+      },
+      "remaining": {
+        "spacing_accent_left": {
+          "count": 0,
+          "by_paper": {},
+          "type": "extractor_bug",
+          "examples": []
+        }
+      },
+      "note": "TeX accents arrive as a spacing accent next to the letter ('D´ efossez'); they are recomposed to 'Défossez'."
+    },
+    "unmapped_glyphs": {
+      "status": "future_retrieval_bug",
+      "fixed_in_extractor": {
+        "big_operator_glyph_mapped": 3
+      },
+      "remaining": {
+        "replacement_or_private_use_chars": {
+          "count": 5,
+          "by_paper": {
+            "moshi": 5
+          },
+          "type": "retrieval_bug",
+          "examples": [
+            {
+              "block_id": "moshi-p14-b007",
+              "snippet": " "
+            },
+            {
+              "block_id": "moshi-p14-b007",
+              "snippet": " "
+            },
+            {
+              "block_id": "moshi-p14-b007",
+              "snippet": " "
+            },
+            {
+              "block_id": "moshi-p14-b008",
+              "snippet": ""
+            },
+            {
+              "block_id": "moshi-p14-b008",
+              "snippet": ""
+            }
+          ]
+        },
+        "math_glyph_mapped_to_accent_char": {
+          "count": 0,
+          "by_paper": {},
+          "type": "retrieval_bug",
+          "examples": []
+        }
+      },
+      "note": "Glyphs with no Unicode mapping in the PDF font (e.g. arrows in 'tokenization�LM�detokenization'). The character is unknowable from the text layer. Harmless for retrieval of surrounding words; an answer quoting the span must not invent the symbol."
+    },
+    "hyphenation": {
+      "status": "fixed",
+      "fixed_in_extractor": {
+        "hyphenation_joined": 179,
+        "hyphen_kept": 51
+      },
+      "remaining": {
+        "broken_hyphenation_left": {
+          "count": 0,
+          "by_paper": {},
+          "type": "extractor_bug",
+          "examples": []
+        }
+      },
+      "note": "A line-end hyphen is removed only when the joined word occurs in the papers more often than the hyphenated form ('transduc-|tion' -> 'transduction', 'sequence-|aligned' kept)."
+    },
+    "headers_footers": {
+      "status": "fixed",
+      "fixed_in_extractor": {
+        "header_footer_removed": 185
+      },
+      "remaining": {
+        "running_title_left_in_text": {
+          "count": 0,
+          "by_paper": {},
+          "type": "extractor_bug",
+          "examples": []
+        },
+        "page_number_left_in_text": {
+          "count": 0,
+          "by_paper": {},
+          "type": "extractor_bug",
+          "examples": []
+        }
+      },
+      "note": "Lines in the top/bottom 8% of the page that repeat on at least 20% of pages (digits normalised), and bare page numbers there, are removed."
+    },
+    "figure_text": {
+      "status": "fixed",
+      "fixed_in_extractor": {},
+      "remaining": {
+        "caesar_shifted_figure_glyphs": {
+          "count": 0,
+          "by_paper": {},
+          "type": "extractor_bug",
+          "examples": []
+        }
+      },
+      "note": "Figure fonts with a private encoding produce text shifted by one letter ('4UBHF' = 'Stage'). Skipping embedded figures removes it; this detector checks none leaked."
+    },
+    "page_breaks": {
+      "status": "future_retrieval_bug",
+      "fixed_in_extractor": {},
+      "remaining": {
+        "paragraph_split_across_pages": {
+          "count": 11,
+          "by_paper": {
+            "attention": 1,
+            "moshi": 7,
+            "dynamic_chunking": 3
+          },
+          "type": "retrieval_bug",
+          "examples": [
+            {
+              "block_id": "attention-p07-b001",
+              "snippet": "...on layers are faster than recurrent layers when the sequence || length n is smaller than the representation dimensionality d..."
+            },
+            {
+              "block_id": "moshi-p16-b001",
+              "snippet": "...nging, and relying on an external ASR system contradicts our || end-to-end speech-to-speech approach. Ablation studies in Se..."
+            },
+            {
+              "block_id": "moshi-p20-b001",
+              "snippet": "...s we noticed that Moshi was initially not performing well on || simple factual tasks like adding numbers. Finally, we genera..."
+            },
+            {
+              "block_id": "moshi-p21-b001",
+              "snippet": "...peakers to be the first (and main) speaker. We train for 10k || batches, with a batch size of 40min of audio with a learning..."
+            },
+            {
+              "block_id": "moshi-p28-b001",
+              "snippet": "...). In this case, we report metrics for a single-stream Moshi || initialized randomly and pretrained only on audio data and w..."
+            },
+            {
+              "block_id": "moshi-p41-b001",
+              "snippet": "...is proposed when learning image watermarking based on neural || networks (Zhu, 2018; Fernandez et al., 2022). In view of our..."
+            }
+          ]
+        }
+      },
+      "note": "Blocks never span pages, so that every block has one page to cite. A paragraph that runs onto the next page becomes two blocks, each half a sentence at the seam. The chunker should join consecutive body blocks of the same section across a page break and cite both pages."
+    }
+  }
+}
