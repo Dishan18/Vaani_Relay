@@ -11,7 +11,7 @@ Drafter fixed (openai/gpt-oss-120b), verifier off; only retrieval changes.
 | large | 18 | 72.2 | 5.6 | 22.2 | 0.0 | 0 | 1 | 1948 | 4622 / 16558 | 4622 / 16558 | 3552 |
 | medium | 18 | 50.0 | 27.8 | 22.2 | 0.0 | 0 | 2 | 2212 | 12234 / 29223 | 12234 / 29223 | 11130 |
 | medium+rerank | 18 | 50.0 | 27.8 | 22.2 | 0.0 | 0 | 1 | 1769 | 8882 / 23195 | 8882 / 23195 | 7659 |
-| small | 18 | 27.8 | 50.0 | 22.2 | 0.0 | 9 | 2 | 1957 | 11146 / 26696 | 11146 / 26696 | 10010 |
+| small | 18 | 27.8 | 50.0 | 22.2 | 0.0 | 8 | 2 | 1957 | 11146 / 26696 | 11146 / 26696 | 10010 |
 | small_lean (incomplete) | 11 | 36.4 | 54.5 | 9.1 | 0.0 | 5 | 1 | 1156 | 7105 / 19596 | 7105 / 19596 | 6390 |
 
 **Chosen setting so far: large.** best correct = 13 (complete settings only); within one of it (tie): large; cheapest tied: large (1948 tokens per answer); not eligible yet (incomplete): small_lean.
@@ -26,9 +26,37 @@ Same configuration for each (verifier off). Rows for the fixed drafter come from
 |---|---|---|---|---|---|---|---|---|---|---|
 | openai/gpt-oss-120b | 18 | 72.2 | 5.6 | 22.2 | 0.0 | 0 | 1948 | 4622 / 16558 | 3552 | 0 |
 | qwen/qwen3.8-27b | 18 | 66.7 | 11.1 | 22.2 | 0.0 | 0 | 1847 | 5268 / 19217 | 4221 | 2 |
-| openai/gpt-oss-20b | 18 | 44.4 | 33.3 | 22.2 | 0.0 | 7 | 2348 | 14422 / 36072 | 12354 | 1 |
+| openai/gpt-oss-20b | 18 | 38.9 | 38.9 | 22.2 | 0.0 | 7 | 2348 | 14422 / 36072 | 12354 | 1 |
 
 **First drafter: openai/gpt-oss-120b.** best correct = 13; within one of it (tie): openai/gpt-oss-120b, qwen/qwen3.8-27b; among those, fewest wrong then lowest total p50: openai/gpt-oss-120b.
+
+## Table 2a: latency per scenario
+
+Load runs only (the evals wait for budget on purpose). TTFT = first checked token = release (replies are buffered until checked), from arrival, queueing included; people who gave up have no TTFT and count in total at the time they left. Nearest-rank percentiles; n = requests with a value.
+
+| scenario | source | requests sent | duration (s) | offered rate/min | TTFT p50 / p95 / p99 (ms) | total p50 / p95 / p99 (ms) | n (TTFT / total) |
+|---|---|---|---|---|---|---|---|
+| burst | stand-in | 34 | 267 | 7.6 | 1344 / 7224 / 7330 (= max, n<100) | 1344 / 7224 / 7330 (= max, n<100) | 34 / 34 |
+| chaos | stand-in | 27 | 273 | 5.9 | 2059 / 12282 / 12766 (= max, n<100) | 2059 / 12282 / 12766 (= max, n<100) | 27 / 27 |
+| daily_exhausted | stand-in | 14 | 261 | 3.2 | 3 / 12 / 12 (= max, n<100) | 3 / 12 / 12 (= max, n<100) | 14 / 14 |
+| overload | stand-in | 78 | 297 | 15.8 | 1803 / 6639 / 14096 (= max, n<100) | 1803 / 8162 / 18764 (= max, n<100) | 77 / 78 |
+| overload_naive_retry | stand-in | 78 | 296 | 15.8 | 6324 / 10314 / 20815 (= max, n<100) | 6321 / 10314 / 20815 (= max, n<100) | 77 / 78 |
+| rpm_halved | stand-in | 36 | 278 | 7.8 | 1295 / 7035 / 9669 (= max, n<100) | 1295 / 7035 / 9669 (= max, n<100) | 36 / 36 |
+| steady | stand-in | 24 | 251 | 5.7 | 1577 / 3655 / 3760 (= max, n<100) | 1577 / 3655 / 3760 (= max, n<100) | 24 / 24 |
+
+## Table 2b: outcomes per scenario
+
+Succeeded = status ok (a checked answer or refusal, any degrade level); rate-limited = cited passages only (no drafter in time); timed out or given up = the simulated person left first. Peak queue length = most requests waiting for budget at once, from the spans in data/results/detail.jsonl. Cost per 1,000 answers: $0 on the free tier we used; shadow = the same calls at Groq's published paid prices (data/prices.json, with URL and date).
+
+| scenario | source | succeeded % | rate-limited % | timed out or given up % | error % | retries per request | peak queue length | tokens per answer | cost per 1,000 answers (free / shadow) |
+|---|---|---|---|---|---|---|---|---|---|
+| burst | stand-in | 70.6 | 29.4 | 0.0 | 0.0 | 0.06 | 3 | 1627 | $0 / $0.84 |
+| chaos | stand-in | 96.3 | 3.7 | 0.0 | 0.0 | 0.44 | 2 | 2843 | $0 / $1.41 |
+| daily_exhausted | stand-in | 0.0 | 100.0 | 0.0 | 0.0 | 0.21 | 1 | 0 | $0 / $0.00 |
+| overload | stand-in | 92.3 | 6.4 | 1.3 | 0.0 | 0.01 | 3 | 1701 | $0 / $0.77 |
+| overload_naive_retry | stand-in | 44.9 | 53.8 | 1.3 | 0.0 | 5.67 | 1 | 1076 | $0 / $0.69 |
+| rpm_halved | stand-in | 94.4 | 5.6 | 0.0 | 0.0 | 0.00 | 2 | 1696 | $0 / $0.79 |
+| steady | stand-in | 100.0 | 0.0 | 0.0 | 0.0 | 0.00 | 1 | 3130 | $0 / $1.50 |
 
 ## Grading coverage (every scenario and source)
 

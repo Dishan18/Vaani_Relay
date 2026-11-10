@@ -25,6 +25,8 @@ results.csv: the brief's columns in order, then ours:
     byte-identical to a graded real answer). make_tables.py stops if a stand-in row carries a grade,
     and shows grading coverage for every scenario and source.
   * degraded rows (level > 0) are graded like any other and keep their degraded_level.
+  * shadow_cost_usd: the request's model calls priced at Groq's published paid prices
+    (data/prices.json, with URL and date); the free tier we ran on costs $0.
   * superseded = 1 when a later run replaces this row: for the evals, a later answer to the same
     (scenario, setting, drafter, question); for load runs, a later run of the same scenario and source
     (the whole earlier run is superseded; the raw files stay, and the newer run's header says why); the
@@ -47,7 +49,18 @@ from relay.retrieve import Retriever  # noqa: E402
 COLUMNS = ["request_id", "scenario", "source", "start_time", "first_token_ms", "total_ms", "status", "retries",
            "tokens_in", "tokens_out", "retrieval_setting", "answer_grade",
            "gave_up", "degraded_level", "queue_wait_ms", "model", "calls", "grade_sure", "answer_id", "grade_note",
-           "superseded"]
+           "superseded", "shadow_cost_usd"]
+PRICES = ROOT / "data" / "prices.json"
+
+
+def shadow_cost(calls: list[dict], prices: dict) -> float:
+    """What this request's model calls would cost at Groq's published paid prices (data/prices.json)."""
+    usd = 0.0
+    for c in calls:
+        pr = prices.get(c.get("model"))
+        if pr:
+            usd += ((c.get("prompt_tokens") or 0) * pr["input"] + (c.get("completion_tokens") or 0) * pr["output"]) / 1e6
+    return usd
 
 
 def read_answers(raw_dir: Path) -> list[dict]:
@@ -72,6 +85,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--overrides", type=Path, default=OVERRIDES)
     a = ap.parse_args(argv)
     qs = load_questions()
+    prices = json.loads(PRICES.read_text(encoding="utf-8"))["models"] if PRICES.exists() else {}
     overrides = load_overrides(a.overrides)
     raw_dirs = a.raw_dir or [ROOT / "results" / "raw" / "answers", ROOT / "results" / "raw" / "runs"]
     rows = [r for d in raw_dirs if d.exists() for r in read_answers(d)]
@@ -138,7 +152,8 @@ def main(argv: list[str] | None = None) -> int:
             "retrieval_setting": r["setting"], "answer_grade": final or "",
             "gave_up": int(gave_up), "degraded_level": reply.get("level"), "queue_wait_ms": reply.get("budget_wait_ms"),
             "model": r["drafter"], "calls": len(calls), "grade_sure": int(bool(g["sure"]) or bool(ov)),
-            "answer_id": g["answer_id"], "grade_note": source, "superseded": superseded})
+            "answer_id": g["answer_id"], "grade_note": source, "superseded": superseded,
+            "shadow_cost_usd": round(shadow_cost(calls, prices), 7)})
     (a.out_dir / "quality").mkdir(parents=True, exist_ok=True)
     with (a.out_dir / "results.csv").open("w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=COLUMNS)

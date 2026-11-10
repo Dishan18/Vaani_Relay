@@ -198,6 +198,24 @@ class DecideAndCheckTests(unittest.TestCase):
         self.assertEqual([c[0] for c in chat.calls], ["understand"])
         self.assertEqual(r.checks["evidence"]["best"], 0.0)
 
+    def test_decide_gate_uses_the_router_rewrite_too(self):
+        """Q14: the question's words miss the routing passage; the router's rewrite doesn't."""
+        q = "How does H-Net decide where to cut the byte stream into pieces?"
+
+        def script(step, model, payload):
+            if step == "understand":
+                return json.dumps({"papers": ["dynamic_chunking"],
+                                   "query": "routing module boundary probability cosine similarity chunking layer",
+                                   "alt_query": "dynamic chunking boundaries"})
+            if step == "draft":
+                return cited_answer(payload["messages"][-1]["content"])
+            return default_script(step, model, payload)
+        chat = ScriptedChat(script)
+        r = run(Pipeline(chat, make_limiter(), Retriever.from_blocks(1200), cfg()).answer(q))
+        self.assertIn(("draft", Q120), chat.calls)               # not refused at the gate
+        decide = next(s for s in r.spans if s.name == "decide")
+        self.assertIsNotNone(decide.detail["rewrite"])
+
     def test_uncited_draft_gets_one_redraft(self):
         def script(step, model, payload):
             user = payload["messages"][-1]["content"]

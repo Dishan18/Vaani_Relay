@@ -429,10 +429,19 @@ class Pipeline:
                                 "pids": [h.piece.pid for h in hits]}
 
         with tr.span("decide") as s:
-            ev = self.retriever.evidence(question, hits)
-            s.detail = ev
+            # Evidence is scored against the question AND against the router's rewrite, and the gate
+            # refuses only when both are weak. Scoring the question alone turned a vocabulary mismatch
+            # into a refusal (Q14: the routing passage shares none of the question's words;
+            # docs/findings_and_decisions.md, candidate 1). Changed 2026-11-11, after the retrieval sweep.
             dc = self.cfg["decide"]
-            if not hits or ev["best"] < dc["refuse_if_best_below"] or ev["top_bm25"] < dc["refuse_if_top_bm25_below"]:
+            ev_q = self.retriever.evidence(question, hits)
+            ev_r = self.retriever.evidence(query, hits) if query != question else ev_q
+
+            def weak(ev):
+                return ev["best"] < dc["refuse_if_best_below"] or ev["top_bm25"] < dc["refuse_if_top_bm25_below"]
+            ev = ev_q if not weak(ev_q) or weak(ev_r) else ev_r
+            s.detail = {**ev, "question": ev_q, "rewrite": ev_r if query != question else None}
+            if not hits or (weak(ev_q) and weak(ev_r)):
                 s.outcome = "refuse: evidence too weak"
                 return Reply(rid, question, "refusal", level,
                              "The papers don't appear to cover this: no passage matches the question.",

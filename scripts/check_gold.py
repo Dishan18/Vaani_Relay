@@ -96,7 +96,9 @@ def check(questions: list[dict], blocks_list: list[dict]) -> tuple[list[dict], l
                     if b["paper"] == paper and b["kind"] != "reference" and rx.search(b["text"]):
                         hits.append(f"/{pat}/ matches {b['block_id']}")
             errs.extend(hits)
-        for pat in [w.get("pattern", "") for w in q.get("wrong_match") or []] + list(q.get("distractor_match") or []):
+        wpats = [x for w in q.get("wrong_match") or [] for x in ([w["pattern"]] if "pattern" in w else
+                                                                   (w.get("all") or []) + (w.get("none") or []))]
+        for pat in wpats + list(q.get("distractor_match") or []):
             try:
                 re.compile(pat, re.I)
             except re.error as e:

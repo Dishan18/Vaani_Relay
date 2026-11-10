@@ -92,6 +92,15 @@ def normalize(text: str) -> str:
     return re.sub(r"[ \t]+", " ", t)
 
 
+def wrong_hit(w: dict, text: str, sents: list[str]) -> bool:
+    """A wrong-answer pattern: {"pattern"} anywhere, or {"all", "none", "same_sentence"} (v3: e.g. a
+    sentence pairing ASR with "audio tokens are delayed", and not mentioning TTS, reverses the direction)."""
+    if "pattern" in w:
+        return bool(re.search(w["pattern"], text, re.I))
+    units = sents if w.get("same_sentence") else [text]
+    return any(_all(w.get("all") or [], u) and not _any(w.get("none") or [], u) for u in units)
+
+
 def _all(patterns: list[str], text: str) -> bool:
     return all(re.search(p, text, re.I) for p in patterns)
 
@@ -179,10 +188,15 @@ def grade(q: dict, reply: dict, pieces: dict[str, dict]) -> dict:
     unsure = []
     for i, f in enumerate(q["facts"], 1):
         pats = f["match"]
-        present = _all(pats, text)
+        if f.get("same_sentence"):
+            # v3: e.g. the ASR fact needs ASR and its delay direction in one sentence
+            present = any(_all(pats, s) for s in sents)
+        else:
+            present = _all(pats, text)
         rec = {"fact": f["fact"], "present": present, "supported": None, "how": "", "optional": bool(f.get("optional"))}
         if present:
-            idx = [j for j, s in enumerate(sents) if _any(pats, s)]
+            idx = ([j for j, s in enumerate(sents) if _all(pats, s)] if f.get("same_sentence")
+                   else [j for j, s in enumerate(sents) if _any(pats, s)])
             cited = sorted({sid for j in idx for sid in cites[j]})
             ev_blocks = {ev["block_id"] for ev in f["evidence"]}
             if any(piece_blocks(sid) & ev_blocks for sid in cited):
@@ -196,7 +210,7 @@ def grade(q: dict, reply: dict, pieces: dict[str, dict]) -> dict:
     # an optional gold fact (gold_changed: the question does not ask for it) never counts as missing
     missing = [r["fact"] for r in out["facts"] if not r["present"] and not r["optional"]]
     unsupported = [r["fact"] for r in out["facts"] if r["present"] and r["supported"] is False]
-    wrong = [w for w in q.get("wrong_match") or [] if re.search(w["pattern"], text, re.I)]
+    wrong = [w for w in q.get("wrong_match") or [] if wrong_hit(w, text, sents)]
     low = []
     for s, cs in zip(sents, cites):
         if cs and len(re.findall(r"[A-Za-z]{3,}", s)) >= 5:

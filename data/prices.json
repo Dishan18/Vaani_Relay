@@ -1,0 +1,13 @@
+{
+  "_what": "Groq's published on-demand prices, used only for a shadow cost: what our answers would cost on the paid tier. Our runs use the free tier, which costs $0.",
+  "source_url": "https://console.groq.com/docs/models",
+  "retrieved_at": "2026-11-10T19:05Z",
+  "note": "qwen/qwen3.8-27b is listed under Preview Models, 'intended for evaluation purposes only'.",
+  "currency": "USD",
+  "unit": "per 1M tokens",
+  "models": {
+    "openai/gpt-oss-120b": {"input": 0.15, "output": 0.60},
+    "openai/gpt-oss-20b": {"input": 0.075, "output": 0.30},
+    "qwen/qwen3.8-27b": {"input": 0.80, "output": 4.00}
+  }
+}

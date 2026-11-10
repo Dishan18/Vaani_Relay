@@ -125,6 +125,53 @@ class CitationNormalisationTests(unittest.TestCase):
         self.assertEqual(g["label"], "correct", g["reasons"])
 
 
+class DirectionAndDefinitionTests(unittest.TestCase):
+    """v3: directions in the same sentence, definitions next to their symbol, reversed delays wrong."""
+
+    def setUp(self):
+        self.p = piece_with("moshi-p16-b007")
+        self.q = QS["Q10"]
+
+    def text(self, asr, tts):
+        return ("Inner Monologue predicts time-aligned text tokens as a prefix to the audio tokens [S1]. "
+                f"{asr} [S1]. {tts} [S1]. "
+                "A single delay hyper-parameter switches between them with no changes in the loss, architecture, "
+                "or training data [S1].")
+
+    def test_correct_directions(self):
+        g = grade(self.q, reply(self.text("For streaming ASR, the text tokens are delayed so the model listens to "
+                                          "the audio first",
+                                          "For streaming TTS, the audio tokens are delayed, giving look-ahead on the "
+                                          "text"), self.p), PIECES)
+        self.assertNotIn("reversed", " ".join(g["reasons"]))
+        self.assertTrue(g["facts"][1]["present"] and g["facts"][2]["present"])
+
+    def test_reversed_directions_are_wrong(self):
+        g = grade(self.q, reply(self.text("When the audio tokens are delayed relative to text, the model yields "
+                                          "streaming ASR",
+                                          "When the text tokens are delayed relative to audio, it produces streaming "
+                                          "TTS"), self.p), PIECES)
+        self.assertEqual(g["label"], "wrong")
+        self.assertIn("reversed delay direction", " ".join(g["reasons"]))
+
+    def test_one_sentence_with_both_is_not_reversed(self):
+        both = ("Setting the audio ahead of the text yields streaming ASR, whereas setting the text ahead of the "
+                "audio yields streaming TTS")
+        g = grade(self.q, reply(self.text(both, both), self.p), PIECES)
+        self.assertNotIn("reversed", " ".join(g["reasons"]))
+
+    def test_wrong_definition_of_n_is_not_present(self):
+        p = piece_with("dynamic_chunking-p08-b018")
+        bad = ("The ratio loss stops the model from retaining nearly all vectors and guides compression to a target [S1]. "
+               "F is the fraction of vectors actually selected [S1]. G denotes the average boundary probability [S1]. "
+               "N is the total number of vectors in the sequence, which sets the target [S1].")
+        g = grade(QS["Q15"], reply(bad, p), PIECES)
+        self.assertFalse(g["facts"][4]["present"])
+        good = bad.replace("N is the total number of vectors in the sequence, which sets the target",
+                           "N controls the target compression ratio")
+        self.assertTrue(grade(QS["Q15"], reply(good, p), PIECES)["facts"][4]["present"])
+
+
 class OverrideTests(unittest.TestCase):
     def test_append_only_latest_wins_and_reason_required(self):
         with tempfile.TemporaryDirectory() as d:

@@ -444,6 +444,8 @@ def main(argv: list[str] | None = None) -> int:
         a.add_argument("--run-id")
         a.add_argument("--qids", help="comma list (default: all 18)")
         a.add_argument("--note", default="", help="why this run exists (kept in the run header)")
+        a.add_argument("--scenario", default=None,
+                       help="override the scenario label (e.g. eval:q14_decide_gate keeps a before/after apart from Table 3)")
         if name == "answers":
             a.add_argument("--settings", default=",".join(ANSWER_SETTINGS))
             a.add_argument("--drafter", default="openai/gpt-oss-120b")
@@ -475,6 +477,7 @@ def main(argv: list[str] | None = None) -> int:
     for s in settings:
         if s not in ANSWER_SETTINGS:
             ap.error(f"unknown setting {s}")
+    scenario = a.scenario or scenario
     run_id = a.run_id or f"{scenario.split(':')[1]}-{stamp}"
     path = asyncio.run(run_answers(settings, drafters, a.real, out_dir, scenario, run_id, qids, a.note))
     print(f"wrote {path}")

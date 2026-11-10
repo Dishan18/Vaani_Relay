@@ -59,6 +59,85 @@ def summarise(rows: list[dict]) -> dict:
             "retries": sum(int(r["retries"]) for r in rows)}
 
 
+DETAIL = ROOT / "data" / "results" / "detail.jsonl"
+
+
+def peak_queue(request_ids: set[str], detail: Path = DETAIL) -> int | None:
+    """Most requests waiting for budget at the same moment, from the per-request spans: a request is
+    queued during each of its wait:* spans (arrival offset + span start..end)."""
+    if not detail.exists():
+        return None
+    events = []
+    with detail.open(encoding="utf-8") as f:
+        for line in f:
+            d = json.loads(line)
+            if d["request_id"] not in request_ids:
+                continue
+            t0 = float(d.get("arrival_offset_s") or 0.0)
+            for sp in d.get("spans") or []:
+                if sp["name"].startswith("wait:") and sp.get("end_ms") is not None and sp["end_ms"] > sp["start_ms"]:
+                    events += [(t0 + sp["start_ms"] / 1000, 1), (t0 + sp["end_ms"] / 1000, -1)]
+    if not events:
+        return 0 if request_ids else None
+    cur = peak = 0
+    for _, step in sorted(events, key=lambda e: (e[0], e[1])):
+        cur += step
+        peak = max(peak, cur)
+    return peak
+
+
+def pctl(xs, q, n_note=True):
+    v = pct(xs, q)
+    if v is None:
+        return "not measured"
+    return f"{v:.0f}" + (" (= max, n<100)" if q == 0.99 and len(xs) < 100 and n_note else "")
+
+
+def load_tables(latest: list[dict]) -> list[str]:
+    from datetime import datetime
+    rows = [r for r in latest if not r["scenario"].startswith("eval:")]
+    if not rows:
+        return []
+    by = defaultdict(list)
+    for r in rows:
+        by[(r["scenario"], r["source"])].append(r)
+    L = ["## Table 2a: latency per scenario", "",
+         "Load runs only (the evals wait for budget on purpose). TTFT = first checked token = release (replies "
+         "are buffered until checked), from arrival, queueing included; people who gave up have no TTFT and count "
+         "in total at the time they left. Nearest-rank percentiles; n = requests with a value.", "",
+         "| scenario | source | requests sent | duration (s) | offered rate/min | TTFT p50 / p95 / p99 (ms) | "
+         "total p50 / p95 / p99 (ms) | n (TTFT / total) |", "|---|---|---|---|---|---|---|---|"]
+    T2b = ["## Table 2b: outcomes per scenario", "",
+           "Succeeded = status ok (a checked answer or refusal, any degrade level); rate-limited = cited passages "
+           "only (no drafter in time); timed out or given up = the simulated person left first. Peak queue length "
+           "= most requests waiting for budget at once, from the spans in data/results/detail.jsonl. Cost per 1,000 "
+           "answers: $0 on the free tier we used; shadow = the same calls at Groq's published paid prices "
+           "(data/prices.json, with URL and date).", "",
+           "| scenario | source | succeeded % | rate-limited % | timed out or given up % | error % | retries per "
+           "request | peak queue length | tokens per answer | cost per 1,000 answers (free / shadow) |",
+           "|---|---|---|---|---|---|---|---|---|---|"]
+    for (sc, src), rs in sorted(by.items()):
+        n = len(rs)
+        ts = [datetime.fromisoformat(r["start_time"]).timestamp() for r in rs]
+        ends = [t + float(r["total_ms"] or 0) / 1000 for t, r in zip(ts, rs)]
+        dur = max(ends) - min(ts) if rs else 0.0
+        ttft = [float(r["first_token_ms"]) for r in rs if r["first_token_ms"]]
+        tot = [float(r["total_ms"]) for r in rs if r["total_ms"]]
+        L.append(f"| {sc} | {src} | {n} | {dur:.0f} | {60 * n / dur:.1f} | {pctl(ttft, .5)} / {pctl(ttft, .95)} / "
+                 f"{pctl(ttft, .99)} | {pctl(tot, .5)} / {pctl(tot, .95)} / {pctl(tot, .99)} | {len(ttft)} / {len(tot)} |")
+        st = defaultdict(int)
+        for r in rs:
+            st[r["status"]] += 1
+        retries = sum(int(r["retries"] or 0) for r in rs) / n
+        tokens = sum(int(r["tokens_in"] or 0) + int(r["tokens_out"] or 0) for r in rs) / n
+        shadow = sum(float(r.get("shadow_cost_usd") or 0) for r in rs) / n * 1000
+        pq = peak_queue({r["request_id"] for r in rs})
+        T2b.append(f"| {sc} | {src} | {100 * st['ok'] / n:.1f} | {100 * st['rate_limited'] / n:.1f} | "
+                   f"{100 * st['timeout'] / n:.1f} | {100 * st['error'] / n:.1f} | {retries:.2f} | "
+                   f"{'not measured' if pq is None else pq} | {tokens:.0f} | $0 / ${shadow:.2f} |")
+    return L + [""] + T2b + [""]
+
+
 def ms(x):
     return "not measured" if x is None else f"{x:.0f}"
 
@@ -151,6 +230,22 @@ def main(argv=None) -> int:
                f"then lowest total p50: {win}")
         L += ["", f"**First drafter: {win}.** {why}.", ""]
         winner["drafter"] = {"chosen": win, "tied": tied, "best_correct": best, "why": why, "stats": stats}
+    gate = [r for r in latest if r["scenario"] == "eval:q14_decide_gate" and r["source"] == "real"]
+    if gate:
+        L += ["## Q14 decide gate: before / after (separate from Table 3)", "",
+              "Before = the retrieval sweep's answer (old gate: evidence scored against the question only); after = "
+              "the same question and setting with the gate scoring the router's rewrite too. The router prompt is "
+              "unchanged, so Table 3 stays as measured.", "",
+              "| qid | setting | drafter | before | after |", "|---|---|---|---|---|"]
+        for g in gate:
+            qid = g["request_id"].rsplit("-", 1)[-1]           # request ids end with -<qid>
+            before = next((r for r in latest if r["scenario"] == "eval:retrieval" and r["source"] == "real"
+                           and r["retrieval_setting"] == g["retrieval_setting"] and r["model"] == g["model"]
+                           and r["request_id"].endswith("-" + qid)), None)
+            L.append(f"| {qid} | {g['retrieval_setting']} | {g['model']} | "
+                     f"{before['answer_grade'] if before else 'not measured'} | {g['answer_grade']} |")
+        L.append("")
+    L += load_tables(latest)
     cov = defaultdict(lambda: defaultdict(int))
     for r in latest:
         key = (r["scenario"], r["source"])
