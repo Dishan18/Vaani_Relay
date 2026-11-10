@@ -8,13 +8,13 @@ Drafter fixed (openai/gpt-oss-120b), verifier off; only retrieval changes.
 
 | setting | questions asked | correct and cited % | wrong % | correctly refused % | ungraded % | unsure | degraded | tokens per answer | TTFT p50 / p95 (ms) | total p50 / p95 (ms) | budget wait p50 (ms) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| large | 18 | 61.1 | 16.7 | 22.2 | 0.0 | 7 | 1 | 1948 | 4622 / 16558 | 4622 / 16558 | 3552 |
-| medium | 18 | 50.0 | 27.8 | 22.2 | 0.0 | 4 | 2 | 2212 | 12234 / 29223 | 12234 / 29223 | 11130 |
-| medium+rerank | 18 | 50.0 | 27.8 | 22.2 | 0.0 | 4 | 1 | 1769 | 8882 / 23195 | 8882 / 23195 | 7659 |
+| large | 18 | 72.2 | 5.6 | 22.2 | 0.0 | 0 | 1 | 1948 | 4622 / 16558 | 4622 / 16558 | 3552 |
+| medium | 18 | 50.0 | 27.8 | 22.2 | 0.0 | 0 | 2 | 2212 | 12234 / 29223 | 12234 / 29223 | 11130 |
+| medium+rerank | 18 | 50.0 | 27.8 | 22.2 | 0.0 | 0 | 1 | 1769 | 8882 / 23195 | 8882 / 23195 | 7659 |
 | small | 18 | 27.8 | 50.0 | 22.2 | 0.0 | 9 | 2 | 1957 | 11146 / 26696 | 11146 / 26696 | 10010 |
 | small_lean (incomplete) | 11 | 36.4 | 54.5 | 9.1 | 0.0 | 5 | 1 | 1156 | 7105 / 19596 | 7105 / 19596 | 6390 |
 
-**Chosen setting so far: large.** best correct = 11 (complete settings only); within one of it (tie): large; cheapest tied: large (1948 tokens per answer); not eligible yet (incomplete): small_lean.
+**Chosen setting so far: large.** best correct = 13 (complete settings only); within one of it (tie): large; cheapest tied: large (1948 tokens per answer); not eligible yet (incomplete): small_lean.
 
 Unsure or ungraded rows exist: the choice is provisional until they are checked (results/quality/unsure.md).
 
@@ -24,11 +24,11 @@ Same configuration for each (verifier off). Rows for the fixed drafter come from
 
 | drafter | questions asked | correct and cited % | wrong % | correctly refused % | ungraded % | unsure | tokens per answer | total p50 / p95 (ms) | budget wait p50 (ms) | retries |
 |---|---|---|---|---|---|---|---|---|---|---|
-| openai/gpt-oss-120b | 18 | 61.1 | 16.7 | 22.2 | 0.0 | 7 | 1948 | 4622 / 16558 | 3552 | 0 |
-| qwen/qwen3.8-27b | 18 | 55.6 | 22.2 | 22.2 | 0.0 | 4 | 1847 | 5268 / 19217 | 4221 | 2 |
+| openai/gpt-oss-120b | 18 | 72.2 | 5.6 | 22.2 | 0.0 | 0 | 1948 | 4622 / 16558 | 3552 | 0 |
+| qwen/qwen3.8-27b | 18 | 66.7 | 11.1 | 22.2 | 0.0 | 0 | 1847 | 5268 / 19217 | 4221 | 2 |
 | openai/gpt-oss-20b | 18 | 44.4 | 33.3 | 22.2 | 0.0 | 7 | 2348 | 14422 / 36072 | 12354 | 1 |
 
-**First drafter: openai/gpt-oss-120b.** best correct = 11; within one of it (tie): openai/gpt-oss-120b, qwen/qwen3.8-27b; among those, fewest wrong then lowest total p50: openai/gpt-oss-120b.
+**First drafter: openai/gpt-oss-120b.** best correct = 13; within one of it (tie): openai/gpt-oss-120b, qwen/qwen3.8-27b; among those, fewest wrong then lowest total p50: openai/gpt-oss-120b.
 
 ## Grading coverage (every scenario and source)
 

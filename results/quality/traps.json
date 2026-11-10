@@ -196,7 +196,7 @@
    {
     "setting": "large",
     "drafter": "openai/gpt-oss-120b",
-    "label": "wrong",
+    "label": "correct",
     "router": {
      "papers": [
       "dynamic_chunking"

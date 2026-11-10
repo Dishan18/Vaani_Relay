@@ -180,7 +180,7 @@ def grade(q: dict, reply: dict, pieces: dict[str, dict]) -> dict:
     for i, f in enumerate(q["facts"], 1):
         pats = f["match"]
         present = _all(pats, text)
-        rec = {"fact": f["fact"], "present": present, "supported": None, "how": ""}
+        rec = {"fact": f["fact"], "present": present, "supported": None, "how": "", "optional": bool(f.get("optional"))}
         if present:
             idx = [j for j, s in enumerate(sents) if _any(pats, s)]
             cited = sorted({sid for j in idx for sid in cites[j]})
@@ -193,7 +193,8 @@ def grade(q: dict, reply: dict, pieces: dict[str, dict]) -> dict:
                 rec.update(supported=False, how=f"sentences mentioning it cite {cited or 'nothing'}, which don't hold it")
                 unsure.append(f"fact {i} may be unsupported by its citation: {f['fact']}")
         out["facts"].append(rec)
-    missing = [r["fact"] for r in out["facts"] if not r["present"]]
+    # an optional gold fact (gold_changed: the question does not ask for it) never counts as missing
+    missing = [r["fact"] for r in out["facts"] if not r["present"] and not r["optional"]]
     unsupported = [r["fact"] for r in out["facts"] if r["present"] and r["supported"] is False]
     wrong = [w for w in q.get("wrong_match") or [] if re.search(w["pattern"], text, re.I)]
     low = []
