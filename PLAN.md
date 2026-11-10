@@ -218,7 +218,7 @@ Everything else is stdlib: `tomllib`, `csv`, `json`, `statistics`, `asyncio`, `u
 | M | Day | What | Real budget |
 |---|---|---|---|
 | M0 | 11-10 | Repo, `CLAUDE.md`, `PLAN.md`, `.gitignore`, remote | 0 |
-| M1 | 11-10 | Fetch papers at exact versions (+sha256); inspect PDF vs HTML vs LaTeX; choose parser and citation granularity (G17); chunker + BM25; offline retrieval sanity checks. **M1a done:** `fetch_papers.py`, `extract_papers.py`, `audit_blocks.py` (see §8). **M1b next:** chunker + BM25. | 0 |
+| M1 | 11-10 | Fetch papers at exact versions (+sha256); inspect PDF vs HTML vs LaTeX; choose parser and citation granularity (G17); chunker + BM25; offline retrieval sanity checks. **M1a done:** `fetch_papers.py`, `extract_papers.py`, `audit_blocks.py` (see §8). **M1b done:** `relay/retrieve.py`, `scripts/eval_retrieval.py`, `scripts/retriever_traps.py` (see §10). | 0 |
 | M2 | 11-10 | Streaming client, ledger, hard cap, limiter; stand-in v0 with placeholder parameters; trace spans; results.csv writer. **Client done:** `relay/llm.py` + offline tests (§9). | 0 |
 | M3 | 11-10 / 11-11 | Record documented limits as hypotheses → **probe (R1)**: latency sample, size sweep, RPM burst to 429, recovery, concurrency steps. **Measurement-first gate: no ladder thresholds, timeouts or retry policy get fixed before this.** | ≤ 15% |
 | M4 | 11-11 | Calibrate stand-in from R1; validate (R2) with quantile comparison; write down where it differs | 0 |
@@ -236,7 +236,7 @@ If M3 shows the daily budget is smaller than expected, the first things to shrin
 
 ## 7. Decisions needed from you
 
-- **D1** (G16): one Groq model only, or a second, smaller model as a disclosed degradation step?
+- **D1** (G16): **decided by the author, 2026-11-10:** spread the pipeline's steps across models according to the probe's limit scope (per model), each step with a fallback order (§10). A reply says when a fallback model answered.
 - **D2** (G9, G10): Vaani heading placement OK? Do tables count toward the 2 pages?
 - **D3**: confirm the deadline is 2026-11-14.
 - **D4**: you'll write the evaluation questions and the human-only sections (Vaani feedback, "what I learned", assistant section). I'll draft candidates only if you ask.
@@ -361,3 +361,42 @@ while implementing.
   capped amount beyond the prompt. See `findings.md`, Q2.
 
 Still open in M2: stand-in v0, results.csv writer.
+
+---
+
+## 10. Retrieval and pipeline (M1b, M5 part)
+
+**Retrieval** (`relay/retrieve.py`). Section-aware pieces from `data/blocks.jsonl` at a configurable
+size: never across a section, joined across page breaks, captions glued to their table, tables
+never split, equation fragments packed together, Moshi's body-line subsections (3.4.4) recognised,
+references and front matter excluded. Okapi BM25 in the stdlib; optional lexical rerank (coverage,
+bigrams, heading, proximity; weights fixed before measuring, not tuned on the questions).
+- `scripts/eval_retrieval.py` -> `data/retrieval/topk.{md,json}`: gold-in-top-k for small (600, k=8),
+  medium (1200, k=5), large (2400, k=3) and medium+rerank (1200, k=4) on the raw question; evidence
+  strength for answerable, unanswerable and off-topic controls, and what the decide gate catches.
+- `scripts/retriever_traps.py` -> `data/retrieval/traps.{md,json}`: plain BM25 top hits for each
+  trap and where the right passage (or the distractor) ranks.
+- **What it showed.** Large pieces won and are the pipeline default. Lexical overlap can't tell
+  unanswerable questions about the papers from answerable ones, so the no-model refusal only
+  catches near-zero overlap; off-topic questions need the router, unanswerable ones the drafter.
+  The vocabulary-mismatch question is never retrieved from its raw wording: the router's rewrite
+  is what can fix it, and that is unmeasured until the real sweep (R3).
+
+**Pipeline** (`relay/pipeline.py`, settings in `config/pipeline.toml`, each marked measured or
+assumption). understand (router model, heuristic fallback) -> retrieve (BM25 tool, one more search
+when evidence is weak, rank fusion) -> decide (refuse with no model call) -> draft (every sentence
+cites [S#], or NOT_IN_PAPERS) -> check (deterministic citation gate always: valid citation, every
+number and quotation in a cited source; LLM verifier on another model only with headroom; one
+redraft) -> send (buffered: released only after the checks, so first token = release).
+- **Ladder**, from `Limiter.predict_wait` on the real retrieved prompt (one free BM25 search sizes
+  it): preferred drafter free within 2 s -> full; another drafter -> full; backed up -> lean (fewer
+  pieces, no router, no verifier); nothing within the max wait -> cited passages, no model call,
+  ETA from the refill rate; internal failure only -> "busy, retry in N s". Recorded as
+  `degraded_level` 0-4 with a notice saying why.
+- **Spans** for every step and every budget wait; tokens summed over every model call.
+- **Limiter additions:** `predict_wait()` (commits nothing), `abandon()` for a call the person
+  left mid-stream (keeps the admission charge: cancelled-stream billing is unmeasured, H10).
+- **Tests:** `tests/test_retrieve.py`, `tests/test_pipeline.py` (every ladder rung, gate, redraft,
+  refusals, 429 fallback, internal failure, and one run over HTTP against `relay/fake_groq.py`).
+- **Not yet measured:** answer quality and real latency (R3/R4 need real calls), the drafter
+  preference (120b first is an assumption), the verifier's value for its cost.

@@ -515,6 +515,29 @@ class Limiter:
     def estimate(self, model: str, messages: list[dict]) -> Prompt:
         return self.estimator.prompt(model, messages)
 
+    def predict_wait(self, model: str, prompt_tokens: int | Prompt, max_tokens: int) -> float | None:
+        """Seconds until a call like this could be admitted, counting every queued request in front
+        (0.0 = now). None if it can never fit, or the model has no measured limits. Commits nothing:
+        for planning (the degrade ladder) before any reservation is made."""
+        st = self.models.get(model)
+        if st is None:
+            return None
+        now = self.now()
+        self._compact(st, now)
+        pt = prompt_tokens.tokens if isinstance(prompt_tokens, Prompt) else int(prompt_tokens)
+        need = self._needs(st, pt, max_tokens)
+        if any(need[n] > b.capacity for n, b in st.buckets.items()):
+            return None
+        if not st.queue and self._feasible_now(st, pt, max_tokens, now):
+            return 0.0
+        items = [(t.prompt_tokens, t.max_tokens) for t in st.queue] + [(pt, max_tokens)]
+        return max(0.0, self._predict(st, items, now)[-1][0] - now)
+
+    def capacity(self, model: str, bucket: str) -> float | None:
+        st = self.models.get(model)
+        b = st.buckets.get(bucket) if st else None
+        return b.capacity if b else None
+
     def reserve(self, model: str, prompt_tokens: int | Prompt, max_tokens: int, deadline: float) -> Grant | Ticket:
         st = self._state(model)
         now = self.now()
@@ -578,6 +601,16 @@ class Limiter:
         for e in st.events:
             if e.grant_id == g.id:
                 e.amount = 0.0
+        st.holds.pop(g.id, None)
+        st.inflight.pop(g.id, None)
+        g.settled = True
+        self._notify(st)
+
+    def abandon(self, g: Grant) -> None:
+        """The call was sent but the caller left before it finished (a person gave up). How Groq
+        bills a cancelled stream is not measured (PLAN.md H10), so keep everything charged at
+        admission (prompt + hold) instead of releasing it; only stop counting it as in flight."""
+        st = self._state(g.model)
         st.holds.pop(g.id, None)
         st.inflight.pop(g.id, None)
         g.settled = True

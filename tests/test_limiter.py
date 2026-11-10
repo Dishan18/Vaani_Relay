@@ -322,5 +322,30 @@ class AsyncTests(unittest.IsolatedAsyncioTestCase):
             await a.acquire()
 
 
+class PredictWaitTests(unittest.TestCase):
+    def test_predicts_like_reserve_and_commits_nothing(self):
+        c = Clock()
+        lim = limiter(c, tpm_level=1000)                     # TPM refills 8000/60 per s
+        before = lim.levels(M)
+        self.assertEqual(lim.predict_wait(M, 500, 100), 0.0)
+        w = lim.predict_wait(M, 3000, 100)
+        self.assertAlmostEqual(w, (3000 - 1000) / (8000 / 60), places=3)
+        self.assertEqual(lim.levels(M), before)               # nothing reserved
+        t = lim.reserve(M, 3000, 100, c() + 60)
+        self.assertAlmostEqual(t.wait_s, w, places=3)         # same prediction as a real reservation
+        self.assertGreater(lim.predict_wait(M, 10, 10), w)    # counts the ticket queued in front
+        self.assertIsNone(lim.predict_wait(M, 9000, 100))     # can never fit
+        self.assertIsNone(lim.predict_wait("unknown", 10, 10))
+
+    def test_abandon_keeps_the_admission_charge(self):
+        c = Clock()
+        lim = limiter(c)
+        g = lim.reserve(M, 500, 100, c() + 5)
+        after = lim.levels(M)["TPM"]
+        lim.abandon(g)
+        self.assertEqual(lim.levels(M)["TPM"], after)        # not released
+        self.assertNotIn(g.id, lim.models[M].inflight)
+
+
 if __name__ == "__main__":
     unittest.main()

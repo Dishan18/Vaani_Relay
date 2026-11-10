@@ -1,0 +1,3229 @@
+{
+ "_generated_by": "scripts/eval_retrieval.py",
+ "settings": [
+  {
+   "setting": "small",
+   "piece_chars": 600,
+   "k": 8,
+   "rerank": false,
+   "pieces": 606,
+   "piece_chars_mean": 481,
+   "questions": 14,
+   "gold_hit_at_k": 0.786,
+   "all_facts_at_k": 0.5,
+   "fact_recall_at_k": 0.661,
+   "right_paper_at_1": 1.0,
+   "first_gold_rank_p50": 3,
+   "first_gold_rank_max": 86,
+   "never_found": [
+    "Q14"
+   ],
+   "missed_at_k": [
+    "Q8",
+    "Q14",
+    "Q16"
+   ],
+   "context_chars_p50": 3814,
+   "context_chars_max": 5021
+  },
+  {
+   "setting": "medium",
+   "piece_chars": 1200,
+   "k": 5,
+   "rerank": false,
+   "pieces": 322,
+   "piece_chars_mean": 907,
+   "questions": 14,
+   "gold_hit_at_k": 0.714,
+   "all_facts_at_k": 0.643,
+   "fact_recall_at_k": 0.661,
+   "right_paper_at_1": 1.0,
+   "first_gold_rank_p50": 2,
+   "first_gold_rank_max": 61,
+   "never_found": [
+    "Q14"
+   ],
+   "missed_at_k": [
+    "Q8",
+    "Q9",
+    "Q14",
+    "Q16"
+   ],
+   "context_chars_p50": 4798,
+   "context_chars_max": 5958
+  },
+  {
+   "setting": "large",
+   "piece_chars": 2400,
+   "k": 3,
+   "rerank": false,
+   "pieces": 170,
+   "piece_chars_mean": 1718,
+   "questions": 14,
+   "gold_hit_at_k": 0.929,
+   "all_facts_at_k": 0.714,
+   "fact_recall_at_k": 0.839,
+   "right_paper_at_1": 1.0,
+   "first_gold_rank_p50": 2,
+   "first_gold_rank_max": 3,
+   "never_found": [
+    "Q14"
+   ],
+   "missed_at_k": [
+    "Q14"
+   ],
+   "context_chars_p50": 4783,
+   "context_chars_max": 6992
+  },
+  {
+   "setting": "medium+rerank",
+   "piece_chars": 1200,
+   "k": 4,
+   "rerank": true,
+   "pieces": 322,
+   "piece_chars_mean": 907,
+   "questions": 14,
+   "gold_hit_at_k": 0.714,
+   "all_facts_at_k": 0.643,
+   "fact_recall_at_k": 0.696,
+   "right_paper_at_1": 1.0,
+   "first_gold_rank_p50": 2,
+   "first_gold_rank_max": 61,
+   "never_found": [
+    "Q14"
+   ],
+   "missed_at_k": [
+    "Q8",
+    "Q9",
+    "Q14",
+    "Q16"
+   ],
+   "context_chars_p50": 3632,
+   "context_chars_max": 4701
+  }
+ ],
+ "per_question": {
+  "small": [
+   {
+    "qid": "Q1",
+    "paper": "attention",
+    "trap": "",
+    "facts": 2,
+    "facts_in_top_k": 2,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 1,
+    "top1_paper": "attention",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "1706.03762v7 p.4 §3.2.1",
+      "pid": "attention:600:0020",
+      "score": 61.322
+     },
+     {
+      "rank": 2,
+      "cite": "1706.03762v7 p.4 §3.2.1",
+      "pid": "attention:600:0022",
+      "score": 44.525
+     },
+     {
+      "rank": 3,
+      "cite": "1706.03762v7 p.4 §3.2.2",
+      "pid": "attention:600:0023",
+      "score": 44.229
+     },
+     {
+      "rank": 4,
+      "cite": "1706.03762v7 pp.3-4 §3.2",
+      "pid": "attention:600:0019",
+      "score": 43.282
+     },
+     {
+      "rank": 5,
+      "cite": "1706.03762v7 p.4 §3.2.1",
+      "pid": "attention:600:0021",
+      "score": 39.439
+     },
+     {
+      "rank": 6,
+      "cite": "1706.03762v7 p.9 §6.2",
+      "pid": "attention:600:0057",
+      "score": 28.466
+     },
+     {
+      "rank": 7,
+      "cite": "1706.03762v7 p.5 §3.2.3",
+      "pid": "attention:600:0028",
+      "score": 25.005
+     },
+     {
+      "rank": 8,
+      "cite": "1706.03762v7 p.1 Abstract",
+      "pid": "attention:600:0002",
+      "score": 23.57
+     }
+    ],
+    "context_chars": 4156
+   },
+   {
+    "qid": "Q2",
+    "paper": "attention",
+    "trap": "",
+    "facts": 3,
+    "facts_in_top_k": 3,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 3,
+    "top1_paper": "attention",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "1706.03762v7 pp.3-4 §3.2",
+      "pid": "attention:600:0019",
+      "score": 12.418
+     },
+     {
+      "rank": 2,
+      "cite": "1706.03762v7 pp.14-15 Attention Visualizations (appendix)",
+      "pid": "attention:600:0066",
+      "score": 10.64
+     },
+     {
+      "rank": 3,
+      "cite": "1706.03762v7 p.5 §3.2.2",
+      "pid": "attention:600:0025",
+      "score": 10.117
+     },
+     {
+      "rank": 4,
+      "cite": "1706.03762v7 p.13 Attention Visualizations (appendix)",
+      "pid": "attention:600:0065",
+      "score": 9.459
+     },
+     {
+      "rank": 5,
+      "cite": "1706.03762v7 p.4 §3.2.2",
+      "pid": "attention:600:0023",
+      "score": 9.439
+     },
+     {
+      "rank": 6,
+      "cite": "1706.03762v7 pp.4-5 §3.2.2",
+      "pid": "attention:600:0024",
+      "score": 9.369
+     },
+     {
+      "rank": 7,
+      "cite": "1706.03762v7 p.9 §6.2",
+      "pid": "attention:600:0056",
+      "score": 9.251
+     },
+     {
+      "rank": 8,
+      "cite": "2507.07955v2 p.35 B FLOPs Computation (appendix)",
+      "pid": "dynamic_chunking:600:0209",
+      "score": 8.899
+     }
+    ],
+    "context_chars": 3873
+   },
+   {
+    "qid": "Q3",
+    "paper": "attention",
+    "trap": "",
+    "facts": 5,
+    "facts_in_top_k": 5,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 1,
+    "top1_paper": "attention",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "1706.03762v7 p.6 §3.5",
+      "pid": "attention:600:0033",
+      "score": 22.628
+     },
+     {
+      "rank": 2,
+      "cite": "1706.03762v7 p.8 §5.4",
+      "pid": "attention:600:0049",
+      "score": 15.172
+     },
+     {
+      "rank": 3,
+      "cite": "1706.03762v7 p.6 §3.5",
+      "pid": "attention:600:0035",
+      "score": 13.159
+     },
+     {
+      "rank": 4,
+      "cite": "1706.03762v7 p.6 §3.5",
+      "pid": "attention:600:0034",
+      "score": 12.973
+     },
+     {
+      "rank": 5,
+      "cite": "1706.03762v7 p.9 §6.2",
+      "pid": "attention:600:0057",
+      "score": 11.551
+     },
+     {
+      "rank": 6,
+      "cite": "2410.00037v1 p.11 §3.3.1",
+      "pid": "moshi:600:0061",
+      "score": 8.523
+     },
+     {
+      "rank": 7,
+      "cite": "2507.07955v2 p.33 §A.2 (appendix)",
+      "pid": "dynamic_chunking:600:0193",
+      "score": 8.302
+     },
+     {
+      "rank": 8,
+      "cite": "1706.03762v7 p.5 §3.4",
+      "pid": "attention:600:0031",
+      "score": 7.589
+     }
+    ],
+    "context_chars": 3695
+   },
+   {
+    "qid": "Q4",
+    "paper": "attention",
+    "trap": "",
+    "facts": 2,
+    "facts_in_top_k": 2,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 2,
+    "top1_paper": "attention",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "1706.03762v7 p.6 §4",
+      "pid": "attention:600:0039",
+      "score": 55.124
+     },
+     {
+      "rank": 2,
+      "cite": "1706.03762v7 p.6 §3.4",
+      "pid": "attention:600:0032",
+      "score": 49.131
+     },
+     {
+      "rank": 3,
+      "cite": "1706.03762v7 p.6 §4",
+      "pid": "attention:600:0037",
+      "score": 29.178
+     },
+     {
+      "rank": 4,
+      "cite": "1706.03762v7 p.6 §4",
+      "pid": "attention:600:0036",
+      "score": 27.948
+     },
+     {
+      "rank": 5,
+      "cite": "1706.03762v7 p.7 §4",
+      "pid": "attention:600:0041",
+      "score": 26.338
+     },
+     {
+      "rank": 6,
+      "cite": "1706.03762v7 p.7 §4",
+      "pid": "attention:600:0040",
+      "score": 20.461
+     },
+     {
+      "rank": 7,
+      "cite": "1706.03762v7 p.7 §4",
+      "pid": "attention:600:0042",
+      "score": 18.86
+     },
+     {
+      "rank": 8,
+      "cite": "1706.03762v7 p.6 §4",
+      "pid": "attention:600:0038",
+      "score": 17.342
+     }
+    ],
+    "context_chars": 3706
+   },
+   {
+    "qid": "Q5",
+    "paper": "attention",
+    "trap": "ragged table row / same number in another row",
+    "facts": 1,
+    "facts_in_top_k": 1,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 3,
+    "top1_paper": "attention",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "1706.03762v7 p.8 §6.1",
+      "pid": "attention:600:0050",
+      "score": 19.934
+     },
+     {
+      "rank": 2,
+      "cite": "1706.03762v7 p.8 §6.1",
+      "pid": "attention:600:0051",
+      "score": 14.516
+     },
+     {
+      "rank": 3,
+      "cite": "1706.03762v7 p.8 §5.4",
+      "pid": "attention:600:0048",
+      "score": 13.852
+     },
+     {
+      "rank": 4,
+      "cite": "1706.03762v7 p.7 §5.2",
+      "pid": "attention:600:0045",
+      "score": 11.177
+     },
+     {
+      "rank": 5,
+      "cite": "2507.07955v2 p.37 §E.2 (appendix)",
+      "pid": "dynamic_chunking:600:0222",
+      "score": 10.308
+     },
+     {
+      "rank": 6,
+      "cite": "1706.03762v7 p.8 §6.1",
+      "pid": "attention:600:0053",
+      "score": 9.916
+     },
+     {
+      "rank": 7,
+      "cite": "2410.00037v1 p.29 §5.5",
+      "pid": "moshi:600:0171",
+      "score": 9.532
+     },
+     {
+      "rank": 8,
+      "cite": "2507.07955v2 p.11 §3",
+      "pid": "dynamic_chunking:600:0086",
+      "score": 9.325
+     }
+    ],
+    "context_chars": 3385
+   },
+   {
+    "qid": "Q7",
+    "paper": "moshi",
+    "trap": "",
+    "facts": 4,
+    "facts_in_top_k": 3,
+    "gold_hit": true,
+    "all_facts": false,
+    "first_gold_rank": 2,
+    "top1_paper": "moshi",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2410.00037v1 p.2 §1",
+      "pid": "moshi:600:0005",
+      "score": 12.822
+     },
+     {
+      "rank": 2,
+      "cite": "2410.00037v1 p.1 Abstract",
+      "pid": "moshi:600:0000",
+      "score": 12.203
+     },
+     {
+      "rank": 3,
+      "cite": "2410.00037v1 p.2 §1",
+      "pid": "moshi:600:0003",
+      "score": 11.88
+     },
+     {
+      "rank": 4,
+      "cite": "2410.00037v1 p.30 §5.5",
+      "pid": "moshi:600:0173",
+      "score": 11.188
+     },
+     {
+      "rank": 5,
+      "cite": "2410.00037v1 p.12 §3.4",
+      "pid": "moshi:600:0069",
+      "score": 10.395
+     },
+     {
+      "rank": 6,
+      "cite": "2410.00037v1 p.41 §7",
+      "pid": "moshi:600:0240",
+      "score": 9.163
+     },
+     {
+      "rank": 7,
+      "cite": "2410.00037v1 p.41 §7",
+      "pid": "moshi:600:0242",
+      "score": 9.037
+     },
+     {
+      "rank": 8,
+      "cite": "2410.00037v1 p.2 §1",
+      "pid": "moshi:600:0007",
+      "score": 8.944
+     }
+    ],
+    "context_chars": 3582
+   },
+   {
+    "qid": "Q8",
+    "paper": "moshi",
+    "trap": "",
+    "facts": 4,
+    "facts_in_top_k": 0,
+    "gold_hit": false,
+    "all_facts": false,
+    "first_gold_rank": 86,
+    "top1_paper": "moshi",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2410.00037v1 p.7 §3.1",
+      "pid": "moshi:600:0038",
+      "score": 12.705
+     },
+     {
+      "rank": 2,
+      "cite": "2507.07955v2 p.4 §2.1.1",
+      "pid": "dynamic_chunking:600:0026",
+      "score": 11.793
+     },
+     {
+      "rank": 3,
+      "cite": "2507.07955v2 p.4 §2.1.1",
+      "pid": "dynamic_chunking:600:0027",
+      "score": 10.421
+     },
+     {
+      "rank": 4,
+      "cite": "2507.07955v2 p.17 §3.3",
+      "pid": "dynamic_chunking:600:0125",
+      "score": 7.982
+     },
+     {
+      "rank": 5,
+      "cite": "2507.07955v2 p.5 §2.1.1",
+      "pid": "dynamic_chunking:600:0029",
+      "score": 7.921
+     },
+     {
+      "rank": 6,
+      "cite": "2507.07955v2 p.5 §2.1.1",
+      "pid": "dynamic_chunking:600:0030",
+      "score": 7.861
+     },
+     {
+      "rank": 7,
+      "cite": "2410.00037v1 p.38 §6.3",
+      "pid": "moshi:600:0221",
+      "score": 7.84
+     },
+     {
+      "rank": 8,
+      "cite": "2410.00037v1 p.62 §F.1 (appendix)",
+      "pid": "moshi:600:0279",
+      "score": 7.11
+     }
+    ],
+    "context_chars": 4326
+   },
+   {
+    "qid": "Q9",
+    "paper": "moshi",
+    "trap": "",
+    "facts": 4,
+    "facts_in_top_k": 1,
+    "gold_hit": true,
+    "all_facts": false,
+    "first_gold_rank": 5,
+    "top1_paper": "moshi",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2410.00037v1 p.5 §2",
+      "pid": "moshi:600:0032",
+      "score": 19.639
+     },
+     {
+      "rank": 2,
+      "cite": "2410.00037v1 p.5 §2",
+      "pid": "moshi:600:0033",
+      "score": 15.556
+     },
+     {
+      "rank": 3,
+      "cite": "2410.00037v1 p.6 §2",
+      "pid": "moshi:600:0034",
+      "score": 11.646
+     },
+     {
+      "rank": 4,
+      "cite": "2410.00037v1 p.6 §3.1",
+      "pid": "moshi:600:0035",
+      "score": 11.607
+     },
+     {
+      "rank": 5,
+      "cite": "2410.00037v1 pp.2-3 §1",
+      "pid": "moshi:600:0010",
+      "score": 10.582
+     },
+     {
+      "rank": 6,
+      "cite": "2410.00037v1 p.17 §3.4.4",
+      "pid": "moshi:600:0097",
+      "score": 10.166
+     },
+     {
+      "rank": 7,
+      "cite": "2410.00037v1 p.3 §1",
+      "pid": "moshi:600:0014",
+      "score": 9.373
+     },
+     {
+      "rank": 8,
+      "cite": "2410.00037v1 p.41 §7",
+      "pid": "moshi:600:0240",
+      "score": 9.326
+     }
+    ],
+    "context_chars": 5021
+   },
+   {
+    "qid": "Q10",
+    "paper": "moshi",
+    "trap": "",
+    "facts": 4,
+    "facts_in_top_k": 2,
+    "gold_hit": true,
+    "all_facts": false,
+    "first_gold_rank": 5,
+    "top1_paper": "moshi",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2410.00037v1 p.31 §5.7",
+      "pid": "moshi:600:0184",
+      "score": 18.511
+     },
+     {
+      "rank": 2,
+      "cite": "2410.00037v1 p.5 §2",
+      "pid": "moshi:600:0031",
+      "score": 17.943
+     },
+     {
+      "rank": 3,
+      "cite": "2410.00037v1 p.31 §5.7",
+      "pid": "moshi:600:0181",
+      "score": 17.526
+     },
+     {
+      "rank": 4,
+      "cite": "2410.00037v1 p.18 §4.3",
+      "pid": "moshi:600:0105",
+      "score": 16.034
+     },
+     {
+      "rank": 5,
+      "cite": "2410.00037v1 p.16 §3.4.4",
+      "pid": "moshi:600:0093",
+      "score": 15.468
+     },
+     {
+      "rank": 6,
+      "cite": "2410.00037v1 p.16 §3.4.4",
+      "pid": "moshi:600:0091",
+      "score": 15.175
+     },
+     {
+      "rank": 7,
+      "cite": "2410.00037v1 p.41 §7",
+      "pid": "moshi:600:0242",
+      "score": 14.243
+     },
+     {
+      "rank": 8,
+      "cite": "2410.00037v1 p.31 §5.7",
+      "pid": "moshi:600:0182",
+      "score": 11.981
+     }
+    ],
+    "context_chars": 3202
+   },
+   {
+    "qid": "Q11",
+    "paper": "moshi",
+    "trap": "",
+    "facts": 1,
+    "facts_in_top_k": 1,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 5,
+    "top1_paper": "moshi",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2410.00037v1 p.26 §5.3",
+      "pid": "moshi:600:0149",
+      "score": 10.568
+     },
+     {
+      "rank": 2,
+      "cite": "2410.00037v1 p.2 §1",
+      "pid": "moshi:600:0009",
+      "score": 8.665
+     },
+     {
+      "rank": 3,
+      "cite": "2410.00037v1 p.41 §7",
+      "pid": "moshi:600:0242",
+      "score": 8.13
+     },
+     {
+      "rank": 4,
+      "cite": "2410.00037v1 p.26 §5.3",
+      "pid": "moshi:600:0153",
+      "score": 8.074
+     },
+     {
+      "rank": 5,
+      "cite": "2410.00037v1 p.1 Abstract",
+      "pid": "moshi:600:0002",
+      "score": 7.86
+     },
+     {
+      "rank": 6,
+      "cite": "2410.00037v1 p.25 §5.3",
+      "pid": "moshi:600:0147",
+      "score": 7.784
+     },
+     {
+      "rank": 7,
+      "cite": "2410.00037v1 p.26 §5.3",
+      "pid": "moshi:600:0150",
+      "score": 6.958
+     },
+     {
+      "rank": 8,
+      "cite": "2507.07955v2 p.35 §A.3 (appendix)",
+      "pid": "dynamic_chunking:600:0208",
+      "score": 6.468
+     }
+    ],
+    "context_chars": 3780
+   },
+   {
+    "qid": "Q13",
+    "paper": "dynamic_chunking",
+    "trap": "same term in the wrong paper",
+    "facts": 4,
+    "facts_in_top_k": 3,
+    "gold_hit": true,
+    "all_facts": false,
+    "first_gold_rank": 1,
+    "top1_paper": "dynamic_chunking",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2507.07955v2 p.2 §1",
+      "pid": "dynamic_chunking:600:0012",
+      "score": 15.998
+     },
+     {
+      "rank": 2,
+      "cite": "2507.07955v2 p.4 §2.1.1",
+      "pid": "dynamic_chunking:600:0026",
+      "score": 14.957
+     },
+     {
+      "rank": 3,
+      "cite": "2507.07955v2 p.5 §2.1.2",
+      "pid": "dynamic_chunking:600:0031",
+      "score": 14.687
+     },
+     {
+      "rank": 4,
+      "cite": "2507.07955v2 p.9 §2.4",
+      "pid": "dynamic_chunking:600:0069",
+      "score": 13.005
+     },
+     {
+      "rank": 5,
+      "cite": "2507.07955v2 p.19 §3.3",
+      "pid": "dynamic_chunking:600:0133",
+      "score": 12.444
+     },
+     {
+      "rank": 6,
+      "cite": "2507.07955v2 p.18 §3.3",
+      "pid": "dynamic_chunking:600:0128",
+      "score": 11.618
+     },
+     {
+      "rank": 7,
+      "cite": "2507.07955v2 p.22 §4",
+      "pid": "dynamic_chunking:600:0145",
+      "score": 11.187
+     },
+     {
+      "rank": 8,
+      "cite": "2507.07955v2 p.4 §2.1.1",
+      "pid": "dynamic_chunking:600:0027",
+      "score": 11.117
+     }
+    ],
+    "context_chars": 3814
+   },
+   {
+    "qid": "Q14",
+    "paper": "dynamic_chunking",
+    "trap": "vocab mismatch with the passage",
+    "facts": 4,
+    "facts_in_top_k": 0,
+    "gold_hit": false,
+    "all_facts": false,
+    "first_gold_rank": null,
+    "top1_paper": "dynamic_chunking",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2507.07955v2 p.14 §3.1",
+      "pid": "dynamic_chunking:600:0103",
+      "score": 11.813
+     },
+     {
+      "rank": 2,
+      "cite": "2507.07955v2 p.10 §2.4",
+      "pid": "dynamic_chunking:600:0075",
+      "score": 9.711
+     },
+     {
+      "rank": 3,
+      "cite": "2507.07955v2 p.12 §3.1",
+      "pid": "dynamic_chunking:600:0093",
+      "score": 8.841
+     },
+     {
+      "rank": 4,
+      "cite": "2507.07955v2 p.16 §3.2",
+      "pid": "dynamic_chunking:600:0111",
+      "score": 8.378
+     },
+     {
+      "rank": 5,
+      "cite": "2507.07955v2 p.15 §3.1",
+      "pid": "dynamic_chunking:600:0108",
+      "score": 8.222
+     },
+     {
+      "rank": 6,
+      "cite": "2507.07955v2 p.4 §1",
+      "pid": "dynamic_chunking:600:0022",
+      "score": 7.849
+     },
+     {
+      "rank": 7,
+      "cite": "2507.07955v2 p.20 §3.3",
+      "pid": "dynamic_chunking:600:0138",
+      "score": 7.708
+     },
+     {
+      "rank": 8,
+      "cite": "2507.07955v2 p.37 F Distilling Token-Level Models to Byte-Level (appendix)",
+      "pid": "dynamic_chunking:600:0225",
+      "score": 7.603
+     }
+    ],
+    "context_chars": 4418
+   },
+   {
+    "qid": "Q15",
+    "paper": "dynamic_chunking",
+    "trap": "",
+    "facts": 5,
+    "facts_in_top_k": 5,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 2,
+    "top1_paper": "dynamic_chunking",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2507.07955v2 p.8 §2.2.3",
+      "pid": "dynamic_chunking:600:0056",
+      "score": 23.515
+     },
+     {
+      "rank": 2,
+      "cite": "2507.07955v2 p.8 §2.2.3",
+      "pid": "dynamic_chunking:600:0054",
+      "score": 20.074
+     },
+     {
+      "rank": 3,
+      "cite": "2507.07955v2 p.8 §2.2.3",
+      "pid": "dynamic_chunking:600:0057",
+      "score": 13.262
+     },
+     {
+      "rank": 4,
+      "cite": "2507.07955v2 p.8 §2.2.3",
+      "pid": "dynamic_chunking:600:0055",
+      "score": 13.225
+     },
+     {
+      "rank": 5,
+      "cite": "2507.07955v2 pp.38-39 F Distilling Token-Level Models to Byte-Level (appendix)",
+      "pid": "dynamic_chunking:600:0233",
+      "score": 7.74
+     },
+     {
+      "rank": 6,
+      "cite": "2507.07955v2 p.2 §1",
+      "pid": "dynamic_chunking:600:0015",
+      "score": 7.653
+     },
+     {
+      "rank": 7,
+      "cite": "2507.07955v2 p.38 F Distilling Token-Level Models to Byte-Level (appendix)",
+      "pid": "dynamic_chunking:600:0232",
+      "score": 7.505
+     },
+     {
+      "rank": 8,
+      "cite": "2410.00037v1 p.54 Appendix B. Audio matching and deduplication (appendix)",
+      "pid": "moshi:600:0250",
+      "score": 7.411
+     }
+    ],
+    "context_chars": 3894
+   },
+   {
+    "qid": "Q16",
+    "paper": "dynamic_chunking",
+    "trap": "",
+    "facts": 3,
+    "facts_in_top_k": 0,
+    "gold_hit": false,
+    "all_facts": false,
+    "first_gold_rank": 9,
+    "top1_paper": "dynamic_chunking",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2507.07955v2 p.21 §3.3",
+      "pid": "dynamic_chunking:600:0142",
+      "score": 19.5
+     },
+     {
+      "rank": 2,
+      "cite": "2507.07955v2 p.11 §3",
+      "pid": "dynamic_chunking:600:0082",
+      "score": 18.579
+     },
+     {
+      "rank": 3,
+      "cite": "2507.07955v2 p.31 §A.1 (appendix)",
+      "pid": "dynamic_chunking:600:0173",
+      "score": 16.88
+     },
+     {
+      "rank": 4,
+      "cite": "2507.07955v2 p.31 §A.1.2 (appendix)",
+      "pid": "dynamic_chunking:600:0175",
+      "score": 16.027
+     },
+     {
+      "rank": 5,
+      "cite": "2507.07955v2 p.32 §A.1.3 (appendix)",
+      "pid": "dynamic_chunking:600:0181",
+      "score": 15.195
+     },
+     {
+      "rank": 6,
+      "cite": "2507.07955v2 p.22 §4",
+      "pid": "dynamic_chunking:600:0150",
+      "score": 14.657
+     },
+     {
+      "rank": 7,
+      "cite": "2410.00037v1 p.20 §4.4",
+      "pid": "moshi:600:0118",
+      "score": 13.187
+     },
+     {
+      "rank": 8,
+      "cite": "2507.07955v2 p.33 §A.1.4 (appendix)",
+      "pid": "dynamic_chunking:600:0188",
+      "score": 12.952
+     }
+    ],
+    "context_chars": 3934
+   }
+  ],
+  "medium": [
+   {
+    "qid": "Q1",
+    "paper": "attention",
+    "trap": "",
+    "facts": 2,
+    "facts_in_top_k": 2,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 1,
+    "top1_paper": "attention",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "1706.03762v7 p.4 §3.2.1",
+      "pid": "attention:1200:0010",
+      "score": 59.631
+     },
+     {
+      "rank": 2,
+      "cite": "1706.03762v7 pp.3-4 §3.2",
+      "pid": "attention:1200:0009",
+      "score": 42.383
+     },
+     {
+      "rank": 3,
+      "cite": "1706.03762v7 p.4 §3.2.1",
+      "pid": "attention:1200:0011",
+      "score": 41.871
+     },
+     {
+      "rank": 4,
+      "cite": "1706.03762v7 pp.4-5 §3.2.2",
+      "pid": "attention:1200:0012",
+      "score": 36.886
+     },
+     {
+      "rank": 5,
+      "cite": "1706.03762v7 p.5 §3.2.3",
+      "pid": "attention:1200:0013",
+      "score": 28.949
+     }
+    ],
+    "context_chars": 4642
+   },
+   {
+    "qid": "Q2",
+    "paper": "attention",
+    "trap": "",
+    "facts": 3,
+    "facts_in_top_k": 3,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 2,
+    "top1_paper": "attention",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "1706.03762v7 pp.3-4 §3.2",
+      "pid": "attention:1200:0009",
+      "score": 12.032
+     },
+     {
+      "rank": 2,
+      "cite": "1706.03762v7 pp.4-5 §3.2.2",
+      "pid": "attention:1200:0012",
+      "score": 10.907
+     },
+     {
+      "rank": 3,
+      "cite": "1706.03762v7 pp.13-15 Attention Visualizations (appendix)",
+      "pid": "attention:1200:0034",
+      "score": 9.885
+     },
+     {
+      "rank": 4,
+      "cite": "1706.03762v7 p.3 §3.1",
+      "pid": "attention:1200:0008",
+      "score": 8.617
+     },
+     {
+      "rank": 5,
+      "cite": "2507.07955v2 p.35 B FLOPs Computation (appendix)",
+      "pid": "dynamic_chunking:1200:0108",
+      "score": 8.336
+     }
+    ],
+    "context_chars": 4853
+   },
+   {
+    "qid": "Q3",
+    "paper": "attention",
+    "trap": "",
+    "facts": 5,
+    "facts_in_top_k": 5,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 1,
+    "top1_paper": "attention",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "1706.03762v7 p.6 §3.5",
+      "pid": "attention:1200:0016",
+      "score": 24.513
+     },
+     {
+      "rank": 2,
+      "cite": "1706.03762v7 p.6 §3.5",
+      "pid": "attention:1200:0017",
+      "score": 12.69
+     },
+     {
+      "rank": 3,
+      "cite": "1706.03762v7 p.9 §6.2",
+      "pid": "attention:1200:0030",
+      "score": 9.901
+     },
+     {
+      "rank": 4,
+      "cite": "1706.03762v7 pp.7-8 §5.4",
+      "pid": "attention:1200:0026",
+      "score": 9.157
+     },
+     {
+      "rank": 5,
+      "cite": "2410.00037v1 p.7 §3.2.1",
+      "pid": "moshi:1200:0022",
+      "score": 8.4
+     }
+    ],
+    "context_chars": 4798
+   },
+   {
+    "qid": "Q4",
+    "paper": "attention",
+    "trap": "",
+    "facts": 2,
+    "facts_in_top_k": 2,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 2,
+    "top1_paper": "attention",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "1706.03762v7 p.6 §4",
+      "pid": "attention:1200:0019",
+      "score": 49.928
+     },
+     {
+      "rank": 2,
+      "cite": "1706.03762v7 pp.5-6 §3.4",
+      "pid": "attention:1200:0015",
+      "score": 44.175
+     },
+     {
+      "rank": 3,
+      "cite": "1706.03762v7 p.6 §4",
+      "pid": "attention:1200:0018",
+      "score": 37.263
+     },
+     {
+      "rank": 4,
+      "cite": "1706.03762v7 p.7 §4",
+      "pid": "attention:1200:0021",
+      "score": 27.536
+     },
+     {
+      "rank": 5,
+      "cite": "1706.03762v7 p.7 §4",
+      "pid": "attention:1200:0020",
+      "score": 20.82
+     }
+    ],
+    "context_chars": 4209
+   },
+   {
+    "qid": "Q5",
+    "paper": "attention",
+    "trap": "ragged table row / same number in another row",
+    "facts": 1,
+    "facts_in_top_k": 1,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 2,
+    "top1_paper": "attention",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "1706.03762v7 p.8 §6.1",
+      "pid": "attention:1200:0027",
+      "score": 19.815
+     },
+     {
+      "rank": 2,
+      "cite": "1706.03762v7 pp.7-8 §5.4",
+      "pid": "attention:1200:0026",
+      "score": 13.421
+     },
+     {
+      "rank": 3,
+      "cite": "1706.03762v7 p.8 §6.1",
+      "pid": "attention:1200:0028",
+      "score": 11.759
+     },
+     {
+      "rank": 4,
+      "cite": "1706.03762v7 p.7 §5.2",
+      "pid": "attention:1200:0024",
+      "score": 10.423
+     },
+     {
+      "rank": 5,
+      "cite": "2507.07955v2 p.37 §E.2 (appendix)",
+      "pid": "dynamic_chunking:1200:0113",
+      "score": 8.42
+     }
+    ],
+    "context_chars": 4324
+   },
+   {
+    "qid": "Q7",
+    "paper": "moshi",
+    "trap": "",
+    "facts": 4,
+    "facts_in_top_k": 4,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 2,
+    "top1_paper": "moshi",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2410.00037v1 p.2 §1",
+      "pid": "moshi:1200:0002",
+      "score": 13.76
+     },
+     {
+      "rank": 2,
+      "cite": "2410.00037v1 p.1 Abstract",
+      "pid": "moshi:1200:0000",
+      "score": 11.449
+     },
+     {
+      "rank": 3,
+      "cite": "2410.00037v1 p.2 §1",
+      "pid": "moshi:1200:0003",
+      "score": 11.015
+     },
+     {
+      "rank": 4,
+      "cite": "2410.00037v1 p.12 §3.4",
+      "pid": "moshi:1200:0038",
+      "score": 10.882
+     },
+     {
+      "rank": 5,
+      "cite": "2410.00037v1 p.2 §1",
+      "pid": "moshi:1200:0004",
+      "score": 10.659
+     }
+    ],
+    "context_chars": 5060
+   },
+   {
+    "qid": "Q8",
+    "paper": "moshi",
+    "trap": "",
+    "facts": 4,
+    "facts_in_top_k": 0,
+    "gold_hit": false,
+    "all_facts": false,
+    "first_gold_rank": 61,
+    "top1_paper": "moshi",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2410.00037v1 p.7 §3.1",
+      "pid": "moshi:1200:0021",
+      "score": 12.188
+     },
+     {
+      "rank": 2,
+      "cite": "2507.07955v2 p.4 §2.1.1",
+      "pid": "dynamic_chunking:1200:0014",
+      "score": 10.952
+     },
+     {
+      "rank": 3,
+      "cite": "2410.00037v1 pp.37-38 §6.3",
+      "pid": "moshi:1200:0122",
+      "score": 8.323
+     },
+     {
+      "rank": 4,
+      "cite": "2410.00037v1 p.6 §2",
+      "pid": "moshi:1200:0018",
+      "score": 6.979
+     },
+     {
+      "rank": 5,
+      "cite": "2507.07955v2 p.5 §2.1.1",
+      "pid": "dynamic_chunking:1200:0015",
+      "score": 6.807
+     }
+    ],
+    "context_chars": 5958
+   },
+   {
+    "qid": "Q9",
+    "paper": "moshi",
+    "trap": "",
+    "facts": 4,
+    "facts_in_top_k": 0,
+    "gold_hit": false,
+    "all_facts": false,
+    "first_gold_rank": 11,
+    "top1_paper": "moshi",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2410.00037v1 p.5 §2",
+      "pid": "moshi:1200:0017",
+      "score": 22.975
+     },
+     {
+      "rank": 2,
+      "cite": "2410.00037v1 p.6 §2",
+      "pid": "moshi:1200:0018",
+      "score": 12.023
+     },
+     {
+      "rank": 3,
+      "cite": "2410.00037v1 p.19 §4.3",
+      "pid": "moshi:1200:0060",
+      "score": 10.801
+     },
+     {
+      "rank": 4,
+      "cite": "2410.00037v1 p.6 §3.1",
+      "pid": "moshi:1200:0019",
+      "score": 10.772
+     },
+     {
+      "rank": 5,
+      "cite": "2410.00037v1 pp.2-3 §1",
+      "pid": "moshi:1200:0005",
+      "score": 10.43
+     }
+    ],
+    "context_chars": 5058
+   },
+   {
+    "qid": "Q10",
+    "paper": "moshi",
+    "trap": "",
+    "facts": 4,
+    "facts_in_top_k": 1,
+    "gold_hit": true,
+    "all_facts": false,
+    "first_gold_rank": 4,
+    "top1_paper": "moshi",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2410.00037v1 p.31 §5.7",
+      "pid": "moshi:1200:0104",
+      "score": 16.989
+     },
+     {
+      "rank": 2,
+      "cite": "2410.00037v1 p.31 §5.7",
+      "pid": "moshi:1200:0102",
+      "score": 16.85
+     },
+     {
+      "rank": 3,
+      "cite": "2410.00037v1 p.5 §2",
+      "pid": "moshi:1200:0016",
+      "score": 14.892
+     },
+     {
+      "rank": 4,
+      "cite": "2410.00037v1 pp.16-17 §3.4.4",
+      "pid": "moshi:1200:0052",
+      "score": 14.024
+     },
+     {
+      "rank": 5,
+      "cite": "2410.00037v1 p.41 §7",
+      "pid": "moshi:1200:0134",
+      "score": 13.824
+     }
+    ],
+    "context_chars": 4244
+   },
+   {
+    "qid": "Q11",
+    "paper": "moshi",
+    "trap": "",
+    "facts": 1,
+    "facts_in_top_k": 1,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 2,
+    "top1_paper": "moshi",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2410.00037v1 p.26 §5.3",
+      "pid": "moshi:1200:0083",
+      "score": 11.513
+     },
+     {
+      "rank": 2,
+      "cite": "2410.00037v1 p.1 Abstract",
+      "pid": "moshi:1200:0001",
+      "score": 8.388
+     },
+     {
+      "rank": 3,
+      "cite": "2410.00037v1 p.2 §1",
+      "pid": "moshi:1200:0004",
+      "score": 7.742
+     },
+     {
+      "rank": 4,
+      "cite": "2410.00037v1 p.26 §5.3",
+      "pid": "moshi:1200:0084",
+      "score": 7.352
+     },
+     {
+      "rank": 5,
+      "cite": "2410.00037v1 p.26 §5.3",
+      "pid": "moshi:1200:0085",
+      "score": 7.214
+     }
+    ],
+    "context_chars": 4825
+   },
+   {
+    "qid": "Q13",
+    "paper": "dynamic_chunking",
+    "trap": "same term in the wrong paper",
+    "facts": 4,
+    "facts_in_top_k": 4,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 1,
+    "top1_paper": "dynamic_chunking",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2507.07955v2 p.2 §1",
+      "pid": "dynamic_chunking:1200:0006",
+      "score": 14.595
+     },
+     {
+      "rank": 2,
+      "cite": "2507.07955v2 p.4 §2.1.1",
+      "pid": "dynamic_chunking:1200:0014",
+      "score": 13.267
+     },
+     {
+      "rank": 3,
+      "cite": "2507.07955v2 p.5 §2.1.2",
+      "pid": "dynamic_chunking:1200:0016",
+      "score": 12.299
+     },
+     {
+      "rank": 4,
+      "cite": "2507.07955v2 p.19 §3.3",
+      "pid": "dynamic_chunking:1200:0071",
+      "score": 12.133
+     },
+     {
+      "rank": 5,
+      "cite": "2507.07955v2 p.10 §3",
+      "pid": "dynamic_chunking:1200:0040",
+      "score": 11.574
+     }
+    ],
+    "context_chars": 5044
+   },
+   {
+    "qid": "Q14",
+    "paper": "dynamic_chunking",
+    "trap": "vocab mismatch with the passage",
+    "facts": 4,
+    "facts_in_top_k": 0,
+    "gold_hit": false,
+    "all_facts": false,
+    "first_gold_rank": null,
+    "top1_paper": "dynamic_chunking",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2507.07955v2 p.14 §3.1",
+      "pid": "dynamic_chunking:1200:0054",
+      "score": 8.863
+     },
+     {
+      "rank": 2,
+      "cite": "2507.07955v2 p.10 §2.4",
+      "pid": "dynamic_chunking:1200:0038",
+      "score": 8.481
+     },
+     {
+      "rank": 3,
+      "cite": "1706.03762v7 p.7 §4",
+      "pid": "attention:1200:0020",
+      "score": 7.651
+     },
+     {
+      "rank": 4,
+      "cite": "2507.07955v2 p.12 §3.1",
+      "pid": "dynamic_chunking:1200:0048",
+      "score": 7.627
+     },
+     {
+      "rank": 5,
+      "cite": "2507.07955v2 p.16 §3.2",
+      "pid": "dynamic_chunking:1200:0058",
+      "score": 7.533
+     }
+    ],
+    "context_chars": 4218
+   },
+   {
+    "qid": "Q15",
+    "paper": "dynamic_chunking",
+    "trap": "",
+    "facts": 5,
+    "facts_in_top_k": 5,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 2,
+    "top1_paper": "dynamic_chunking",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2507.07955v2 p.8 §2.2.3",
+      "pid": "dynamic_chunking:1200:0030",
+      "score": 21.372
+     },
+     {
+      "rank": 2,
+      "cite": "2507.07955v2 p.8 §2.2.3",
+      "pid": "dynamic_chunking:1200:0029",
+      "score": 19.855
+     },
+     {
+      "rank": 3,
+      "cite": "2507.07955v2 p.38 F Distilling Token-Level Models to Byte-Level (appendix)",
+      "pid": "dynamic_chunking:1200:0116",
+      "score": 8.964
+     },
+     {
+      "rank": 4,
+      "cite": "2507.07955v2 p.16 §3.2",
+      "pid": "dynamic_chunking:1200:0059",
+      "score": 8.021
+     },
+     {
+      "rank": 5,
+      "cite": "2410.00037v1 p.54 Appendix B. Audio matching and deduplication (appendix)",
+      "pid": "moshi:1200:0139",
+      "score": 7.705
+     }
+    ],
+    "context_chars": 5287
+   },
+   {
+    "qid": "Q16",
+    "paper": "dynamic_chunking",
+    "trap": "",
+    "facts": 3,
+    "facts_in_top_k": 0,
+    "gold_hit": false,
+    "all_facts": false,
+    "first_gold_rank": 10,
+    "top1_paper": "dynamic_chunking",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2507.07955v2 p.21 §3.3",
+      "pid": "dynamic_chunking:1200:0075",
+      "score": 19.791
+     },
+     {
+      "rank": 2,
+      "cite": "2507.07955v2 pp.31-32 §A.1.2 (appendix)",
+      "pid": "dynamic_chunking:1200:0093",
+      "score": 17.953
+     },
+     {
+      "rank": 3,
+      "cite": "2507.07955v2 p.31 §A.1 (appendix)",
+      "pid": "dynamic_chunking:1200:0091",
+      "score": 17.047
+     },
+     {
+      "rank": 4,
+      "cite": "2507.07955v2 p.32 §A.1.3 (appendix)",
+      "pid": "dynamic_chunking:1200:0096",
+      "score": 15.738
+     },
+     {
+      "rank": 5,
+      "cite": "2507.07955v2 pp.14-15 §3.1",
+      "pid": "dynamic_chunking:1200:0055",
+      "score": 14.299
+     }
+    ],
+    "context_chars": 4164
+   }
+  ],
+  "large": [
+   {
+    "qid": "Q1",
+    "paper": "attention",
+    "trap": "",
+    "facts": 2,
+    "facts_in_top_k": 2,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 1,
+    "top1_paper": "attention",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "1706.03762v7 p.4 §3.2.1",
+      "pid": "attention:2400:0006",
+      "score": 54.238
+     },
+     {
+      "rank": 2,
+      "cite": "1706.03762v7 pp.3-4 §3.2",
+      "pid": "attention:2400:0005",
+      "score": 37.711
+     },
+     {
+      "rank": 3,
+      "cite": "1706.03762v7 pp.4-5 §3.2.2",
+      "pid": "attention:2400:0007",
+      "score": 35.416
+     }
+    ],
+    "context_chars": 3474
+   },
+   {
+    "qid": "Q2",
+    "paper": "attention",
+    "trap": "",
+    "facts": 3,
+    "facts_in_top_k": 3,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 2,
+    "top1_paper": "attention",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "1706.03762v7 pp.3-4 §3.2",
+      "pid": "attention:2400:0005",
+      "score": 10.365
+     },
+     {
+      "rank": 2,
+      "cite": "1706.03762v7 pp.4-5 §3.2.2",
+      "pid": "attention:2400:0007",
+      "score": 9.689
+     },
+     {
+      "rank": 3,
+      "cite": "1706.03762v7 pp.13-15 Attention Visualizations (appendix)",
+      "pid": "attention:2400:0023",
+      "score": 8.22
+     }
+    ],
+    "context_chars": 2882
+   },
+   {
+    "qid": "Q3",
+    "paper": "attention",
+    "trap": "",
+    "facts": 5,
+    "facts_in_top_k": 5,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 1,
+    "top1_paper": "attention",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "1706.03762v7 p.6 §3.5",
+      "pid": "attention:2400:0011",
+      "score": 24.008
+     },
+     {
+      "rank": 2,
+      "cite": "1706.03762v7 pp.8-9 §6.2",
+      "pid": "attention:2400:0020",
+      "score": 11.077
+     },
+     {
+      "rank": 3,
+      "cite": "1706.03762v7 pp.7-8 §5.4",
+      "pid": "attention:2400:0018",
+      "score": 10.769
+     }
+    ],
+    "context_chars": 4783
+   },
+   {
+    "qid": "Q4",
+    "paper": "attention",
+    "trap": "",
+    "facts": 2,
+    "facts_in_top_k": 2,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 2,
+    "top1_paper": "attention",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "1706.03762v7 pp.6-7 §4",
+      "pid": "attention:2400:0012",
+      "score": 47.014
+     },
+     {
+      "rank": 2,
+      "cite": "1706.03762v7 pp.5-6 §3.4",
+      "pid": "attention:2400:0010",
+      "score": 42.598
+     },
+     {
+      "rank": 3,
+      "cite": "1706.03762v7 p.7 §4",
+      "pid": "attention:2400:0013",
+      "score": 26.323
+     }
+    ],
+    "context_chars": 4211
+   },
+   {
+    "qid": "Q5",
+    "paper": "attention",
+    "trap": "ragged table row / same number in another row",
+    "facts": 1,
+    "facts_in_top_k": 1,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 2,
+    "top1_paper": "attention",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "1706.03762v7 p.8 §6.1",
+      "pid": "attention:2400:0019",
+      "score": 17.458
+     },
+     {
+      "rank": 2,
+      "cite": "1706.03762v7 pp.7-8 §5.4",
+      "pid": "attention:2400:0018",
+      "score": 13.769
+     },
+     {
+      "rank": 3,
+      "cite": "1706.03762v7 p.7 §5.2",
+      "pid": "attention:2400:0016",
+      "score": 9.148
+     }
+    ],
+    "context_chars": 3326
+   },
+   {
+    "qid": "Q7",
+    "paper": "moshi",
+    "trap": "",
+    "facts": 4,
+    "facts_in_top_k": 4,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 1,
+    "top1_paper": "moshi",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2410.00037v1 p.2 §1",
+      "pid": "moshi:2400:0001",
+      "score": 14.626
+     },
+     {
+      "rank": 2,
+      "cite": "2410.00037v1 p.1 Abstract",
+      "pid": "moshi:2400:0000",
+      "score": 10.801
+     },
+     {
+      "rank": 3,
+      "cite": "2410.00037v1 p.12 §3.4",
+      "pid": "moshi:2400:0018",
+      "score": 10.438
+     }
+    ],
+    "context_chars": 4476
+   },
+   {
+    "qid": "Q8",
+    "paper": "moshi",
+    "trap": "",
+    "facts": 4,
+    "facts_in_top_k": 4,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 1,
+    "top1_paper": "moshi",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2410.00037v1 pp.6-7 §3.1",
+      "pid": "moshi:2400:0009",
+      "score": 8.984
+     },
+     {
+      "rank": 2,
+      "cite": "2507.07955v2 pp.4-5 §2.1.1",
+      "pid": "dynamic_chunking:2400:0007",
+      "score": 8.684
+     },
+     {
+      "rank": 3,
+      "cite": "2410.00037v1 p.6 §2",
+      "pid": "moshi:2400:0008",
+      "score": 7.119
+     }
+    ],
+    "context_chars": 6241
+   },
+   {
+    "qid": "Q9",
+    "paper": "moshi",
+    "trap": "",
+    "facts": 4,
+    "facts_in_top_k": 1,
+    "gold_hit": true,
+    "all_facts": false,
+    "first_gold_rank": 2,
+    "top1_paper": "moshi",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2410.00037v1 p.5 §2",
+      "pid": "moshi:2400:0007",
+      "score": 22.943
+     },
+     {
+      "rank": 2,
+      "cite": "2410.00037v1 pp.6-7 §3.1",
+      "pid": "moshi:2400:0009",
+      "score": 11.751
+     },
+     {
+      "rank": 3,
+      "cite": "2410.00037v1 p.6 §2",
+      "pid": "moshi:2400:0008",
+      "score": 11.677
+     }
+    ],
+    "context_chars": 5348
+   },
+   {
+    "qid": "Q10",
+    "paper": "moshi",
+    "trap": "",
+    "facts": 4,
+    "facts_in_top_k": 3,
+    "gold_hit": true,
+    "all_facts": false,
+    "first_gold_rank": 3,
+    "top1_paper": "moshi",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2410.00037v1 p.31 §5.7",
+      "pid": "moshi:2400:0050",
+      "score": 16.835
+     },
+     {
+      "rank": 2,
+      "cite": "2410.00037v1 pp.41-42 §7",
+      "pid": "moshi:2400:0065",
+      "score": 15.089
+     },
+     {
+      "rank": 3,
+      "cite": "2410.00037v1 pp.16-17 §3.4.4",
+      "pid": "moshi:2400:0024",
+      "score": 13.714
+     }
+    ],
+    "context_chars": 6992
+   },
+   {
+    "qid": "Q11",
+    "paper": "moshi",
+    "trap": "",
+    "facts": 1,
+    "facts_in_top_k": 1,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 3,
+    "top1_paper": "moshi",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2410.00037v1 pp.25-26 §5.3",
+      "pid": "moshi:2400:0040",
+      "score": 13.445
+     },
+     {
+      "rank": 2,
+      "cite": "2410.00037v1 p.26 §5.3",
+      "pid": "moshi:2400:0041",
+      "score": 9.558
+     },
+     {
+      "rank": 3,
+      "cite": "2410.00037v1 p.1 Abstract",
+      "pid": "moshi:2400:0000",
+      "score": 7.319
+     }
+    ],
+    "context_chars": 5956
+   },
+   {
+    "qid": "Q13",
+    "paper": "dynamic_chunking",
+    "trap": "same term in the wrong paper",
+    "facts": 4,
+    "facts_in_top_k": 3,
+    "gold_hit": true,
+    "all_facts": false,
+    "first_gold_rank": 3,
+    "top1_paper": "dynamic_chunking",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2507.07955v2 pp.19-20 §3.3",
+      "pid": "dynamic_chunking:2400:0035",
+      "score": 13.078
+     },
+     {
+      "rank": 2,
+      "cite": "2507.07955v2 pp.4-5 §2.1.1",
+      "pid": "dynamic_chunking:2400:0007",
+      "score": 13.024
+     },
+     {
+      "rank": 3,
+      "cite": "2507.07955v2 p.2 §1",
+      "pid": "dynamic_chunking:2400:0003",
+      "score": 13.016
+     }
+    ],
+    "context_chars": 6937
+   },
+   {
+    "qid": "Q14",
+    "paper": "dynamic_chunking",
+    "trap": "vocab mismatch with the passage",
+    "facts": 4,
+    "facts_in_top_k": 0,
+    "gold_hit": false,
+    "all_facts": false,
+    "first_gold_rank": null,
+    "top1_paper": "dynamic_chunking",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2507.07955v2 pp.14-15 §3.1",
+      "pid": "dynamic_chunking:2400:0028",
+      "score": 10.362
+     },
+     {
+      "rank": 2,
+      "cite": "2507.07955v2 p.10 §2.4",
+      "pid": "dynamic_chunking:2400:0019",
+      "score": 9.292
+     },
+     {
+      "rank": 3,
+      "cite": "1706.03762v7 p.7 §5.1",
+      "pid": "attention:2400:0015",
+      "score": 7.088
+     }
+    ],
+    "context_chars": 3582
+   },
+   {
+    "qid": "Q15",
+    "paper": "dynamic_chunking",
+    "trap": "",
+    "facts": 5,
+    "facts_in_top_k": 5,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 1,
+    "top1_paper": "dynamic_chunking",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2507.07955v2 p.8 §2.2.3",
+      "pid": "dynamic_chunking:2400:0015",
+      "score": 20.122
+     },
+     {
+      "rank": 2,
+      "cite": "2507.07955v2 p.16 §3.2",
+      "pid": "dynamic_chunking:2400:0030",
+      "score": 7.941
+     },
+     {
+      "rank": 3,
+      "cite": "2507.07955v2 pp.37-38 F Distilling Token-Level Models to Byte-Level (appendix)",
+      "pid": "dynamic_chunking:2400:0060",
+      "score": 7.354
+     }
+    ],
+    "context_chars": 6108
+   },
+   {
+    "qid": "Q16",
+    "paper": "dynamic_chunking",
+    "trap": "",
+    "facts": 3,
+    "facts_in_top_k": 3,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 3,
+    "top1_paper": "dynamic_chunking",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2507.07955v2 p.32 §A.1.3 (appendix)",
+      "pid": "dynamic_chunking:2400:0048",
+      "score": 18.519
+     },
+     {
+      "rank": 2,
+      "cite": "2507.07955v2 p.21 §3.3",
+      "pid": "dynamic_chunking:2400:0037",
+      "score": 18.38
+     },
+     {
+      "rank": 3,
+      "cite": "2507.07955v2 p.12 §3.1",
+      "pid": "dynamic_chunking:2400:0024",
+      "score": 16.565
+     }
+    ],
+    "context_chars": 5522
+   }
+  ],
+  "medium+rerank": [
+   {
+    "qid": "Q1",
+    "paper": "attention",
+    "trap": "",
+    "facts": 2,
+    "facts_in_top_k": 2,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 1,
+    "top1_paper": "attention",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "1706.03762v7 p.4 §3.2.1",
+      "pid": "attention:1200:0010",
+      "score": 1.902
+     },
+     {
+      "rank": 2,
+      "cite": "1706.03762v7 p.4 §3.2.1",
+      "pid": "attention:1200:0011",
+      "score": 1.411
+     },
+     {
+      "rank": 3,
+      "cite": "1706.03762v7 pp.3-4 §3.2",
+      "pid": "attention:1200:0009",
+      "score": 1.282
+     },
+     {
+      "rank": 4,
+      "cite": "1706.03762v7 pp.4-5 §3.2.2",
+      "pid": "attention:1200:0012",
+      "score": 1.157
+     }
+    ],
+    "context_chars": 3473
+   },
+   {
+    "qid": "Q2",
+    "paper": "attention",
+    "trap": "",
+    "facts": 3,
+    "facts_in_top_k": 3,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 1,
+    "top1_paper": "attention",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "1706.03762v7 pp.4-5 §3.2.2",
+      "pid": "attention:1200:0012",
+      "score": 1.681
+     },
+     {
+      "rank": 2,
+      "cite": "1706.03762v7 pp.3-4 §3.2",
+      "pid": "attention:1200:0009",
+      "score": 1.65
+     },
+     {
+      "rank": 3,
+      "cite": "1706.03762v7 pp.13-15 Attention Visualizations (appendix)",
+      "pid": "attention:1200:0034",
+      "score": 1.444
+     },
+     {
+      "rank": 4,
+      "cite": "1706.03762v7 p.9 §6.2",
+      "pid": "attention:1200:0030",
+      "score": 1.265
+     }
+    ],
+    "context_chars": 3858
+   },
+   {
+    "qid": "Q3",
+    "paper": "attention",
+    "trap": "",
+    "facts": 5,
+    "facts_in_top_k": 5,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 1,
+    "top1_paper": "attention",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "1706.03762v7 p.6 §3.5",
+      "pid": "attention:1200:0016",
+      "score": 1.572
+     },
+     {
+      "rank": 2,
+      "cite": "1706.03762v7 p.6 §3.5",
+      "pid": "attention:1200:0017",
+      "score": 1.065
+     },
+     {
+      "rank": 3,
+      "cite": "1706.03762v7 p.9 §6.2",
+      "pid": "attention:1200:0030",
+      "score": 0.904
+     },
+     {
+      "rank": 4,
+      "cite": "1706.03762v7 pp.7-8 §5.4",
+      "pid": "attention:1200:0026",
+      "score": 0.789
+     }
+    ],
+    "context_chars": 3632
+   },
+   {
+    "qid": "Q4",
+    "paper": "attention",
+    "trap": "",
+    "facts": 2,
+    "facts_in_top_k": 2,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 2,
+    "top1_paper": "attention",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "1706.03762v7 p.6 §4",
+      "pid": "attention:1200:0019",
+      "score": 1.955
+     },
+     {
+      "rank": 2,
+      "cite": "1706.03762v7 pp.5-6 §3.4",
+      "pid": "attention:1200:0015",
+      "score": 1.755
+     },
+     {
+      "rank": 3,
+      "cite": "1706.03762v7 p.6 §4",
+      "pid": "attention:1200:0018",
+      "score": 1.37
+     },
+     {
+      "rank": 4,
+      "cite": "1706.03762v7 p.7 §4",
+      "pid": "attention:1200:0021",
+      "score": 1.047
+     }
+    ],
+    "context_chars": 3628
+   },
+   {
+    "qid": "Q5",
+    "paper": "attention",
+    "trap": "ragged table row / same number in another row",
+    "facts": 1,
+    "facts_in_top_k": 1,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 2,
+    "top1_paper": "attention",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "1706.03762v7 p.8 §6.1",
+      "pid": "attention:1200:0027",
+      "score": 1.704
+     },
+     {
+      "rank": 2,
+      "cite": "1706.03762v7 pp.7-8 §5.4",
+      "pid": "attention:1200:0026",
+      "score": 1.381
+     },
+     {
+      "rank": 3,
+      "cite": "1706.03762v7 p.8 §6.1",
+      "pid": "attention:1200:0028",
+      "score": 1.11
+     },
+     {
+      "rank": 4,
+      "cite": "1706.03762v7 p.7 §5.2",
+      "pid": "attention:1200:0024",
+      "score": 0.808
+     }
+    ],
+    "context_chars": 3325
+   },
+   {
+    "qid": "Q7",
+    "paper": "moshi",
+    "trap": "",
+    "facts": 4,
+    "facts_in_top_k": 4,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 2,
+    "top1_paper": "moshi",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2410.00037v1 p.2 §1",
+      "pid": "moshi:1200:0002",
+      "score": 1.407
+     },
+     {
+      "rank": 2,
+      "cite": "2410.00037v1 p.1 Abstract",
+      "pid": "moshi:1200:0000",
+      "score": 1.395
+     },
+     {
+      "rank": 3,
+      "cite": "2410.00037v1 p.41 §7",
+      "pid": "moshi:1200:0133",
+      "score": 1.345
+     },
+     {
+      "rank": 4,
+      "cite": "2410.00037v1 p.41 §7",
+      "pid": "moshi:1200:0134",
+      "score": 1.25
+     }
+    ],
+    "context_chars": 4489
+   },
+   {
+    "qid": "Q8",
+    "paper": "moshi",
+    "trap": "",
+    "facts": 4,
+    "facts_in_top_k": 0,
+    "gold_hit": false,
+    "all_facts": false,
+    "first_gold_rank": 61,
+    "top1_paper": "moshi",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2410.00037v1 p.7 §3.1",
+      "pid": "moshi:1200:0021",
+      "score": 1.852
+     },
+     {
+      "rank": 2,
+      "cite": "2507.07955v2 p.4 §2.1.1",
+      "pid": "dynamic_chunking:1200:0014",
+      "score": 1.769
+     },
+     {
+      "rank": 3,
+      "cite": "2410.00037v1 p.6 §2",
+      "pid": "moshi:1200:0018",
+      "score": 1.575
+     },
+     {
+      "rank": 4,
+      "cite": "2410.00037v1 pp.37-38 §6.3",
+      "pid": "moshi:1200:0122",
+      "score": 1.243
+     }
+    ],
+    "context_chars": 4701
+   },
+   {
+    "qid": "Q9",
+    "paper": "moshi",
+    "trap": "",
+    "facts": 4,
+    "facts_in_top_k": 0,
+    "gold_hit": false,
+    "all_facts": false,
+    "first_gold_rank": 8,
+    "top1_paper": "moshi",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2410.00037v1 p.5 §2",
+      "pid": "moshi:1200:0017",
+      "score": 1.607
+     },
+     {
+      "rank": 2,
+      "cite": "2410.00037v1 p.6 §2",
+      "pid": "moshi:1200:0018",
+      "score": 0.926
+     },
+     {
+      "rank": 3,
+      "cite": "2410.00037v1 p.6 §3.1",
+      "pid": "moshi:1200:0019",
+      "score": 0.813
+     },
+     {
+      "rank": 4,
+      "cite": "2410.00037v1 pp.2-3 §1",
+      "pid": "moshi:1200:0005",
+      "score": 0.792
+     }
+    ],
+    "context_chars": 3915
+   },
+   {
+    "qid": "Q10",
+    "paper": "moshi",
+    "trap": "",
+    "facts": 4,
+    "facts_in_top_k": 3,
+    "gold_hit": true,
+    "all_facts": false,
+    "first_gold_rank": 3,
+    "top1_paper": "moshi",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2410.00037v1 p.31 §5.7",
+      "pid": "moshi:1200:0102",
+      "score": 2.046
+     },
+     {
+      "rank": 2,
+      "cite": "2410.00037v1 p.31 §5.7",
+      "pid": "moshi:1200:0104",
+      "score": 1.923
+     },
+     {
+      "rank": 3,
+      "cite": "2410.00037v1 p.16 §3.4.4",
+      "pid": "moshi:1200:0051",
+      "score": 1.781
+     },
+     {
+      "rank": 4,
+      "cite": "2410.00037v1 pp.16-17 §3.4.4",
+      "pid": "moshi:1200:0052",
+      "score": 1.615
+     }
+    ],
+    "context_chars": 3554
+   },
+   {
+    "qid": "Q11",
+    "paper": "moshi",
+    "trap": "",
+    "facts": 1,
+    "facts_in_top_k": 1,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 2,
+    "top1_paper": "moshi",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2410.00037v1 p.26 §5.3",
+      "pid": "moshi:1200:0083",
+      "score": 1.435
+     },
+     {
+      "rank": 2,
+      "cite": "2410.00037v1 p.1 Abstract",
+      "pid": "moshi:1200:0001",
+      "score": 1.342
+     },
+     {
+      "rank": 3,
+      "cite": "2410.00037v1 p.2 §1",
+      "pid": "moshi:1200:0004",
+      "score": 1.286
+     },
+     {
+      "rank": 4,
+      "cite": "2410.00037v1 p.26 §5.3",
+      "pid": "moshi:1200:0085",
+      "score": 1.24
+     }
+    ],
+    "context_chars": 3728
+   },
+   {
+    "qid": "Q13",
+    "paper": "dynamic_chunking",
+    "trap": "same term in the wrong paper",
+    "facts": 4,
+    "facts_in_top_k": 4,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 1,
+    "top1_paper": "dynamic_chunking",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2507.07955v2 p.2 §1",
+      "pid": "dynamic_chunking:1200:0006",
+      "score": 1.677
+     },
+     {
+      "rank": 2,
+      "cite": "2507.07955v2 p.5 §2.1.2",
+      "pid": "dynamic_chunking:1200:0016",
+      "score": 1.661
+     },
+     {
+      "rank": 3,
+      "cite": "2507.07955v2 p.4 §2.1.1",
+      "pid": "dynamic_chunking:1200:0014",
+      "score": 1.545
+     },
+     {
+      "rank": 4,
+      "cite": "2507.07955v2 p.10 §3",
+      "pid": "dynamic_chunking:1200:0040",
+      "score": 1.426
+     }
+    ],
+    "context_chars": 4060
+   },
+   {
+    "qid": "Q14",
+    "paper": "dynamic_chunking",
+    "trap": "vocab mismatch with the passage",
+    "facts": 4,
+    "facts_in_top_k": 0,
+    "gold_hit": false,
+    "all_facts": false,
+    "first_gold_rank": null,
+    "top1_paper": "dynamic_chunking",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2507.07955v2 p.10 §2.4",
+      "pid": "dynamic_chunking:1200:0038",
+      "score": 1.681
+     },
+     {
+      "rank": 2,
+      "cite": "2507.07955v2 p.14 §3.1",
+      "pid": "dynamic_chunking:1200:0054",
+      "score": 1.486
+     },
+     {
+      "rank": 3,
+      "cite": "2507.07955v2 p.12 §3.1",
+      "pid": "dynamic_chunking:1200:0048",
+      "score": 1.318
+     },
+     {
+      "rank": 4,
+      "cite": "1706.03762v7 p.7 §4",
+      "pid": "attention:1200:0020",
+      "score": 1.308
+     }
+    ],
+    "context_chars": 3386
+   },
+   {
+    "qid": "Q15",
+    "paper": "dynamic_chunking",
+    "trap": "",
+    "facts": 5,
+    "facts_in_top_k": 5,
+    "gold_hit": true,
+    "all_facts": true,
+    "first_gold_rank": 2,
+    "top1_paper": "dynamic_chunking",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2507.07955v2 p.8 §2.2.3",
+      "pid": "dynamic_chunking:1200:0030",
+      "score": 2.27
+     },
+     {
+      "rank": 2,
+      "cite": "2507.07955v2 p.8 §2.2.3",
+      "pid": "dynamic_chunking:1200:0029",
+      "score": 1.863
+     },
+     {
+      "rank": 3,
+      "cite": "2507.07955v2 p.16 §3.2",
+      "pid": "dynamic_chunking:1200:0059",
+      "score": 0.933
+     },
+     {
+      "rank": 4,
+      "cite": "2507.07955v2 p.38 F Distilling Token-Level Models to Byte-Level (appendix)",
+      "pid": "dynamic_chunking:1200:0116",
+      "score": 0.825
+     }
+    ],
+    "context_chars": 4362
+   },
+   {
+    "qid": "Q16",
+    "paper": "dynamic_chunking",
+    "trap": "",
+    "facts": 3,
+    "facts_in_top_k": 0,
+    "gold_hit": false,
+    "all_facts": false,
+    "first_gold_rank": 8,
+    "top1_paper": "dynamic_chunking",
+    "top_k": [
+     {
+      "rank": 1,
+      "cite": "2507.07955v2 p.21 §3.3",
+      "pid": "dynamic_chunking:1200:0075",
+      "score": 1.459
+     },
+     {
+      "rank": 2,
+      "cite": "2507.07955v2 p.31 §A.1 (appendix)",
+      "pid": "dynamic_chunking:1200:0091",
+      "score": 1.408
+     },
+     {
+      "rank": 3,
+      "cite": "2507.07955v2 pp.31-32 §A.1.2 (appendix)",
+      "pid": "dynamic_chunking:1200:0093",
+      "score": 1.285
+     },
+     {
+      "rank": 4,
+      "cite": "2507.07955v2 p.32 §A.1.3 (appendix)",
+      "pid": "dynamic_chunking:1200:0096",
+      "score": 1.221
+     }
+    ],
+    "context_chars": 3207
+   }
+  ]
+ },
+ "evidence_strength": {
+  "small": {
+   "answerable": [
+    {
+     "qid": "Q1",
+     "best": 0.822,
+     "union": 0.822,
+     "top_bm25": 61.322,
+     "query_terms": 13
+    },
+    {
+     "qid": "Q2",
+     "best": 0.496,
+     "union": 0.496,
+     "top_bm25": 12.418,
+     "query_terms": 6
+    },
+    {
+     "qid": "Q3",
+     "best": 0.516,
+     "union": 0.516,
+     "top_bm25": 22.628,
+     "query_terms": 7
+    },
+    {
+     "qid": "Q4",
+     "best": 1.0,
+     "union": 1.0,
+     "top_bm25": 55.124,
+     "query_terms": 13
+    },
+    {
+     "qid": "Q5",
+     "best": 0.858,
+     "union": 1.0,
+     "top_bm25": 19.934,
+     "query_terms": 8
+    },
+    {
+     "qid": "Q7",
+     "best": 0.323,
+     "union": 0.432,
+     "top_bm25": 12.822,
+     "query_terms": 7
+    },
+    {
+     "qid": "Q8",
+     "best": 1.0,
+     "union": 1.0,
+     "top_bm25": 12.705,
+     "query_terms": 5
+    },
+    {
+     "qid": "Q9",
+     "best": 0.692,
+     "union": 1.0,
+     "top_bm25": 19.639,
+     "query_terms": 8
+    },
+    {
+     "qid": "Q10",
+     "best": 0.759,
+     "union": 0.759,
+     "top_bm25": 18.511,
+     "query_terms": 6
+    },
+    {
+     "qid": "Q11",
+     "best": 0.516,
+     "union": 0.516,
+     "top_bm25": 10.568,
+     "query_terms": 4
+    },
+    {
+     "qid": "Q13",
+     "best": 0.744,
+     "union": 0.744,
+     "top_bm25": 15.998,
+     "query_terms": 7
+    },
+    {
+     "qid": "Q14",
+     "best": 0.481,
+     "union": 0.6,
+     "top_bm25": 11.813,
+     "query_terms": 7
+    },
+    {
+     "qid": "Q15",
+     "best": 1.0,
+     "union": 1.0,
+     "top_bm25": 23.515,
+     "query_terms": 5
+    },
+    {
+     "qid": "Q16",
+     "best": 0.567,
+     "union": 0.827,
+     "top_bm25": 19.5,
+     "query_terms": 10
+    }
+   ],
+   "unanswerable": [
+    {
+     "qid": "Q6",
+     "best": 0.583,
+     "union": 0.628,
+     "top_bm25": 23.253,
+     "query_terms": 12
+    },
+    {
+     "qid": "Q12",
+     "best": 0.408,
+     "union": 1.0,
+     "top_bm25": 9.746,
+     "query_terms": 10
+    },
+    {
+     "qid": "Q17",
+     "best": 0.289,
+     "union": 0.515,
+     "top_bm25": 9.274,
+     "query_terms": 10
+    },
+    {
+     "qid": "Q18",
+     "best": 0.538,
+     "union": 1.0,
+     "top_bm25": 7.39,
+     "query_terms": 7
+    }
+   ],
+   "off_topic": [
+    {
+     "query": "What is the capital of France?",
+     "best": 1.0,
+     "union": 1.0,
+     "top_bm25": 5.73,
+     "query_terms": 2
+    },
+    {
+     "query": "How do I bake sourdough bread at home?",
+     "best": 0.0,
+     "union": 0.0,
+     "top_bm25": 0.0,
+     "query_terms": 4
+    },
+    {
+     "query": "Who won the 2022 football World Cup?",
+     "best": 0.415,
+     "union": 1.0,
+     "top_bm25": 10.375,
+     "query_terms": 5
+    },
+    {
+     "query": "Which Python web framework is the fastest?",
+     "best": 0.535,
+     "union": 0.535,
+     "top_bm25": 7.006,
+     "query_terms": 4
+    }
+   ]
+  },
+  "medium": {
+   "answerable": [
+    {
+     "qid": "Q1",
+     "best": 0.825,
+     "union": 0.825,
+     "top_bm25": 59.631,
+     "query_terms": 13
+    },
+    {
+     "qid": "Q2",
+     "best": 0.503,
+     "union": 0.661,
+     "top_bm25": 12.032,
+     "query_terms": 6
+    },
+    {
+     "qid": "Q3",
+     "best": 0.71,
+     "union": 0.71,
+     "top_bm25": 24.513,
+     "query_terms": 7
+    },
+    {
+     "qid": "Q4",
+     "best": 1.0,
+     "union": 1.0,
+     "top_bm25": 49.928,
+     "query_terms": 13
+    },
+    {
+     "qid": "Q5",
+     "best": 0.863,
+     "union": 1.0,
+     "top_bm25": 19.815,
+     "query_terms": 8
+    },
+    {
+     "qid": "Q7",
+     "best": 0.43,
+     "union": 0.43,
+     "top_bm25": 13.76,
+     "query_terms": 7
+    },
+    {
+     "qid": "Q8",
+     "best": 1.0,
+     "union": 1.0,
+     "top_bm25": 12.188,
+     "query_terms": 5
+    },
+    {
+     "qid": "Q9",
+     "best": 0.873,
+     "union": 1.0,
+     "top_bm25": 22.975,
+     "query_terms": 8
+    },
+    {
+     "qid": "Q10",
+     "best": 0.764,
+     "union": 0.764,
+     "top_bm25": 16.989,
+     "query_terms": 6
+    },
+    {
+     "qid": "Q11",
+     "best": 0.695,
+     "union": 0.695,
+     "top_bm25": 11.513,
+     "query_terms": 4
+    },
+    {
+     "qid": "Q13",
+     "best": 0.736,
+     "union": 0.736,
+     "top_bm25": 14.595,
+     "query_terms": 7
+    },
+    {
+     "qid": "Q14",
+     "best": 0.484,
+     "union": 0.892,
+     "top_bm25": 8.863,
+     "query_terms": 7
+    },
+    {
+     "qid": "Q15",
+     "best": 1.0,
+     "union": 1.0,
+     "top_bm25": 21.372,
+     "query_terms": 5
+    },
+    {
+     "qid": "Q16",
+     "best": 0.58,
+     "union": 0.651,
+     "top_bm25": 19.791,
+     "query_terms": 10
+    }
+   ],
+   "unanswerable": [
+    {
+     "qid": "Q6",
+     "best": 0.597,
+     "union": 0.635,
+     "top_bm25": 24.055,
+     "query_terms": 12
+    },
+    {
+     "qid": "Q12",
+     "best": 0.409,
+     "union": 0.809,
+     "top_bm25": 8.671,
+     "query_terms": 10
+    },
+    {
+     "qid": "Q17",
+     "best": 0.281,
+     "union": 0.494,
+     "top_bm25": 8.128,
+     "query_terms": 10
+    },
+    {
+     "qid": "Q18",
+     "best": 0.574,
+     "union": 1.0,
+     "top_bm25": 6.402,
+     "query_terms": 7
+    }
+   ],
+   "off_topic": [
+    {
+     "query": "What is the capital of France?",
+     "best": 1.0,
+     "union": 1.0,
+     "top_bm25": 5.233,
+     "query_terms": 2
+    },
+    {
+     "query": "How do I bake sourdough bread at home?",
+     "best": 0.0,
+     "union": 0.0,
+     "top_bm25": 0.0,
+     "query_terms": 4
+    },
+    {
+     "query": "Who won the 2022 football World Cup?",
+     "best": 0.426,
+     "union": 1.0,
+     "top_bm25": 9.711,
+     "query_terms": 5
+    },
+    {
+     "query": "Which Python web framework is the fastest?",
+     "best": 0.532,
+     "union": 1.0,
+     "top_bm25": 5.844,
+     "query_terms": 4
+    }
+   ]
+  },
+  "large": {
+   "answerable": [
+    {
+     "qid": "Q1",
+     "best": 0.832,
+     "union": 0.832,
+     "top_bm25": 54.238,
+     "query_terms": 13
+    },
+    {
+     "qid": "Q2",
+     "best": 0.501,
+     "union": 0.653,
+     "top_bm25": 10.365,
+     "query_terms": 6
+    },
+    {
+     "qid": "Q3",
+     "best": 0.719,
+     "union": 0.719,
+     "top_bm25": 24.008,
+     "query_terms": 7
+    },
+    {
+     "qid": "Q4",
+     "best": 1.0,
+     "union": 1.0,
+     "top_bm25": 47.014,
+     "query_terms": 13
+    },
+    {
+     "qid": "Q5",
+     "best": 0.866,
+     "union": 1.0,
+     "top_bm25": 17.458,
+     "query_terms": 8
+    },
+    {
+     "qid": "Q7",
+     "best": 0.426,
+     "union": 0.426,
+     "top_bm25": 14.626,
+     "query_terms": 7
+    },
+    {
+     "qid": "Q8",
+     "best": 1.0,
+     "union": 1.0,
+     "top_bm25": 8.984,
+     "query_terms": 5
+    },
+    {
+     "qid": "Q9",
+     "best": 0.936,
+     "union": 1.0,
+     "top_bm25": 22.943,
+     "query_terms": 8
+    },
+    {
+     "qid": "Q10",
+     "best": 1.0,
+     "union": 1.0,
+     "top_bm25": 16.835,
+     "query_terms": 6
+    },
+    {
+     "qid": "Q11",
+     "best": 1.0,
+     "union": 1.0,
+     "top_bm25": 13.445,
+     "query_terms": 4
+    },
+    {
+     "qid": "Q13",
+     "best": 0.728,
+     "union": 0.728,
+     "top_bm25": 13.078,
+     "query_terms": 7
+    },
+    {
+     "qid": "Q14",
+     "best": 0.595,
+     "union": 0.893,
+     "top_bm25": 10.362,
+     "query_terms": 7
+    },
+    {
+     "qid": "Q15",
+     "best": 1.0,
+     "union": 1.0,
+     "top_bm25": 20.122,
+     "query_terms": 5
+    },
+    {
+     "qid": "Q16",
+     "best": 0.82,
+     "union": 0.82,
+     "top_bm25": 18.519,
+     "query_terms": 10
+    }
+   ],
+   "unanswerable": [
+    {
+     "qid": "Q6",
+     "best": 0.708,
+     "union": 0.708,
+     "top_bm25": 22.335,
+     "query_terms": 12
+    },
+    {
+     "qid": "Q12",
+     "best": 0.478,
+     "union": 0.627,
+     "top_bm25": 9.675,
+     "query_terms": 10
+    },
+    {
+     "qid": "Q17",
+     "best": 0.372,
+     "union": 0.63,
+     "top_bm25": 9.793,
+     "query_terms": 10
+    },
+    {
+     "qid": "Q18",
+     "best": 0.59,
+     "union": 1.0,
+     "top_bm25": 5.565,
+     "query_terms": 7
+    }
+   ],
+   "off_topic": [
+    {
+     "query": "What is the capital of France?",
+     "best": 1.0,
+     "union": 1.0,
+     "top_bm25": 5.133,
+     "query_terms": 2
+    },
+    {
+     "query": "How do I bake sourdough bread at home?",
+     "best": 0.0,
+     "union": 0.0,
+     "top_bm25": 0.0,
+     "query_terms": 4
+    },
+    {
+     "query": "Who won the 2022 football World Cup?",
+     "best": 0.432,
+     "union": 1.0,
+     "top_bm25": 8.398,
+     "query_terms": 5
+    },
+    {
+     "query": "Which Python web framework is the fastest?",
+     "best": 0.538,
+     "union": 1.0,
+     "top_bm25": 5.206,
+     "query_terms": 4
+    }
+   ]
+  },
+  "medium+rerank": {
+   "answerable": [
+    {
+     "qid": "Q1",
+     "best": 0.825,
+     "union": 0.825,
+     "top_bm25": 59.631,
+     "query_terms": 13
+    },
+    {
+     "qid": "Q2",
+     "best": 0.503,
+     "union": 0.661,
+     "top_bm25": 10.907,
+     "query_terms": 6
+    },
+    {
+     "qid": "Q3",
+     "best": 0.71,
+     "union": 0.71,
+     "top_bm25": 24.513,
+     "query_terms": 7
+    },
+    {
+     "qid": "Q4",
+     "best": 1.0,
+     "union": 1.0,
+     "top_bm25": 49.928,
+     "query_terms": 13
+    },
+    {
+     "qid": "Q5",
+     "best": 0.863,
+     "union": 1.0,
+     "top_bm25": 19.815,
+     "query_terms": 8
+    },
+    {
+     "qid": "Q7",
+     "best": 0.43,
+     "union": 0.43,
+     "top_bm25": 13.76,
+     "query_terms": 7
+    },
+    {
+     "qid": "Q8",
+     "best": 1.0,
+     "union": 1.0,
+     "top_bm25": 12.188,
+     "query_terms": 5
+    },
+    {
+     "qid": "Q9",
+     "best": 0.873,
+     "union": 1.0,
+     "top_bm25": 22.975,
+     "query_terms": 8
+    },
+    {
+     "qid": "Q10",
+     "best": 0.764,
+     "union": 0.764,
+     "top_bm25": 16.85,
+     "query_terms": 6
+    },
+    {
+     "qid": "Q11",
+     "best": 0.695,
+     "union": 0.695,
+     "top_bm25": 11.513,
+     "query_terms": 4
+    },
+    {
+     "qid": "Q13",
+     "best": 0.736,
+     "union": 0.736,
+     "top_bm25": 14.595,
+     "query_terms": 7
+    },
+    {
+     "qid": "Q14",
+     "best": 0.484,
+     "union": 0.595,
+     "top_bm25": 8.481,
+     "query_terms": 7
+    },
+    {
+     "qid": "Q15",
+     "best": 1.0,
+     "union": 1.0,
+     "top_bm25": 21.372,
+     "query_terms": 5
+    },
+    {
+     "qid": "Q16",
+     "best": 0.58,
+     "union": 0.651,
+     "top_bm25": 19.791,
+     "query_terms": 10
+    }
+   ],
+   "unanswerable": [
+    {
+     "qid": "Q6",
+     "best": 0.597,
+     "union": 0.635,
+     "top_bm25": 21.046,
+     "query_terms": 12
+    },
+    {
+     "qid": "Q12",
+     "best": 0.392,
+     "union": 0.392,
+     "top_bm25": 7.719,
+     "query_terms": 10
+    },
+    {
+     "qid": "Q17",
+     "best": 0.281,
+     "union": 0.504,
+     "top_bm25": 7.913,
+     "query_terms": 10
+    },
+    {
+     "qid": "Q18",
+     "best": 0.426,
+     "union": 0.426,
+     "top_bm25": 6.187,
+     "query_terms": 7
+    }
+   ],
+   "off_topic": [
+    {
+     "query": "What is the capital of France?",
+     "best": 1.0,
+     "union": 1.0,
+     "top_bm25": 5.233,
+     "query_terms": 2
+    },
+    {
+     "query": "How do I bake sourdough bread at home?",
+     "best": 0.0,
+     "union": 0.0,
+     "top_bm25": 0.0,
+     "query_terms": 4
+    },
+    {
+     "query": "Who won the 2022 football World Cup?",
+     "best": 0.426,
+     "union": 1.0,
+     "top_bm25": 9.711,
+     "query_terms": 5
+    },
+    {
+     "query": "Which Python web framework is the fastest?",
+     "best": 0.532,
+     "union": 1.0,
+     "top_bm25": 5.844,
+     "query_terms": 4
+    }
+   ]
+  }
+ }
+}

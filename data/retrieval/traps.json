@@ -1,0 +1,594 @@
+{
+ "_generated_by": "scripts/retriever_traps.py",
+ "size": 2400,
+ "rows": [
+  {
+   "qid": "Q5",
+   "paper": "attention",
+   "trap": "ragged table row / same number in another row",
+   "question": "What training cost in FLOPs does Table 2 report for the big Transformer?",
+   "ranks": {
+    "600": {
+     "right_or_distractor_rank": 3,
+     "its_cite": "1706.03762v7 p.8 §5.4",
+     "first_wrong_paper_rank": 5,
+     "ranked_pieces": 444
+    },
+    "1200": {
+     "right_or_distractor_rank": 2,
+     "its_cite": "1706.03762v7 pp.7-8 §5.4",
+     "first_wrong_paper_rank": 5,
+     "ranked_pieces": 270
+    },
+    "2400": {
+     "right_or_distractor_rank": 2,
+     "its_cite": "1706.03762v7 pp.7-8 §5.4",
+     "first_wrong_paper_rank": 4,
+     "ranked_pieces": 159
+    }
+   },
+   "top_hits": [
+    {
+     "rank": 1,
+     "score": 17.46,
+     "paper": "attention",
+     "wrong_paper": false,
+     "cite": "1706.03762v7 p.8 §6.1",
+     "text": "On the WMT 2014 English-to-German translation task, the big transformer model (Transformer (big) in Table 2) outperforms the best previously reported models (in"
+    },
+    {
+     "rank": 2,
+     "score": 13.77,
+     "paper": "attention",
+     "wrong_paper": false,
+     "cite": "1706.03762v7 pp.7-8 §5.4",
+     "text": "We employ three types of regularization during training: Table 2: The Transformer achieves better BLEU scores than previous state-of-the-art models on the Engli"
+    },
+    {
+     "rank": 3,
+     "score": 9.15,
+     "paper": "attention",
+     "wrong_paper": false,
+     "cite": "1706.03762v7 p.7 §5.2",
+     "text": "We trained our models on one machine with 8 NVIDIA P100 GPUs. For our base models using the hyperparameters described throughout the paper, each training step t"
+    },
+    {
+     "rank": 4,
+     "score": 7.99,
+     "paper": "dynamic_chunking",
+     "wrong_paper": true,
+     "cite": "2507.07955v2 p.11 §3",
+     "text": "Experimental Setup. Following established practice (Xue et al. 2022; Wang et al. 2024; Slagle 2024), we measure performance using bits-per-byte (BPB) to ensure "
+    },
+    {
+     "rank": 5,
+     "score": 7.48,
+     "paper": "dynamic_chunking",
+     "wrong_paper": true,
+     "cite": "2507.07955v2 p.37 §E.2 (appendix)",
+     "text": "In Section 3.2, we analyzed the performance of H-Net (2-stage) against Transformer and H-Net (space) on Chinese and on code, finding superior scaling for H-Net "
+    }
+   ],
+   "shared_terms": [
+    "train",
+    "cost",
+    "flop",
+    "table",
+    "2",
+    "big",
+    "transformer"
+   ],
+   "question_terms": [
+    "train",
+    "cost",
+    "flop",
+    "table",
+    "2",
+    "report",
+    "big",
+    "transformer"
+   ]
+  },
+  {
+   "qid": "Q6",
+   "paper": "attention",
+   "trap": "distractors (unanswerable)",
+   "question": "What was the Transformer's 95th percentile inference latency on the WMT 2014 English-German test set?",
+   "ranks": {
+    "600": {
+     "right_or_distractor_rank": 83,
+     "its_cite": "2410.00037v1 p.1 Abstract",
+     "first_wrong_paper_rank": 10,
+     "ranked_pieces": 282
+    },
+    "1200": {
+     "right_or_distractor_rank": 44,
+     "its_cite": "2410.00037v1 p.1 Abstract",
+     "first_wrong_paper_rank": 9,
+     "ranked_pieces": 206
+    },
+    "2400": {
+     "right_or_distractor_rank": 33,
+     "its_cite": "2410.00037v1 p.1 Abstract",
+     "first_wrong_paper_rank": 8,
+     "ranked_pieces": 131
+    }
+   },
+   "top_hits": [
+    {
+     "rank": 1,
+     "score": 22.33,
+     "paper": "attention",
+     "wrong_paper": false,
+     "cite": "1706.03762v7 p.7 §5.1",
+     "text": "We trained on the standard WMT 2014 English-German dataset consisting of about 4.5 million sentence pairs. Sentences were encoded using byte-pair encoding [3], "
+    },
+    {
+     "rank": 2,
+     "score": 22.1,
+     "paper": "attention",
+     "wrong_paper": false,
+     "cite": "1706.03762v7 p.8 §6.1",
+     "text": "On the WMT 2014 English-to-German translation task, the big transformer model (Transformer (big) in Table 2) outperforms the best previously reported models (in"
+    },
+    {
+     "rank": 3,
+     "score": 19.35,
+     "paper": "attention",
+     "wrong_paper": false,
+     "cite": "1706.03762v7 p.10 §7",
+     "text": "In this work, we presented the Transformer, the first sequence transduction model based entirely on attention, replacing the recurrent layers most commonly used"
+    },
+    {
+     "rank": 4,
+     "score": 18.59,
+     "paper": "attention",
+     "wrong_paper": false,
+     "cite": "1706.03762v7 p.1 Abstract",
+     "text": "The dominant sequence transduction models are based on complex recurrent or convolutional neural networks that include an encoder and a decoder. The best perfor"
+    },
+    {
+     "rank": 5,
+     "score": 15.2,
+     "paper": "attention",
+     "wrong_paper": false,
+     "cite": "1706.03762v7 pp.9-10 §6.3",
+     "text": "To evaluate if the Transformer can generalize to other tasks we performed experiments on English constituency parsing. This task presents specific challenges: t"
+    }
+   ],
+   "shared_terms": [
+    "latency"
+   ],
+   "question_terms": [
+    "transformer",
+    "s",
+    "95th",
+    "percentile",
+    "inference",
+    "latency",
+    "wmt",
+    "2014",
+    "english",
+    "german",
+    "test",
+    "set"
+   ]
+  },
+  {
+   "qid": "Q12",
+   "paper": "moshi",
+   "trap": "distractors (unanswerable)",
+   "question": "What is Moshi's word error rate on noisy Indian English telephone calls?",
+   "ranks": {
+    "600": {
+     "right_or_distractor_rank": 135,
+     "its_cite": "2410.00037v1 p.31 §5.7",
+     "first_wrong_paper_rank": 6,
+     "ranked_pieces": 290
+    },
+    "1200": {
+     "right_or_distractor_rank": 6,
+     "its_cite": "2410.00037v1 p.21 §4.4",
+     "first_wrong_paper_rank": 8,
+     "ranked_pieces": 194
+    },
+    "2400": {
+     "right_or_distractor_rank": 1,
+     "its_cite": "2410.00037v1 pp.17-18 §4.2",
+     "first_wrong_paper_rank": 3,
+     "ranked_pieces": 120
+    }
+   },
+   "top_hits": [
+    {
+     "rank": 1,
+     "score": 9.68,
+     "paper": "moshi",
+     "wrong_paper": false,
+     "cite": "2410.00037v1 pp.17-18 §4.2",
+     "text": "We use a first audio collection of 7 million hours, which we call the unsupervised audio dataset, of readily available audio content, the majority of which cont"
+    },
+    {
+     "rank": 2,
+     "score": 8.3,
+     "paper": "moshi",
+     "wrong_paper": false,
+     "cite": "2410.00037v1 pp.16-17 §3.4.4",
+     "text": "Note that if t_i = 1, we instead insert EPAD at index 1, and shift the text tokens. We do not insert an EPAD token if it would overwrite a text token from a pre"
+    },
+    {
+     "rank": 3,
+     "score": 8.15,
+     "paper": "dynamic_chunking",
+     "wrong_paper": true,
+     "cite": "2507.07955v2 p.10 §3",
+     "text": "We first describe our general experimental protocol for language modeling, used for the majority of our experiments. In Section 3.1, we evaluate on a high-quali"
+    },
+    {
+     "rank": 4,
+     "score": 7.99,
+     "paper": "moshi",
+     "wrong_paper": false,
+     "cite": "2410.00037v1 pp.55-56 Appendix C. Delayed text LM as a zero-shot streaming ASR and TTS (appendix)",
+     "text": "As explained in Section 3.4.4, Moshi models audio tokens, along with a text stream, that is aligned on the audio frame rate with the use of special padding toke"
+    },
+    {
+     "rank": 5,
+     "score": 7.75,
+     "paper": "moshi",
+     "wrong_paper": false,
+     "cite": "2410.00037v1 p.31 §5.7",
+     "text": "Metrics. Section 3.4.4 and Appendix C describe how Inner Monologue can provide a streaming TTS or streaming ASR system by simply changing the delay it uses betw"
+    }
+   ],
+   "shared_terms": [
+    "moshi",
+    "word",
+    "english",
+    "call"
+   ],
+   "question_terms": [
+    "moshi",
+    "s",
+    "word",
+    "error",
+    "rate",
+    "noisy",
+    "indian",
+    "english",
+    "telephone",
+    "call"
+   ]
+  },
+  {
+   "qid": "Q13",
+   "paper": "dynamic_chunking",
+   "trap": "same term in the wrong paper",
+   "question": "In H-Net, what do the encoder and decoder networks do, and at what resolution do they run?",
+   "ranks": {
+    "600": {
+     "right_or_distractor_rank": 1,
+     "its_cite": "2507.07955v2 p.2 §1",
+     "first_wrong_paper_rank": 14,
+     "ranked_pieces": 221
+    },
+    "1200": {
+     "right_or_distractor_rank": 1,
+     "its_cite": "2507.07955v2 p.2 §1",
+     "first_wrong_paper_rank": 23,
+     "ranked_pieces": 143
+    },
+    "2400": {
+     "right_or_distractor_rank": 3,
+     "its_cite": "2507.07955v2 p.2 §1",
+     "first_wrong_paper_rank": 24,
+     "ranked_pieces": 92
+    }
+   },
+   "top_hits": [
+    {
+     "rank": 1,
+     "score": 13.08,
+     "paper": "dynamic_chunking",
+     "wrong_paper": false,
+     "cite": "2507.07955v2 pp.19-20 §3.3",
+     "text": "A natural question arises: does the importance of Mamba layers (i) stem specifically from processing fine-grained byte inputs, or (ii) because they are better f"
+    },
+    {
+     "rank": 2,
+     "score": 13.02,
+     "paper": "dynamic_chunking",
+     "wrong_paper": false,
+     "cite": "2507.07955v2 pp.4-5 §2.1.1",
+     "text": "H-Net employs a hierarchical architecture comprising three primary components – encoder networks (E), main network (M), and decoder networks (D) – where each co"
+    },
+    {
+     "rank": 3,
+     "score": 13.02,
+     "paper": "dynamic_chunking",
+     "wrong_paper": false,
+     "cite": "2507.07955v2 p.2 §1",
+     "text": "Hierarchical Processing. The H-Net adopts the hierarchical architecture from prior work (Goel et al. 2022; Nawrot, Tworkowski, et al. 2022; Slagle 2024), resemb"
+    },
+    {
+     "rank": 4,
+     "score": 11.22,
+     "paper": "dynamic_chunking",
+     "wrong_paper": false,
+     "cite": "2507.07955v2 p.5 §2.1.2",
+     "text": "Encoder and Decoder Networks. The encoder and decoder networks in H-Net face unique design constraints due to their dual objectives and computational requiremen"
+    },
+    {
+     "rank": 5,
+     "score": 9.99,
+     "paper": "dynamic_chunking",
+     "wrong_paper": false,
+     "cite": "2507.07955v2 pp.18-19 §3.3",
+     "text": "Encoder & Decoder Layer Selection. The composition of sequence mixing layers in H-Net’s encoders and decoders substantially influences both compression efficien"
+    }
+   ],
+   "shared_terms": [
+    "h",
+    "net",
+    "encoder",
+    "decoder",
+    "network",
+    "resolution"
+   ],
+   "question_terms": [
+    "h",
+    "net",
+    "encoder",
+    "decoder",
+    "network",
+    "resolution",
+    "run"
+   ]
+  },
+  {
+   "qid": "Q14",
+   "paper": "dynamic_chunking",
+   "trap": "vocab mismatch with the passage",
+   "question": "How does H-Net decide where to cut the byte stream into pieces?",
+   "ranks": {
+    "600": {
+     "right_or_distractor_rank": null,
+     "its_cite": null,
+     "first_wrong_paper_rank": 9,
+     "ranked_pieces": 251
+    },
+    "1200": {
+     "right_or_distractor_rank": null,
+     "its_cite": null,
+     "first_wrong_paper_rank": 3,
+     "ranked_pieces": 172
+    },
+    "2400": {
+     "right_or_distractor_rank": null,
+     "its_cite": null,
+     "first_wrong_paper_rank": 3,
+     "ranked_pieces": 104
+    }
+   },
+   "top_hits": [
+    {
+     "rank": 1,
+     "score": 10.36,
+     "paper": "dynamic_chunking",
+     "wrong_paper": false,
+     "cite": "2507.07955v2 pp.14-15 §3.1",
+     "text": "Visualization of Tokenized Positions. In Figure 4, we provide visualizations of the boundaries dynamically drawn by H- Net (1-stage) and H-Net (2-stage). The vi"
+    },
+    {
+     "rank": 2,
+     "score": 9.29,
+     "paper": "dynamic_chunking",
+     "wrong_paper": false,
+     "cite": "2507.07955v2 p.10 §2.4",
+     "text": "(c) Step the main network if necessary, in which case we also need to step the dechunking layer. (d) Use the result of the dechunking layer to step the decoder "
+    },
+    {
+     "rank": 3,
+     "score": 7.09,
+     "paper": "attention",
+     "wrong_paper": true,
+     "cite": "1706.03762v7 p.7 §5.1",
+     "text": "We trained on the standard WMT 2014 English-German dataset consisting of about 4.5 million sentence pairs. Sentences were encoded using byte-pair encoding [3], "
+    },
+    {
+     "rank": 4,
+     "score": 6.58,
+     "paper": "dynamic_chunking",
+     "wrong_paper": false,
+     "cite": "2507.07955v2 pp.15-16 §3.2",
+     "text": "Besides conventional language modeling, we also examine three other language modeling settings: Chinese, code, and DNA. These three settings present distinct ch"
+    },
+    {
+     "rank": 5,
+     "score": 6.56,
+     "paper": "dynamic_chunking",
+     "wrong_paper": false,
+     "cite": "2507.07955v2 p.12 §3.1",
+     "text": "Training Curves. Figure 3 presents validation BPB metrics throughout training for both Large and XL model scales. Large Scale. At the Large scale, we make note "
+    }
+   ],
+   "shared_terms": [],
+   "gold_piece": "2507.07955v2 p.6 §2.2.1",
+   "question_terms": [
+    "h",
+    "net",
+    "decide",
+    "cut",
+    "byte",
+    "stream",
+    "piece"
+   ]
+  },
+  {
+   "qid": "Q17",
+   "paper": "dynamic_chunking",
+   "trap": "distractors (unanswerable)",
+   "question": "What is H-Net's p95 latency serving 1,000 simultaneous requests?",
+   "ranks": {
+    "600": {
+     "right_or_distractor_rank": 142,
+     "its_cite": "2410.00037v1 p.1 Abstract",
+     "first_wrong_paper_rank": 2,
+     "ranked_pieces": 375
+    },
+    "1200": {
+     "right_or_distractor_rank": 75,
+     "its_cite": "2410.00037v1 p.1 Abstract",
+     "first_wrong_paper_rank": 1,
+     "ranked_pieces": 243
+    },
+    "2400": {
+     "right_or_distractor_rank": 44,
+     "its_cite": "2410.00037v1 p.1 Abstract",
+     "first_wrong_paper_rank": 1,
+     "ranked_pieces": 144
+    }
+   },
+   "top_hits": [
+    {
+     "rank": 1,
+     "score": 9.79,
+     "paper": "moshi",
+     "wrong_paper": true,
+     "cite": "2410.00037v1 p.2 §1",
+     "text": "Voice has provided a convenient interface to early conversational systems, from Alexa^1 to Siri^2 and Google Assistant.^3 In this context, a “wake word” spoken "
+    },
+    {
+     "rank": 2,
+     "score": 7.91,
+     "paper": "moshi",
+     "wrong_paper": true,
+     "cite": "2410.00037v1 pp.19-20 §4.3",
+     "text": "Similarly, to give Moshi information about itself and the Kyutai lab, we generate paragraphs describing both and use them as additional context. Second, we prod"
+    },
+    {
+     "rank": 3,
+     "score": 7.88,
+     "paper": "dynamic_chunking",
+     "wrong_paper": false,
+     "cite": "2507.07955v2 p.5 §2.1.2",
+     "text": "Encoder and Decoder Networks. The encoder and decoder networks in H-Net face unique design constraints due to their dual objectives and computational requiremen"
+    },
+    {
+     "rank": 4,
+     "score": 7.77,
+     "paper": "dynamic_chunking",
+     "wrong_paper": false,
+     "cite": "2507.07955v2 p.22 §4",
+     "text": "Deeper Hierarchies. H-Net is the first dynamic hierarchical model that can recursively nest its chunking strategy (see Table 6 and Appendix A). In this paper, w"
+    },
+    {
+     "rank": 5,
+     "score": 7.22,
+     "paper": "moshi",
+     "wrong_paper": true,
+     "cite": "2410.00037v1 p.58 Appendix D. Characterizing Audio Artifacts Caused by Quantization (appendix)",
+     "text": "First, recall that Moshi jointly outputs two streams of tokens, W_k for text, and A_s,k for audio, where 1 ≤ k ≤ Q corresponds to the semantic+acoustic tokens o"
+    }
+   ],
+   "shared_terms": [
+    "latency"
+   ],
+   "question_terms": [
+    "h",
+    "net",
+    "s",
+    "p95",
+    "latency",
+    "serv",
+    "1",
+    "000",
+    "simultaneous",
+    "request"
+   ]
+  },
+  {
+   "qid": "Q18",
+   "paper": "dynamic_chunking",
+   "trap": "distractors (unanswerable)",
+   "question": "How much energy (kWh) or CO2 did training the H-Net models use?",
+   "ranks": {
+    "600": {
+     "right_or_distractor_rank": 383,
+     "its_cite": "2507.07955v2 p.13 §3.1",
+     "first_wrong_paper_rank": 2,
+     "ranked_pieces": 472
+    },
+    "1200": {
+     "right_or_distractor_rank": 240,
+     "its_cite": "2507.07955v2 p.13 §3.1",
+     "first_wrong_paper_rank": 1,
+     "ranked_pieces": 277
+    },
+    "2400": {
+     "right_or_distractor_rank": 13,
+     "its_cite": "2507.07955v2 pp.12-13 §3.1",
+     "first_wrong_paper_rank": 2,
+     "ranked_pieces": 155
+    }
+   },
+   "top_hits": [
+    {
+     "rank": 1,
+     "score": 5.56,
+     "paper": "dynamic_chunking",
+     "wrong_paper": false,
+     "cite": "2507.07955v2 p.12 §3.1",
+     "text": "Training Curves. Figure 3 presents validation BPB metrics throughout training for both Large and XL model scales. Large Scale. At the Large scale, we make note "
+    },
+    {
+     "rank": 2,
+     "score": 5.45,
+     "paper": "moshi",
+     "wrong_paper": true,
+     "cite": "2410.00037v1 pp.53-54 Appendix B. Audio matching and deduplication (appendix)",
+     "text": "We have developed an audio matching system, whose objective is twofold: 1. Deduplication of source content. Removing frequent duplicates to avoid overfitting an"
+    },
+    {
+     "rank": 3,
+     "score": 5.43,
+     "paper": "dynamic_chunking",
+     "wrong_paper": false,
+     "cite": "2507.07955v2 p.4 §1",
+     "text": "Recursive H-Nets represent a new class of foundation model architectures that not only overcome tokenization, but discover and operate over abstractions learned"
+    },
+    {
+     "rank": 4,
+     "score": 5.39,
+     "paper": "dynamic_chunking",
+     "wrong_paper": false,
+     "cite": "2507.07955v2 pp.15-16 §3.2",
+     "text": "Besides conventional language modeling, we also examine three other language modeling settings: Chinese, code, and DNA. These three settings present distinct ch"
+    },
+    {
+     "rank": 5,
+     "score": 5.35,
+     "paper": "dynamic_chunking",
+     "wrong_paper": false,
+     "cite": "2507.07955v2 p.17 §3.2",
+     "text": "Table 5: Model details and final performance on HG38. We trained two isotropic models and two H-Net models, varying the main network architecture (Transformer o"
+    }
+   ],
+   "shared_terms": [
+    "train",
+    "h",
+    "net",
+    "model"
+   ],
+   "question_terms": [
+    "energy",
+    "kwh",
+    "co2",
+    "train",
+    "h",
+    "net",
+    "model"
+   ]
+  }
+ ]
+}

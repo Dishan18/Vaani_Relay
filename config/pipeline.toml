@@ -1,0 +1,62 @@
+# Settings for relay/pipeline.py. Each number says where it comes from:
+#   (measured: <file>)  read off a file a script produced
+#   (assumption)        a choice to revisit once the named measurement exists
+
+[retrieval]
+# (measured: data/retrieval/topk.md) 2400-char pieces with k=3 had the best gold hit@k (93%) and
+# fact recall (84%) at the same median context size as 1200 x 5; the lexical rerank did not raise
+# gold hit@k at 1200 chars.
+piece_chars = 2400
+k_full = 3
+k_lean = 2                 # lean answers read fewer pieces (assumption: about 2/3 of the tokens)
+rerank = false
+# One more search, with the router's alternative phrasing (or the raw question), when the best
+# piece covers less than this share of the question's terms (idf-weighted). (assumption)
+second_search_below = 0.6
+
+[decide]
+# Refuse without any model call when retrieval found almost nothing. (measured:
+# data/retrieval/topk.md, "Evidence strength") Lowest values over the answerable questions at 2400
+# chars: best 0.426, top BM25 8.98. These thresholds are well below that, so they only catch
+# near-zero overlap ("How do I bake sourdough bread?" scores 0 / 0). Lexical overlap does NOT
+# separate unanswerable questions about the papers from answerable ones (unanswerable best goes up
+# to 0.708), so those are refused by the drafter, and off-topic ones by the router.
+refuse_if_best_below = 0.3
+refuse_if_top_bm25_below = 4.0
+
+[models]
+# Every limit is per model (measured: data/probe/findings.md Q3), so steps on different models do
+# not compete for the same buckets. Each list is that step's fallback order.
+# Router: qwen had the shortest server queue (p50 0.05 s vs 0.39 s / 0.99 s) and runs without
+# reasoning (measured: data/probe/calibration.json).
+understand = ["qwen/qwen3.8-27b", "openai/gpt-oss-20b"]
+# Drafter: 120b first for answer quality (assumption until the retrieval sweep R3 measures it);
+# its queue tail is the longest (max 6.8 s in the probe), which the ladder sees as wait.
+draft = ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b"]
+# Verifier: never the model that drafted (an independent check, a different bucket).
+verify = ["qwen/qwen3.8-27b", "openai/gpt-oss-20b", "openai/gpt-oss-120b"]
+
+[max_tokens]
+# gpt-oss reasoning tokens count toward completion_tokens (measured: findings.md), so drafts get
+# room for reasoning plus about 6 sentences. Admission holds only min(max_tokens, ~200) beyond the
+# prompt (measured: findings.md Q2), so a generous max_tokens costs little budget up front.
+understand = 300
+draft = 1200
+verify = 400
+
+[ladder]
+# The degrade ladder is decided from the limiter's predicted wait (Limiter.predict_wait).
+preferred_free_within_s = 2.0     # (assumption) the spec's "free within 2 s"
+router_free_within_s = 0.5        # (assumption) skip the router rather than wait for it
+max_wait_s = 8.0                  # (assumption, PLAN.md G3) longest budget wait before passages
+deadline_s = 30.0                 # (assumption) whole request, arrival to release
+verify_min_tpm_left_fraction = 0.3  # (assumption) verify only if the verifier's TPM keeps 30% after it
+busy_retry_s = 10                 # (assumption) "retry in N s" after an internal failure
+
+[timeouts]
+# (measured: data/probe/calibration.json, ttfb.headers_ms, n = 13-21, p95 = max at that n)
+# response headers p95: qwen 0.38 s, 20b 1.76 s, 120b 6.92 s (server queue 6.76 s). Per-step
+# timeouts leave room for that tail plus reasoning before the first visible token.
+understand = { first_visible_s = 6.0, stall_s = 4.0, deadline_s = 10.0 }
+draft = { first_visible_s = 15.0, stall_s = 6.0, deadline_s = 25.0 }
+verify = { first_visible_s = 8.0, stall_s = 4.0, deadline_s = 12.0 }

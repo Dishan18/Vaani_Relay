@@ -135,8 +135,9 @@ class _Counter:
 
 
 class FakeGroq:
-    def __init__(self, truth: Truth = Truth(), clock=time.time) -> None:
+    def __init__(self, truth: Truth = Truth(), clock=time.time, responder=None) -> None:
         self.truth = truth
+        self.responder = responder      # optional: payload dict -> answer text (pipeline tests)
         self.clock = clock
         self.req: dict[str, _Counter] = {}
         self.tok: dict[str, _Counter] = {}
@@ -312,7 +313,9 @@ class FakeGroq:
         else:
             reasoning_tokens = {"none": 0, "default": 0, "low": 40}.get(effort or "default", 120)
             show_reasoning = p.get("reasoning_format") == "parsed"
-        if "JSON" in system:
+        if self.responder is not None:
+            answer = self.responder(p)
+        elif "JSON" in system:
             answer = '{"papers": ["attention"], "kind": "fact"}'
         elif "PASSAGES" in user:
             answer = ("The model uses scaled dot-product attention [attention p.4 §3.2.1]. " * 14).strip()
