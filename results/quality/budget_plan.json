@@ -1,27 +1,11 @@
 {
  "_generated_by": "scripts/budget_plan.py",
- "now": "2026-11-10 18:39 UTC",
+ "now": "2026-11-10 19:29 UTC",
  "accounting": "ledger: reported usage, rolling 24 h, no refill assumed",
  "measured_tokens_per_request": {
-  "large": {
-   "understand:qwen/qwen3.8-27b": 267.94444444444446,
-   "draft:openai/gpt-oss-120b": 1798.111111111111
-  },
-  "medium": {
-   "understand:qwen/qwen3.8-27b": 277.94444444444446,
-   "draft:openai/gpt-oss-120b": 2094.5
-  },
-  "small": {
-   "understand:qwen/qwen3.8-27b": 264.22222222222223,
-   "draft:openai/gpt-oss-120b": 1693.1666666666667
-  },
-  "small_lean": {
-   "draft:openai/gpt-oss-120b": 1155.7272727272727
-  },
-  "medium+rerank": {
-   "understand:qwen/qwen3.8-27b": 275.05555555555554,
-   "draft:openai/gpt-oss-120b": 1494.0
-  }
+  "qwen/qwen3.8-27b": 688.8235294117648,
+  "openai/gpt-oss-120b": 655.9117647058823,
+  "openai/gpt-oss-20b": 283.8529411764706
  },
  "answered": {
   "large": 18,
@@ -55,7 +39,7 @@
  },
  "jobs": [
   {
-   "job": "sweep: small_lean, 7 questions left",
+   "job": "scheduled 14:04: small_lean Q12-Q18 (worktree at c6e22ba)",
    "tokens": {
     "openai/gpt-oss-120b": 7761
    },
@@ -63,10 +47,20 @@
    "fits_now": false
   },
   {
+   "job": "scheduled 14:04: Q14 on large after the decide-gate fix",
+   "tokens": {
+    "openai/gpt-oss-120b": 1798,
+    "qwen/qwen3.8-27b": 268
+   },
+   "start": "11-11 14:09 UTC",
+   "fits_now": false
+  },
+  {
    "job": "real_steady (2 requests/min for 15 min)",
    "tokens": {
-    "openai/gpt-oss-120b": 53943,
-    "qwen/qwen3.8-27b": 51193
+    "qwen/qwen3.8-27b": 38556,
+    "openai/gpt-oss-120b": 39555,
+    "openai/gpt-oss-20b": 15786
    },
    "start": "11-11 17:54 UTC",
    "fits_now": false
@@ -74,25 +68,48 @@
   {
    "job": "real_burst (20 requests within 10 s (inside RPM 30))",
    "tokens": {
-    "openai/gpt-oss-120b": 35962,
-    "qwen/qwen3.8-27b": 34129
+    "qwen/qwen3.8-27b": 13776,
+    "openai/gpt-oss-120b": 13118,
+    "openai/gpt-oss-20b": 5677
    },
-   "start": "11-11 18:16 UTC",
+   "start": "11-11 17:59 UTC",
    "fits_now": false
   }
  ],
  "load_assumptions": {
   "real_steady": {
    "requests": 30,
-   "how": "2 requests/min for 15 min"
+   "how": "2 requests/min for 15 min",
+   "like": "steady"
   },
   "real_burst": {
    "requests": 20,
-   "how": "20 requests within 10 s (inside RPM 30)"
+   "how": "20 requests within 10 s (inside RPM 30)",
+   "like": "burst"
   }
  },
  "load_run_120b_room_after_all_jobs": {
   "real_steady": "11-11 17:54 UTC",
   "real_burst": "11-11 17:54 UTC"
+ },
+ "load_cost_basis": {
+  "real_steady": {
+   "stand_in_run": "steady-20261110T192348Z.jsonl",
+   "stand_in_requests": 24,
+   "tokens_per_request": {
+    "qwen/qwen3.8-27b": 1285,
+    "openai/gpt-oss-120b": 1318,
+    "openai/gpt-oss-20b": 526
+   }
+  },
+  "real_burst": {
+   "stand_in_run": "burst-20261110T192348Z.jsonl",
+   "stand_in_requests": 34,
+   "tokens_per_request": {
+    "qwen/qwen3.8-27b": 689,
+    "openai/gpt-oss-120b": 656,
+    "openai/gpt-oss-20b": 284
+   }
+  }
  }
 }

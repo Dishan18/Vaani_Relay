@@ -81,3 +81,8 @@ Numbers here point at the generated files that hold them (rule 3); nothing is ty
 
 ## Iterate rounds (stand-in only; one change per round, 2 seeds, kept only if better)
 
+- **r1_token_margin** (20261110T190658Z, stand-in, seeds 7,8): margin_560 not better. Kept: baseline. `data/experiments/r1_token_margin/result.md`
+- **r2_max_wait** (20261110T191008Z, stand-in, seeds 7,8): wait_3s not better; wait_6s not better; wait_15s better (fewer people without a written answer). Kept: wait_15s. `data/experiments/r2_max_wait/result.md`
+- **r3_first_token_timeout** (20261110T191322Z, stand-in, seeds 7,8): first_token_3s not better; first_token_6s not better. Kept: baseline_15s. `data/experiments/r3_first_token_timeout/result.md`
+- **r4_retry_policy** (20261110T191647Z, stand-in, seeds 7,8): retry_on not better. Kept: retry_off. `data/experiments/r4_retry_policy/result.md`
+- **r4b_policy_vs_naive** (20261110T192004Z, stand-in, seeds 7,8): policy not better. Kept: current. `data/experiments/r4b_policy_vs_naive/result.md`

@@ -1,0 +1,215 @@
+{
+ "_generated_by": "scripts/run_experiment.py",
+ "name": "r4b_policy_vs_naive",
+ "stamp": "20261110T192004Z",
+ "arms": {
+  "current": {},
+  "policy": {
+   "retry.enabled": true
+  }
+ },
+ "seeds": [
+  7,
+  8
+ ],
+ "scenarios": [
+  "overload",
+  "overload_naive_retry"
+ ],
+ "duration_s": 180.0,
+ "summary": {
+  "current": {
+   "7": {
+    "requests": 94,
+    "no_written_answer": 25,
+    "gave_up": 1,
+    "passages": 24,
+    "written_pct": 73.4,
+    "ttft_p50_ms": 3573.2,
+    "ttft_p95_ms": 10139.4,
+    "calls": 443,
+    "failed_calls": 276,
+    "http_429": 275,
+    "by_scenario": {
+     "overload": {
+      "requests": 47,
+      "no_written_answer": 0,
+      "gave_up": 0,
+      "passages": 0,
+      "written_pct": 100.0,
+      "ttft_p50_ms": 1622.8,
+      "ttft_p95_ms": 9016.2,
+      "calls": 91,
+      "failed_calls": 1,
+      "http_429": 1
+     },
+     "overload_naive_retry": {
+      "requests": 47,
+      "no_written_answer": 25,
+      "gave_up": 1,
+      "passages": 24,
+      "written_pct": 46.8,
+      "ttft_p50_ms": 6349.0,
+      "ttft_p95_ms": 16442.6,
+      "calls": 352,
+      "failed_calls": 275,
+      "http_429": 274
+     }
+    },
+    "stand_in_429": 275
+   },
+   "8": {
+    "requests": 94,
+    "no_written_answer": 23,
+    "gave_up": 0,
+    "passages": 23,
+    "written_pct": 75.5,
+    "ttft_p50_ms": 4644.6,
+    "ttft_p95_ms": 11315.4,
+    "calls": 438,
+    "failed_calls": 273,
+    "http_429": 272,
+    "by_scenario": {
+     "overload": {
+      "requests": 47,
+      "no_written_answer": 0,
+      "gave_up": 0,
+      "passages": 0,
+      "written_pct": 100.0,
+      "ttft_p50_ms": 1953.1,
+      "ttft_p95_ms": 11315.4,
+      "calls": 94,
+      "failed_calls": 9,
+      "http_429": 8
+     },
+     "overload_naive_retry": {
+      "requests": 47,
+      "no_written_answer": 23,
+      "gave_up": 0,
+      "passages": 23,
+      "written_pct": 51.1,
+      "ttft_p50_ms": 6316.9,
+      "ttft_p95_ms": 8115.9,
+      "calls": 344,
+      "failed_calls": 264,
+      "http_429": 264
+     }
+    },
+    "stand_in_429": 272
+   }
+  },
+  "policy": {
+   "7": {
+    "requests": 94,
+    "no_written_answer": 24,
+    "gave_up": 0,
+    "passages": 24,
+    "written_pct": 74.5,
+    "ttft_p50_ms": 3625.7,
+    "ttft_p95_ms": 9305.6,
+    "calls": 448,
+    "failed_calls": 279,
+    "http_429": 278,
+    "by_scenario": {
+     "overload": {
+      "requests": 47,
+      "no_written_answer": 0,
+      "gave_up": 0,
+      "passages": 0,
+      "written_pct": 100.0,
+      "ttft_p50_ms": 1653.5,
+      "ttft_p95_ms": 9019.2,
+      "calls": 91,
+      "failed_calls": 1,
+      "http_429": 1
+     },
+     "overload_naive_retry": {
+      "requests": 47,
+      "no_written_answer": 24,
+      "gave_up": 0,
+      "passages": 24,
+      "written_pct": 48.9,
+      "ttft_p50_ms": 6344.8,
+      "ttft_p95_ms": 13714.8,
+      "calls": 357,
+      "failed_calls": 278,
+      "http_429": 277
+     }
+    },
+    "stand_in_429": 278
+   },
+   "8": {
+    "requests": 94,
+    "no_written_answer": 27,
+    "gave_up": 0,
+    "passages": 27,
+    "written_pct": 71.3,
+    "ttft_p50_ms": 4359.9,
+    "ttft_p95_ms": 8148.2,
+    "calls": 438,
+    "failed_calls": 270,
+    "http_429": 270,
+    "by_scenario": {
+     "overload": {
+      "requests": 47,
+      "no_written_answer": 3,
+      "gave_up": 0,
+      "passages": 3,
+      "written_pct": 93.6,
+      "ttft_p50_ms": 1537.1,
+      "ttft_p95_ms": 9934.1,
+      "calls": 93,
+      "failed_calls": 5,
+      "http_429": 5
+     },
+     "overload_naive_retry": {
+      "requests": 47,
+      "no_written_answer": 24,
+      "gave_up": 0,
+      "passages": 24,
+      "written_pct": 48.9,
+      "ttft_p50_ms": 6314.4,
+      "ttft_p95_ms": 7974.1,
+      "calls": 345,
+      "failed_calls": 265,
+      "http_429": 265
+     }
+    },
+    "stand_in_429": 270
+   }
+  }
+ },
+ "verdicts": {
+  "policy": "not better"
+ },
+ "keep": "current",
+ "slowest": {
+  "current": {
+   "request_id": "overload_naive_retry-20261110T192004Z-current-seed7-0004",
+   "end_ms": 17565.4,
+   "split_ms": {
+    "waiting": 0.0,
+    "retrying": 2211.9,
+    "working": 15350.6,
+    "local": 2.9
+   },
+   "before_first_token_ms": 17565.4,
+   "after_first_token_ms": 0.0,
+   "got_first_token": true
+  },
+  "policy": {
+   "request_id": "overload_naive_retry-20261110T192004Z-policy-seed7-0004",
+   "end_ms": 17188.2,
+   "split_ms": {
+    "waiting": 0.0,
+    "retrying": 1873.6,
+    "working": 15312.8,
+    "local": 1.8
+   },
+   "before_first_token_ms": 17188.2,
+   "after_first_token_ms": 0.0,
+   "got_first_token": true
+  }
+ },
+ "rule": "better = no-written-answer count at least 2 lower on every seed, or within 1 on every seed and TTFT p95 at least 10% lower on every seed"
+}

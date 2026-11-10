@@ -1,0 +1,313 @@
+{
+ "_generated_by": "scripts/run_experiment.py",
+ "name": "r1_token_margin",
+ "stamp": "20261110T190658Z",
+ "arms": {
+  "baseline": {},
+  "margin_560": {
+   "limiter.token_margin": 560
+  }
+ },
+ "seeds": [
+  7,
+  8
+ ],
+ "scenarios": [
+  "steady",
+  "burst",
+  "overload",
+  "chaos"
+ ],
+ "duration_s": 180.0,
+ "summary": {
+  "baseline": {
+   "7": {
+    "requests": 107,
+    "no_written_answer": 15,
+    "gave_up": 0,
+    "passages": 15,
+    "written_pct": 86.0,
+    "ttft_p50_ms": 1559.2,
+    "ttft_p95_ms": 7857.2,
+    "calls": 216,
+    "failed_calls": 8,
+    "http_429": 1,
+    "by_scenario": {
+     "steady": {
+      "requests": 12,
+      "no_written_answer": 0,
+      "gave_up": 0,
+      "passages": 0,
+      "written_pct": 100.0,
+      "ttft_p50_ms": 1559.2,
+      "ttft_p95_ms": 8236.8,
+      "calls": 35,
+      "failed_calls": 0,
+      "http_429": 0
+     },
+     "burst": {
+      "requests": 29,
+      "no_written_answer": 10,
+      "gave_up": 0,
+      "passages": 10,
+      "written_pct": 65.5,
+      "ttft_p50_ms": 972.4,
+      "ttft_p95_ms": 6862.8,
+      "calls": 40,
+      "failed_calls": 0,
+      "http_429": 0
+     },
+     "overload": {
+      "requests": 47,
+      "no_written_answer": 2,
+      "gave_up": 0,
+      "passages": 2,
+      "written_pct": 95.7,
+      "ttft_p50_ms": 1477.5,
+      "ttft_p95_ms": 7260.0,
+      "calls": 93,
+      "failed_calls": 1,
+      "http_429": 1
+     },
+     "chaos": {
+      "requests": 19,
+      "no_written_answer": 3,
+      "gave_up": 0,
+      "passages": 3,
+      "written_pct": 84.2,
+      "ttft_p50_ms": 1808.6,
+      "ttft_p95_ms": 9610.2,
+      "calls": 48,
+      "failed_calls": 7,
+      "http_429": 0
+     }
+    },
+    "stand_in_429": 1
+   },
+   "8": {
+    "requests": 100,
+    "no_written_answer": 14,
+    "gave_up": 0,
+    "passages": 14,
+    "written_pct": 86.0,
+    "ttft_p50_ms": 1393.7,
+    "ttft_p95_ms": 9621.0,
+    "calls": 201,
+    "failed_calls": 18,
+    "http_429": 11,
+    "by_scenario": {
+     "steady": {
+      "requests": 8,
+      "no_written_answer": 0,
+      "gave_up": 0,
+      "passages": 0,
+      "written_pct": 100.0,
+      "ttft_p50_ms": 1915.9,
+      "ttft_p95_ms": 4887.9,
+      "calls": 24,
+      "failed_calls": 0,
+      "http_429": 0
+     },
+     "burst": {
+      "requests": 27,
+      "no_written_answer": 12,
+      "gave_up": 0,
+      "passages": 12,
+      "written_pct": 55.6,
+      "ttft_p50_ms": 903.6,
+      "ttft_p95_ms": 4167.7,
+      "calls": 34,
+      "failed_calls": 2,
+      "http_429": 2
+     },
+     "overload": {
+      "requests": 47,
+      "no_written_answer": 2,
+      "gave_up": 0,
+      "passages": 2,
+      "written_pct": 95.7,
+      "ttft_p50_ms": 1444.3,
+      "ttft_p95_ms": 6552.9,
+      "calls": 94,
+      "failed_calls": 8,
+      "http_429": 8
+     },
+     "chaos": {
+      "requests": 18,
+      "no_written_answer": 0,
+      "gave_up": 0,
+      "passages": 0,
+      "written_pct": 100.0,
+      "ttft_p50_ms": 2688.7,
+      "ttft_p95_ms": 15384.5,
+      "calls": 49,
+      "failed_calls": 8,
+      "http_429": 1
+     }
+    },
+    "stand_in_429": 11
+   }
+  },
+  "margin_560": {
+   "7": {
+    "requests": 107,
+    "no_written_answer": 19,
+    "gave_up": 0,
+    "passages": 19,
+    "written_pct": 82.2,
+    "ttft_p50_ms": 1316.1,
+    "ttft_p95_ms": 7890.1,
+    "calls": 210,
+    "failed_calls": 9,
+    "http_429": 1,
+    "by_scenario": {
+     "steady": {
+      "requests": 12,
+      "no_written_answer": 0,
+      "gave_up": 0,
+      "passages": 0,
+      "written_pct": 100.0,
+      "ttft_p50_ms": 1620.2,
+      "ttft_p95_ms": 8255.8,
+      "calls": 35,
+      "failed_calls": 0,
+      "http_429": 0
+     },
+     "burst": {
+      "requests": 29,
+      "no_written_answer": 14,
+      "gave_up": 0,
+      "passages": 14,
+      "written_pct": 51.7,
+      "ttft_p50_ms": 474.9,
+      "ttft_p95_ms": 7958.0,
+      "calls": 36,
+      "failed_calls": 1,
+      "http_429": 1
+     },
+     "overload": {
+      "requests": 47,
+      "no_written_answer": 2,
+      "gave_up": 0,
+      "passages": 2,
+      "written_pct": 95.7,
+      "ttft_p50_ms": 1288.4,
+      "ttft_p95_ms": 4242.4,
+      "calls": 92,
+      "failed_calls": 0,
+      "http_429": 0
+     },
+     "chaos": {
+      "requests": 19,
+      "no_written_answer": 3,
+      "gave_up": 0,
+      "passages": 3,
+      "written_pct": 84.2,
+      "ttft_p50_ms": 2042.0,
+      "ttft_p95_ms": 10750.9,
+      "calls": 47,
+      "failed_calls": 8,
+      "http_429": 0
+     }
+    },
+    "stand_in_429": 1
+   },
+   "8": {
+    "requests": 100,
+    "no_written_answer": 13,
+    "gave_up": 0,
+    "passages": 13,
+    "written_pct": 87.0,
+    "ttft_p50_ms": 1612.2,
+    "ttft_p95_ms": 8626.7,
+    "calls": 186,
+    "failed_calls": 9,
+    "http_429": 2,
+    "by_scenario": {
+     "steady": {
+      "requests": 8,
+      "no_written_answer": 0,
+      "gave_up": 0,
+      "passages": 0,
+      "written_pct": 100.0,
+      "ttft_p50_ms": 1909.0,
+      "ttft_p95_ms": 4851.8,
+      "calls": 24,
+      "failed_calls": 0,
+      "http_429": 0
+     },
+     "burst": {
+      "requests": 27,
+      "no_written_answer": 12,
+      "gave_up": 0,
+      "passages": 12,
+      "written_pct": 55.6,
+      "ttft_p50_ms": 669.8,
+      "ttft_p95_ms": 8742.1,
+      "calls": 30,
+      "failed_calls": 2,
+      "http_429": 2
+     },
+     "overload": {
+      "requests": 47,
+      "no_written_answer": 1,
+      "gave_up": 0,
+      "passages": 1,
+      "written_pct": 97.9,
+      "ttft_p50_ms": 1559.8,
+      "ttft_p95_ms": 6910.9,
+      "calls": 84,
+      "failed_calls": 0,
+      "http_429": 0
+     },
+     "chaos": {
+      "requests": 18,
+      "no_written_answer": 0,
+      "gave_up": 0,
+      "passages": 0,
+      "written_pct": 100.0,
+      "ttft_p50_ms": 2088.5,
+      "ttft_p95_ms": 15338.9,
+      "calls": 48,
+      "failed_calls": 7,
+      "http_429": 0
+     }
+    },
+    "stand_in_429": 2
+   }
+  }
+ },
+ "verdicts": {
+  "margin_560": "not better"
+ },
+ "keep": "baseline",
+ "slowest": {
+  "baseline": {
+   "request_id": "overload-20261110T190658Z-baseline-seed7-0024",
+   "end_ms": 10141.6,
+   "split_ms": {
+    "waiting": 0.3,
+    "retrying": 0.0,
+    "working": 10137.0,
+    "local": 4.3
+   },
+   "before_first_token_ms": 10141.6,
+   "after_first_token_ms": 0.0,
+   "got_first_token": true
+  },
+  "margin_560": {
+   "request_id": "chaos-20261110T190658Z-margin_560-seed7-0017",
+   "end_ms": 10750.9,
+   "split_ms": {
+    "waiting": 0.3,
+    "retrying": 0.0,
+    "working": 10746.1,
+    "local": 4.5
+   },
+   "before_first_token_ms": 10750.9,
+   "after_first_token_ms": 0.0,
+   "got_first_token": true
+  }
+ },
+ "rule": "better = no-written-answer count at least 2 lower on every seed, or within 1 on every seed and TTFT p95 at least 10% lower on every seed"
+}

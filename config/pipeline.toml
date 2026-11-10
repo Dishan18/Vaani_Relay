@@ -48,7 +48,7 @@ verify = 400
 # The degrade ladder is decided from the limiter's predicted wait (Limiter.predict_wait).
 preferred_free_within_s = 2.0     # (assumption) the spec's "free within 2 s"
 router_free_within_s = 0.5        # (assumption) skip the router rather than wait for it
-max_wait_s = 8.0                  # (assumption, PLAN.md G3) longest budget wait before passages
+max_wait_s = 15.0                 # iterate round 2 (data/experiments/r2_max_wait): 15 s beat 8 s (fewer people without a written answer, both seeds); TTFT p95 rose
 deadline_s = 30.0                 # (assumption) whole request, arrival to release
 verify_min_tpm_left_fraction = 0.3  # (assumption) verify only if the verifier's TPM keeps 30% after it
 busy_retry_s = 10                 # (assumption) "retry in N s" after an internal failure

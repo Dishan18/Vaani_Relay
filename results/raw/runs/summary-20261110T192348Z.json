@@ -1,0 +1,166 @@
+{
+ "_generated_by": "scripts/run_load.py",
+ "stamp": "20261110T192348Z",
+ "duration_s": 300.0,
+ "seed": 7,
+ "replay": {
+  "router": 18,
+  "drafts": 94
+ },
+ "scenarios": [
+  {
+   "scenario": "steady",
+   "run_id": "steady-20261110T192348Z",
+   "requests": 24,
+   "outcomes": {
+    "answer": 22,
+    "refusal": 2
+   },
+   "stand_in": {
+    "requests": 68,
+    "ok": 67,
+    "429": 0,
+    "503": 0,
+    "413": 0,
+    "stalls": 0,
+    "replay_hits": 36,
+    "replay_misses": 31
+   },
+   "overrides": {},
+   "wall_s": 307.1
+  },
+  {
+   "scenario": "burst",
+   "run_id": "burst-20261110T192348Z",
+   "requests": 34,
+   "outcomes": {
+    "answer": 22,
+    "refusal": 2,
+    "passages": 10
+   },
+   "stand_in": {
+    "requests": 56,
+    "ok": 54,
+    "429": 2,
+    "503": 0,
+    "413": 0,
+    "stalls": 0,
+    "replay_hits": 33,
+    "replay_misses": 21
+   },
+   "overrides": {},
+   "wall_s": 278.7
+  },
+  {
+   "scenario": "overload",
+   "run_id": "overload-20261110T192348Z",
+   "requests": 78,
+   "outcomes": {
+    "refusal": 3,
+    "answer": 65,
+    "gave_up": 4,
+    "passages": 6
+   },
+   "stand_in": {
+    "requests": 119,
+    "ok": 117,
+    "429": 1,
+    "503": 0,
+    "413": 0,
+    "stalls": 0,
+    "replay_hits": 64,
+    "replay_misses": 54
+   },
+   "overrides": {},
+   "wall_s": 306.5
+  },
+  {
+   "scenario": "overload_naive_retry",
+   "run_id": "overload_naive_retry-20261110T192348Z",
+   "requests": 78,
+   "outcomes": {
+    "answer": 34,
+    "refusal": 2,
+    "passages": 41,
+    "gave_up": 1
+   },
+   "stand_in": {
+    "requests": 579,
+    "ok": 125,
+    "429": 452,
+    "503": 0,
+    "413": 0,
+    "stalls": 0,
+    "replay_hits": 84,
+    "replay_misses": 43
+   },
+   "overrides": {},
+   "wall_s": 301.1
+  },
+  {
+   "scenario": "rpm_halved",
+   "run_id": "rpm_halved-20261110T192348Z",
+   "requests": 36,
+   "outcomes": {
+    "refusal": 2,
+    "answer": 29,
+    "gave_up": 2,
+    "passages": 3
+   },
+   "stand_in": {
+    "requests": 51,
+    "ok": 50,
+    "429": 1,
+    "503": 0,
+    "413": 0,
+    "stalls": 0,
+    "replay_hits": 24,
+    "replay_misses": 26
+   },
+   "overrides": {},
+   "wall_s": 310.8
+  },
+  {
+   "scenario": "daily_exhausted",
+   "run_id": "daily_exhausted-20261110T192348Z",
+   "requests": 14,
+   "outcomes": {
+    "passages": 14
+   },
+   "stand_in": {
+    "requests": 3,
+    "ok": 0,
+    "429": 3,
+    "503": 0,
+    "413": 0,
+    "stalls": 0,
+    "replay_hits": 0,
+    "replay_misses": 0
+   },
+   "overrides": {},
+   "wall_s": 277.4
+  },
+  {
+   "scenario": "chaos",
+   "run_id": "chaos-20261110T192348Z",
+   "requests": 27,
+   "outcomes": {
+    "answer": 25,
+    "refusal": 1,
+    "gave_up": 1
+   },
+   "stand_in": {
+    "requests": 77,
+    "ok": 69,
+    "429": 0,
+    "503": 6,
+    "413": 0,
+    "stalls": 4,
+    "replay_hits": 40,
+    "replay_misses": 31
+   },
+   "overrides": {},
+   "wall_s": 287.5
+  }
+ ]
+}

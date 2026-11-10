@@ -36,13 +36,13 @@ Load runs only (the evals wait for budget on purpose). TTFT = first checked toke
 
 | scenario | source | requests sent | duration (s) | offered rate/min | TTFT p50 / p95 / p99 (ms) | total p50 / p95 / p99 (ms) | n (TTFT / total) |
 |---|---|---|---|---|---|---|---|
-| burst | stand-in | 34 | 267 | 7.6 | 1344 / 7224 / 7330 (= max, n<100) | 1344 / 7224 / 7330 (= max, n<100) | 34 / 34 |
-| chaos | stand-in | 27 | 273 | 5.9 | 2059 / 12282 / 12766 (= max, n<100) | 2059 / 12282 / 12766 (= max, n<100) | 27 / 27 |
-| daily_exhausted | stand-in | 14 | 261 | 3.2 | 3 / 12 / 12 (= max, n<100) | 3 / 12 / 12 (= max, n<100) | 14 / 14 |
-| overload | stand-in | 78 | 297 | 15.8 | 1803 / 6639 / 14096 (= max, n<100) | 1803 / 8162 / 18764 (= max, n<100) | 77 / 78 |
-| overload_naive_retry | stand-in | 78 | 296 | 15.8 | 6324 / 10314 / 20815 (= max, n<100) | 6321 / 10314 / 20815 (= max, n<100) | 77 / 78 |
-| rpm_halved | stand-in | 36 | 278 | 7.8 | 1295 / 7035 / 9669 (= max, n<100) | 1295 / 7035 / 9669 (= max, n<100) | 36 / 36 |
-| steady | stand-in | 24 | 251 | 5.7 | 1577 / 3655 / 3760 (= max, n<100) | 1577 / 3655 / 3760 (= max, n<100) | 24 / 24 |
+| burst | stand-in | 34 | 266 | 7.7 | 948 / 7828 / 11641 (= max, n<100) | 948 / 7828 / 11641 (= max, n<100) | 34 / 34 |
+| chaos | stand-in | 27 | 274 | 5.9 | 1966 / 9509 / 14496 (= max, n<100) | 2013 / 14496 / 17112 (= max, n<100) | 26 / 27 |
+| daily_exhausted | stand-in | 14 | 261 | 3.2 | 4 / 9 / 9 (= max, n<100) | 4 / 9 / 9 (= max, n<100) | 14 / 14 |
+| overload | stand-in | 78 | 299 | 15.6 | 1730 / 14043 / 28404 (= max, n<100) | 1961 / 16453 / 30882 (= max, n<100) | 74 / 78 |
+| overload_naive_retry | stand-in | 78 | 294 | 15.9 | 6271 / 11547 / 18414 (= max, n<100) | 6271 / 11547 / 18414 (= max, n<100) | 77 / 78 |
+| rpm_halved | stand-in | 36 | 289 | 7.5 | 3135 / 12601 / 16205 (= max, n<100) | 3522 / 12601 / 16205 (= max, n<100) | 34 / 36 |
+| steady | stand-in | 24 | 264 | 5.4 | 2029 / 9630 / 16001 (= max, n<100) | 2029 / 9630 / 16001 (= max, n<100) | 24 / 24 |
 
 ## Table 2b: outcomes per scenario
 
@@ -50,13 +50,13 @@ Succeeded = status ok (a checked answer or refusal, any degrade level); rate-lim
 
 | scenario | source | succeeded % | rate-limited % | timed out or given up % | error % | retries per request | peak queue length | tokens per answer | cost per 1,000 answers (free / shadow) |
 |---|---|---|---|---|---|---|---|---|---|
-| burst | stand-in | 70.6 | 29.4 | 0.0 | 0.0 | 0.06 | 3 | 1627 | $0 / $0.84 |
-| chaos | stand-in | 96.3 | 3.7 | 0.0 | 0.0 | 0.44 | 2 | 2843 | $0 / $1.41 |
+| burst | stand-in | 70.6 | 29.4 | 0.0 | 0.0 | 0.06 | 4 | 1629 | $0 / $0.83 |
+| chaos | stand-in | 96.3 | 0.0 | 3.7 | 0.0 | 0.26 | 2 | 2916 | $0 / $1.43 |
 | daily_exhausted | stand-in | 0.0 | 100.0 | 0.0 | 0.0 | 0.21 | 1 | 0 | $0 / $0.00 |
-| overload | stand-in | 92.3 | 6.4 | 1.3 | 0.0 | 0.01 | 3 | 1701 | $0 / $0.77 |
-| overload_naive_retry | stand-in | 44.9 | 53.8 | 1.3 | 0.0 | 5.67 | 1 | 1076 | $0 / $0.69 |
-| rpm_halved | stand-in | 94.4 | 5.6 | 0.0 | 0.0 | 0.00 | 2 | 1696 | $0 / $0.79 |
-| steady | stand-in | 100.0 | 0.0 | 0.0 | 0.0 | 0.00 | 1 | 3130 | $0 / $1.50 |
+| overload | stand-in | 87.2 | 7.7 | 5.1 | 0.0 | 0.01 | 5 | 1483 | $0 / $0.51 |
+| overload_naive_retry | stand-in | 46.2 | 52.6 | 1.3 | 0.0 | 5.81 | 1 | 1032 | $0 / $0.66 |
+| rpm_halved | stand-in | 86.1 | 8.3 | 5.6 | 0.0 | 0.03 | 3 | 1352 | $0 / $0.69 |
+| steady | stand-in | 100.0 | 0.0 | 0.0 | 0.0 | 0.04 | 1 | 3130 | $0 / $1.50 |
 
 ## Grading coverage (every scenario and source)
 
