@@ -733,7 +733,7 @@
       "expect_if_usage": 81.4,
       "expect_if_max_tokens_held_no_refill": 1852,
       "expect_if_usage_no_refill": 108,
-      "verdict": "only the prompt charged at admission",
+      "verdict": "max_tokens not held in full at admission",
       "B": {
        "remaining_tokens": "7593",
        "at": "2026-11-10T13:50:56.913+00:00",
@@ -971,7 +971,8 @@
       "dt_headers_s": 15.013,
       "saturated_headers": true,
       "res_usage_headers": -1912,
-      "res_admission_headers": -1896
+      "res_admission_headers": -1896,
+      "idle_extra": 1912
      },
      {
       "p": "P1/tiny/poll",
@@ -987,7 +988,8 @@
       "dt_headers_s": 30.378,
       "saturated_headers": true,
       "res_usage_headers": -1309,
-      "res_admission_headers": -1109
+      "res_admission_headers": -1109,
+      "idle_extra": 1309
      },
      {
       "p": "P6/router/sequential",
@@ -1129,6 +1131,36 @@
       "median": -217.9,
       "min": -217.9,
       "max": -217.9
+     }
+    },
+    "admission_extra_after_idle": {
+     "_what": "limit - prompt_tokens - x-ratelimit-remaining-tokens on calls admitted into a full bucket: tokens admission held beyond the prompt",
+     "all": {
+      "n": 2,
+      "p50": 1309,
+      "p90": 1912,
+      "min": 1309,
+      "max": 1912
+     },
+     "by_max_tokens": {
+      "16": {
+       "n": 1,
+       "p50": 1912,
+       "min": 1912,
+       "max": 1912,
+       "values": [
+        1912
+       ]
+      },
+      "200": {
+       "n": 1,
+       "p50": 1309,
+       "min": 1309,
+       "max": 1309,
+       "values": [
+        1309
+       ]
+      }
      }
     }
    },
@@ -1863,7 +1895,7 @@
       "expect_if_usage": 67.1,
       "expect_if_max_tokens_held_no_refill": 1852,
       "expect_if_usage_no_refill": 108,
-      "verdict": "only the prompt charged at admission",
+      "verdict": "max_tokens not held in full at admission",
       "B": {
        "remaining_tokens": "7170",
        "at": "2026-11-10T13:50:58.076+00:00",
@@ -1989,7 +2021,8 @@
       "dt_headers_s": 54.754,
       "saturated_headers": true,
       "res_usage_headers": -2011,
-      "res_admission_headers": -1511
+      "res_admission_headers": -1511,
+      "idle_extra": 2011
      },
      {
       "p": "P6/draft/sequential",
@@ -2185,6 +2218,27 @@
       "median": 3281.8,
       "min": 3281.8,
       "max": 3281.8
+     }
+    },
+    "admission_extra_after_idle": {
+     "_what": "limit - prompt_tokens - x-ratelimit-remaining-tokens on calls admitted into a full bucket: tokens admission held beyond the prompt",
+     "all": {
+      "n": 1,
+      "p50": 2011,
+      "p90": 2011,
+      "min": 2011,
+      "max": 2011
+     },
+     "by_max_tokens": {
+      "500": {
+       "n": 1,
+       "p50": 2011,
+       "min": 2011,
+       "max": 2011,
+       "values": [
+        2011
+       ]
+      }
      }
     }
    },
@@ -2879,7 +2933,7 @@
       "expect_if_usage": 11.3,
       "expect_if_max_tokens_held_no_refill": 1812,
       "expect_if_usage_no_refill": 68,
-      "verdict": "only the prompt charged at admission",
+      "verdict": "max_tokens not held in full at admission",
       "B": {
        "remaining_tokens": "6975",
        "at": "2026-11-10T13:50:59.612+00:00",
@@ -3005,7 +3059,8 @@
       "dt_headers_s": 86.985,
       "saturated_headers": true,
       "res_usage_headers": -3946,
-      "res_admission_headers": -3446
+      "res_admission_headers": -3446,
+      "idle_extra": 3946
      },
      {
       "p": "P6/draft/sequential",
@@ -3181,7 +3236,8 @@
       "dt_headers_s": 3.019,
       "saturated_headers": true,
       "res_usage_headers": -148,
-      "res_admission_headers": 52
+      "res_admission_headers": 52,
+      "idle_extra": 148
      },
      {
       "p": "P6/router/sequential",
@@ -3197,7 +3253,8 @@
       "dt_headers_s": 3.0,
       "saturated_headers": true,
       "res_usage_headers": -298,
-      "res_admission_headers": -98
+      "res_admission_headers": -98,
+      "idle_extra": 298
      },
      {
       "p": "P6/router/sequential",
@@ -3286,6 +3343,37 @@
       "min": 3795.8,
       "max": 3795.8
      }
+    },
+    "admission_extra_after_idle": {
+     "_what": "limit - prompt_tokens - x-ratelimit-remaining-tokens on calls admitted into a full bucket: tokens admission held beyond the prompt",
+     "all": {
+      "n": 3,
+      "p50": 298,
+      "p90": 3946,
+      "min": 148,
+      "max": 3946
+     },
+     "by_max_tokens": {
+      "200": {
+       "n": 2,
+       "p50": 148,
+       "min": 148,
+       "max": 298,
+       "values": [
+        148,
+        298
+       ]
+      },
+      "500": {
+       "n": 1,
+       "p50": 3946,
+       "min": 3946,
+       "max": 3946,
+       "values": [
+        3946
+       ]
+      }
+     }
     }
    },
    "server_ttfb_vs_queue_time": {
@@ -3350,7 +3438,7 @@
     "charge_model_used": {
      "admission_max_tokens": false,
      "refund": false,
-     "from": "only the prompt charged at admission"
+     "from": "max_tokens not held in full at admission"
     },
     "series": [
      {
@@ -3470,7 +3558,7 @@
     "charge_model_used": {
      "admission_max_tokens": false,
      "refund": false,
-     "from": "only the prompt charged at admission"
+     "from": "max_tokens not held in full at admission"
     },
     "series": [
      {
@@ -4222,9 +4310,9 @@
    "qwen/qwen3.8-27b": "fixed window aligned to the wall-clock minute"
   },
   "admission": {
-   "openai/gpt-oss-20b": "only the prompt charged at admission",
-   "openai/gpt-oss-120b": "only the prompt charged at admission",
-   "qwen/qwen3.8-27b": "only the prompt charged at admission"
+   "openai/gpt-oss-20b": "max_tokens not held in full at admission",
+   "openai/gpt-oss-120b": "max_tokens not held in full at admission",
+   "qwen/qwen3.8-27b": "max_tokens not held in full at admission"
   },
   "pooling": "pooled or partly pooled (walls came early or the bystander was refused)",
   "concurrency": {
@@ -4243,9 +4331,9 @@
   "- PASS requests_window gpt-oss-20b: expected window, got 'fixed window aligned to the wall-clock minute'",
   "- PASS requests_window gpt-oss-120b: expected window, got 'fixed window aligned to the wall-clock minute'",
   "- PASS requests_window qwen3.8-27b: expected window, got 'fixed window aligned to the wall-clock minute'",
-  "- PASS admission gpt-oss-20b: expected 'only the prompt', got 'only the prompt charged at admission'",
-  "- PASS admission gpt-oss-120b: expected 'only the prompt', got 'only the prompt charged at admission'",
-  "- PASS admission qwen3.8-27b: expected 'only the prompt', got 'only the prompt charged at admission'",
+  "- PASS admission gpt-oss-20b: expected 'max_tokens not held', got 'max_tokens not held in full at admission'",
+  "- PASS admission gpt-oss-120b: expected 'max_tokens not held', got 'max_tokens not held in full at admission'",
+  "- PASS admission qwen3.8-27b: expected 'max_tokens not held', got 'max_tokens not held in full at admission'",
   "- PASS pooling: expected 'pooled', got 'pooled or partly pooled (walls came early or the bystander was refused)'"
  ]
 }

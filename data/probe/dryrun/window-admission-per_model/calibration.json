@@ -1020,7 +1020,8 @@
       "dt_headers_s": 9.001,
       "saturated_headers": true,
       "res_usage_headers": -597,
-      "res_admission_headers": -397
+      "res_admission_headers": -397,
+      "idle_extra": 597
      },
      {
       "p": "P6/router/sequential",
@@ -1036,7 +1037,8 @@
       "dt_headers_s": 9.0,
       "saturated_headers": true,
       "res_usage_headers": -991,
-      "res_admission_headers": -791
+      "res_admission_headers": -791,
+      "idle_extra": 991
      },
      {
       "p": "P6/router/sequential",
@@ -1146,6 +1148,28 @@
       "median": 33.4,
       "min": 33.4,
       "max": 33.4
+     }
+    },
+    "admission_extra_after_idle": {
+     "_what": "limit - prompt_tokens - x-ratelimit-remaining-tokens on calls admitted into a full bucket: tokens admission held beyond the prompt",
+     "all": {
+      "n": 2,
+      "p50": 597,
+      "p90": 991,
+      "min": 597,
+      "max": 991
+     },
+     "by_max_tokens": {
+      "200": {
+       "n": 2,
+       "p50": 597,
+       "min": 597,
+       "max": 991,
+       "values": [
+        597,
+        991
+       ]
+      }
      }
     }
    },
@@ -2007,7 +2031,8 @@
       "dt_headers_s": 36.645,
       "saturated_headers": true,
       "res_usage_headers": -3659,
-      "res_admission_headers": -3159
+      "res_admission_headers": -3159,
+      "idle_extra": 3659
      },
      {
       "p": "P6/draft/sequential",
@@ -2103,7 +2128,8 @@
       "dt_headers_s": 8.998,
       "saturated_headers": true,
       "res_usage_headers": -587,
-      "res_admission_headers": -387
+      "res_admission_headers": -387,
+      "idle_extra": 587
      },
      {
       "p": "P6/router/sequential",
@@ -2119,7 +2145,8 @@
       "dt_headers_s": 9.007,
       "saturated_headers": true,
       "res_usage_headers": -988,
-      "res_admission_headers": -788
+      "res_admission_headers": -788,
+      "idle_extra": 988
      }
     ],
     "fit": {
@@ -2203,6 +2230,37 @@
       "median": 5243.5,
       "min": 5243.5,
       "max": 5243.5
+     }
+    },
+    "admission_extra_after_idle": {
+     "_what": "limit - prompt_tokens - x-ratelimit-remaining-tokens on calls admitted into a full bucket: tokens admission held beyond the prompt",
+     "all": {
+      "n": 3,
+      "p50": 988,
+      "p90": 3659,
+      "min": 587,
+      "max": 3659
+     },
+     "by_max_tokens": {
+      "200": {
+       "n": 2,
+       "p50": 587,
+       "min": 587,
+       "max": 988,
+       "values": [
+        587,
+        988
+       ]
+      },
+      "500": {
+       "n": 1,
+       "p50": 3659,
+       "min": 3659,
+       "max": 3659,
+       "values": [
+        3659
+       ]
+      }
      }
     }
    },
@@ -2853,7 +2911,8 @@
       "dt_headers_s": 86.258,
       "saturated_headers": true,
       "res_usage_headers": -500,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 500
      },
      {
       "p": "P6/draft/sequential",
@@ -2917,7 +2976,8 @@
       "dt_headers_s": 9.001,
       "saturated_headers": true,
       "res_usage_headers": -542,
-      "res_admission_headers": -342
+      "res_admission_headers": -342,
+      "idle_extra": 542
      },
      {
       "p": "P6/router/sequential",
@@ -2933,7 +2993,8 @@
       "dt_headers_s": 9.02,
       "saturated_headers": true,
       "res_usage_headers": -878,
-      "res_admission_headers": -678
+      "res_admission_headers": -678,
+      "idle_extra": 878
      },
      {
       "p": "P6/router/sequential",
@@ -2949,7 +3010,8 @@
       "dt_headers_s": 9.014,
       "saturated_headers": true,
       "res_usage_headers": -1215,
-      "res_admission_headers": -1015
+      "res_admission_headers": -1015,
+      "idle_extra": 1215
      },
      {
       "p": "P6/router/sequential",
@@ -3045,7 +3107,8 @@
       "dt_headers_s": 3.005,
       "saturated_headers": true,
       "res_usage_headers": -537,
-      "res_admission_headers": -337
+      "res_admission_headers": -337,
+      "idle_extra": 537
      },
      {
       "p": "P6/router/sequential",
@@ -3149,6 +3212,39 @@
       "median": -1065.4,
       "min": -1065.4,
       "max": -659.9
+     }
+    },
+    "admission_extra_after_idle": {
+     "_what": "limit - prompt_tokens - x-ratelimit-remaining-tokens on calls admitted into a full bucket: tokens admission held beyond the prompt",
+     "all": {
+      "n": 5,
+      "p50": 542,
+      "p90": 1215,
+      "min": 500,
+      "max": 1215
+     },
+     "by_max_tokens": {
+      "200": {
+       "n": 4,
+       "p50": 542,
+       "min": 537,
+       "max": 1215,
+       "values": [
+        542,
+        878,
+        1215,
+        537
+       ]
+      },
+      "500": {
+       "n": 1,
+       "p50": 500,
+       "min": 500,
+       "max": 500,
+       "values": [
+        500
+       ]
+      }
      }
     }
    },
@@ -4217,9 +4313,9 @@
   "- PASS tokens_window gpt-oss-120b: expected window, got 'fixed window (no refill between polls inside a minute)'",
   "- PASS requests_window gpt-oss-20b: expected window, got 'fixed window aligned to the wall-clock minute'",
   "- PASS requests_window gpt-oss-120b: expected window, got 'fixed window aligned to the wall-clock minute'",
-  "- PASS admission gpt-oss-20b: expected 'max_tokens', got 'max_tokens reserved at admission'",
-  "- PASS admission gpt-oss-120b: expected 'max_tokens', got 'max_tokens reserved at admission'",
-  "- PASS admission qwen3.8-27b: expected 'max_tokens', got 'max_tokens reserved at admission'",
+  "- PASS admission gpt-oss-20b: expected 'max_tokens reserved', got 'max_tokens reserved at admission'",
+  "- PASS admission gpt-oss-120b: expected 'max_tokens reserved', got 'max_tokens reserved at admission'",
+  "- PASS admission qwen3.8-27b: expected 'max_tokens reserved', got 'max_tokens reserved at admission'",
   "- PASS pooling: expected 'per model', got 'per model (each model hit its own wall; the bystander model was never refused)'"
  ]
 }

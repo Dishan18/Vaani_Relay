@@ -377,18 +377,18 @@ def admission(calls: list[Call], m: str) -> dict | None:
         d_use = min(abs(drop_raw - d["expect_if_usage"]), abs(drop_raw - d["expect_if_usage_no_refill"]))
         gap = abs(d["expect_if_max_tokens_held_no_refill"] - d["expect_if_usage_no_refill"])
         d["verdict"] = ("max_tokens reserved at admission" if d_adm < d_use and d_adm < 0.4 * gap
-                        else "only the prompt charged at admission" if d_use < d_adm and d_use < 0.4 * gap
+                        else "max_tokens not held in full at admission" if d_use < d_adm and d_use < 0.4 * gap
                         else "inconclusive")
         if b is not None and b.hi("x-ratelimit-remaining-tokens") is not None:
             dt_b = b.t_adm - a.t_adm
             rise = b.hi("x-ratelimit-remaining-tokens") - a.hi("x-ratelimit-remaining-tokens")
             unused = a.max_tokens - (a.completion_tokens or 0)
-            b_charge = (b.prompt_tokens or 0) + (b.max_tokens if d["verdict"].startswith("max_tokens") else 0)
+            b_charge = (b.prompt_tokens or 0) + (b.max_tokens if d["verdict"].startswith("max_tokens reserved") else 0)
             d["B"] = {"remaining_tokens": b.h.get("x-ratelimit-remaining-tokens"), "at": iso(b.t_headers),
                       "seconds_after_A_admission": round(dt_b, 3), "rise_since_A": rise,
                       "A_unused_max_tokens": unused, "B_own_charge_est": b_charge,
                       "refill_if_bucket": round(rate * dt_b, 1)}
-            if d["verdict"].startswith("max_tokens"):
+            if d["verdict"].startswith("max_tokens reserved"):
                 refunded = rise + b_charge
                 refill = rate * dt_b
                 # refunded within the window if the rise exceeds what refill alone could explain
@@ -407,7 +407,7 @@ def charge_model(cal_m: dict | None) -> dict:
     """How a call moves x-ratelimit-remaining-tokens, from P2's verdicts (defaults: prompt only)."""
     pairs = ((cal_m or {}).get("admission") or {}).get("pairs") or []
     v = pairs[-1] if pairs else {}
-    admission = (v.get("verdict") or "").startswith("max_tokens")
+    admission = (v.get("verdict") or "").startswith("max_tokens reserved")
     refund = (v.get("B") or {}).get("refund_verdict", "").startswith("unused")
     return {"admission_max_tokens": admission, "refund": refund, "from": v.get("verdict") or "no P2 verdict"}
 
@@ -421,6 +421,7 @@ def token_accounting(calls: list[Call], m: str) -> dict | None:
     Both assume a bucket refilling at limit/60 per second, capped at the limit."""
     cs = sorted([c for c in calls if c.model == m and c.ok and c.phase != "P3"
                  and c.hi("x-ratelimit-remaining-tokens") is not None], key=lambda c: c.t0)
+    all_m = [c for c in calls if c.model == m]
     pairs = []
     for p, q in zip(cs, cs[1:]):
         if p.t_end > q.t0 + 0.05:
@@ -439,6 +440,11 @@ def token_accounting(calls: list[Call], m: str) -> dict | None:
             row[f"saturated_{base}"] = rp - ct_p + rate * dt >= lim
             row[f"res_usage_{base}"] = round(rq - (lvl_u - pt_q), 1)
             row[f"res_admission_{base}"] = round(rq - (lvl_a - pt_q - (q.max_tokens or 0)), 1)
+        alone = not any(c is not q and c.t0 <= q.t_adm and c.t_end >= q.t0 - 0.05 for c in all_m)
+        if row["saturated_admission"] and alone:
+            # the bucket was full before q was admitted and nothing else of ours was in flight:
+            # whatever q's header shows beyond its own prompt is what admission held on top of it
+            row["idle_extra"] = lim - pt_q - rq
         pairs.append(row)
     if not pairs:
         return None
@@ -454,9 +460,21 @@ def token_accounting(calls: list[Call], m: str) -> dict | None:
     for x in pairs:
         if not x["saturated_admission"]:
             by_max[f"{x['max_tokens_p']}->{x['max_tokens_q']}"].append(x["res_usage_admission"])
+    extra = defaultdict(list)
+    for x in pairs:
+        if "idle_extra" in x:
+            extra[x["max_tokens_q"]].append(x["idle_extra"])
+    allx = [v for vs in extra.values() for v in vs]
     return {"pairs": pairs, "fit": summary, "best": best,
             "usage_residual_by_max_tokens_pair": {k: {"n": len(v), "median": pct(v, 0.5), "min": min(v), "max": max(v)}
-                                                  for k, v in sorted(by_max.items())}}
+                                                  for k, v in sorted(by_max.items())},
+            "admission_extra_after_idle": {
+                "_what": "limit - prompt_tokens - x-ratelimit-remaining-tokens on calls admitted into a full bucket: "
+                         "tokens admission held beyond the prompt",
+                "all": {"n": len(allx), "p50": pct(allx, 0.5), "p90": pct(allx, 0.9), "min": min(allx, default=None),
+                        "max": max(allx, default=None)},
+                "by_max_tokens": {str(k): {"n": len(v), "p50": pct(v, 0.5), "min": min(v), "max": max(v), "values": v}
+                                  for k, v in sorted(extra.items())}}}
 
 
 def tokens_window(calls: list[Call], m: str, cm: dict) -> list[dict] | None:
@@ -787,6 +805,28 @@ def run_findings(calls, events, doc, cal, tokwin, p3, rpd429, mode, truths) -> t
                      f"max_tokens transitions (previous -> next call): "
                      + "; ".join(f"{k}: median {v['median']} (n={v['n']}, {v['min']}..{v['max']})" for k, v in big.items())
                      + ". A positive residual means more tokens were left than the rule predicts.")
+    bucket_q1 = bool(v_tok) and all("bucket" in v for v in v_tok.values())
+    for m in MODELS:
+        ta = cal.get(m, {}).get("token_accounting_fit")
+        ex = (ta or {}).get("admission_extra_after_idle")
+        if not ex or not ex["all"]["n"]:
+            continue
+        if not bucket_q1:
+            L.append(f"- {SHORT[m]}: admission hold beyond the prompt not computed (it assumes the refilling "
+                     f"bucket of Q1, which was not found).")
+            continue
+        bym = ex["by_max_tokens"]
+        at_max = sum(1 for k, v in bym.items() for x in v["values"] if abs(x - int(k)) <= 2)
+        below = sum(1 for k, v in bym.items() for x in v["values"] if x < int(k) - 2)
+        above = sum(1 for k, v in bym.items() for x in v["values"] if x > int(k) + 2)
+        held = ex["all"]["p50"] is not None and ex["all"]["p50"] > 20
+        L.append(f"- **{SHORT[m]}: admission {'holds more than the prompt' if held else 'holds about the prompt only'}.** "
+                 f"On {ex['all']['n']} calls admitted into a full bucket with no other call of this model in flight, "
+                 f"`limit - prompt_tokens - remaining-tokens` by max_tokens: "
+                 + "; ".join(f"max_tokens {k}: {v['values']}" for k, v in bym.items())
+                 + f". {at_max} equal max_tokens, {below} are below it, {above} above it; largest "
+                   f"{ex['all']['max']}. Consistent with admission holding prompt + up to min(max_tokens, {ex['all']['max']}) "
+                   f"(capped observations: the cap is at least that).")
     ev = [e for e in events if e["event"] == "skipped" and e["phase"] == "P2-overflow"]
     for e in ev:
         L.append(f"- P2-overflow skipped: {e['reason']}.")
@@ -1060,7 +1100,7 @@ def truth_check(truths: list[str], verdicts: dict) -> list[str]:
             for m, v in verdicts.get(kind, {}).items():
                 ok = (exp_w in (v or "")) if exp_w == "bucket" else ("window" in (v or "") and "bucket" not in (v or ""))
                 out.append(f"- {'PASS' if ok else 'FAIL'} {kind} {SHORT[m]}: expected {exp_w}, got {v!r}")
-        exp_a = "max_tokens" if charge.startswith("admission") else "only the prompt"
+        exp_a = "max_tokens reserved" if charge.startswith("admission") else "max_tokens not held"
         for m, v in verdicts.get("admission", {}).items():
             out.append(f"- {'PASS' if v and v.startswith(exp_a) else 'FAIL'} admission {SHORT[m]}: expected {exp_a!r}, got {v!r}")
         pv = verdicts.get("pooling") or ""

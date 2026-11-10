@@ -340,4 +340,24 @@ while implementing.
 - **Not settled.** p95 latency per call size needs P6 repeated on later days:
   `probe_groq.py --real --phases P6`, which reuses the measured settings.
 
-Still open in M2: client-side limiter (built on the probe findings), stand-in v0, results.csv writer.
+**Client-side limiter done** (`relay/limiter.py`), built from `data/probe/` (not the docs) by
+`Limiter.from_probe()`.
+- **Buckets.** Every limit the probe saw is a refilling bucket per model, with capacity and period
+  measured: TPM and RPD from headers, RPM from 429 bodies. A limit first named in a runtime 429
+  body becomes a new bucket.
+- **Header overwrite.** Each response's headers become the bucket's new anchor at that call's
+  admission time; our calls in flight are replayed on top.
+- **Reservation.** Reserve charges what admission holds: the prompt plus min(max_tokens, a learned
+  hold cap). Settle releases it down to actual usage.
+- **API.** `reserve()` never blocks. It returns a grant, or a ticket with a predicted wait that
+  counts the FIFO queue in front, or raises `Unavailable`. `Ticket.acquire()` never waits past the
+  deadline.
+- **Prompt-token estimator.** Least-squares fit on chars and messages with a relative upper bound,
+  seeded from probe usage. It is updated by every settled call and by token 429 "Requested" values.
+- **Checks.** Unit tests in `tests/test_limiter.py`. `scripts/replay_limiter.py` replays the real
+  probe log and scores the limiter's forecasts against Groq's headers
+  (`data/probe/limiter_replay.json`).
+- **Q2 refined while building it.** `max_tokens` is not held in full, but admission does hold a
+  capped amount beyond the prompt. See `findings.md`, Q2.
+
+Still open in M2: stand-in v0, results.csv writer.

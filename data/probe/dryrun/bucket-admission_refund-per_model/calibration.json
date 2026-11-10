@@ -684,7 +684,8 @@
       "dt_headers_s": 5.907,
       "saturated_headers": true,
       "res_usage_headers": -200,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 200
      },
      {
       "p": "P4/router/k1",
@@ -844,7 +845,8 @@
       "dt_headers_s": 15.01,
       "saturated_headers": true,
       "res_usage_headers": -16,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 16
      },
      {
       "p": "P1/tiny/poll",
@@ -860,7 +862,8 @@
       "dt_headers_s": 27.829,
       "saturated_headers": true,
       "res_usage_headers": -200,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 200
      },
      {
       "p": "P6/router/sequential",
@@ -876,7 +879,8 @@
       "dt_headers_s": 9.005,
       "saturated_headers": true,
       "res_usage_headers": -200,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 200
      },
      {
       "p": "P6/router/sequential",
@@ -892,7 +896,8 @@
       "dt_headers_s": 9.025,
       "saturated_headers": true,
       "res_usage_headers": -200,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 200
      },
      {
       "p": "P6/router/sequential",
@@ -908,7 +913,8 @@
       "dt_headers_s": 9.023,
       "saturated_headers": true,
       "res_usage_headers": -200,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 200
      },
      {
       "p": "P6/router/sequential",
@@ -924,7 +930,8 @@
       "dt_headers_s": 9.007,
       "saturated_headers": true,
       "res_usage_headers": -200,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 200
      }
     ],
     "fit": {
@@ -990,6 +997,41 @@
       "median": 496.2,
       "min": 496.2,
       "max": 496.2
+     }
+    },
+    "admission_extra_after_idle": {
+     "_what": "limit - prompt_tokens - x-ratelimit-remaining-tokens on calls admitted into a full bucket: tokens admission held beyond the prompt",
+     "all": {
+      "n": 7,
+      "p50": 200,
+      "p90": 200,
+      "min": 16,
+      "max": 200
+     },
+     "by_max_tokens": {
+      "16": {
+       "n": 1,
+       "p50": 16,
+       "min": 16,
+       "max": 16,
+       "values": [
+        16
+       ]
+      },
+      "200": {
+       "n": 6,
+       "p50": 200,
+       "min": 200,
+       "max": 200,
+       "values": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+       ]
+      }
      }
     }
    },
@@ -1707,7 +1749,8 @@
       "dt_headers_s": 53.988,
       "saturated_headers": true,
       "res_usage_headers": -500,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 500
      },
      {
       "p": "P6/draft/sequential",
@@ -1771,7 +1814,8 @@
       "dt_headers_s": 6.438,
       "saturated_headers": true,
       "res_usage_headers": -500,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 500
      },
      {
       "p": "P6/draft/sequential",
@@ -1803,7 +1847,8 @@
       "dt_headers_s": 9.021,
       "saturated_headers": true,
       "res_usage_headers": -200,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 200
      },
      {
       "p": "P6/router/sequential",
@@ -1819,7 +1864,8 @@
       "dt_headers_s": 9.008,
       "saturated_headers": true,
       "res_usage_headers": -200,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 200
      }
     ],
     "fit": {
@@ -1891,6 +1937,38 @@
       "median": -88.7,
       "min": -88.7,
       "max": -88.7
+     }
+    },
+    "admission_extra_after_idle": {
+     "_what": "limit - prompt_tokens - x-ratelimit-remaining-tokens on calls admitted into a full bucket: tokens admission held beyond the prompt",
+     "all": {
+      "n": 4,
+      "p50": 200,
+      "p90": 500,
+      "min": 200,
+      "max": 500
+     },
+     "by_max_tokens": {
+      "200": {
+       "n": 2,
+       "p50": 200,
+       "min": 200,
+       "max": 200,
+       "values": [
+        200,
+        200
+       ]
+      },
+      "500": {
+       "n": 2,
+       "p50": 500,
+       "min": 500,
+       "max": 500,
+       "values": [
+        500,
+        500
+       ]
+      }
      }
     }
    },
@@ -2509,7 +2587,8 @@
       "dt_headers_s": 0.833,
       "saturated_headers": true,
       "res_usage_headers": -200,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 200
      },
      {
       "p": "P4/router/k1",
@@ -2541,7 +2620,8 @@
       "dt_headers_s": 86.336,
       "saturated_headers": true,
       "res_usage_headers": -500,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 500
      },
      {
       "p": "P6/draft/sequential",
@@ -2637,7 +2717,8 @@
       "dt_headers_s": 9.026,
       "saturated_headers": true,
       "res_usage_headers": -200,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 200
      },
      {
       "p": "P6/router/sequential",
@@ -2653,7 +2734,8 @@
       "dt_headers_s": 9.016,
       "saturated_headers": true,
       "res_usage_headers": -200,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 200
      },
      {
       "p": "P6/router/sequential",
@@ -2669,7 +2751,8 @@
       "dt_headers_s": 6.015,
       "saturated_headers": true,
       "res_usage_headers": -200,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 200
      },
      {
       "p": "P6/router/sequential",
@@ -2685,7 +2768,8 @@
       "dt_headers_s": 5.997,
       "saturated_headers": true,
       "res_usage_headers": -200,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 200
      },
      {
       "p": "P6/router/sequential",
@@ -2701,7 +2785,8 @@
       "dt_headers_s": 3.012,
       "saturated_headers": true,
       "res_usage_headers": -200,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 200
      },
      {
       "p": "P6/router/sequential",
@@ -2717,7 +2802,8 @@
       "dt_headers_s": 3.005,
       "saturated_headers": true,
       "res_usage_headers": -200,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 200
      },
      {
       "p": "P6/router/sequential",
@@ -2733,7 +2819,8 @@
       "dt_headers_s": 2.996,
       "saturated_headers": true,
       "res_usage_headers": -200,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 200
      },
      {
       "p": "P6/router/sequential",
@@ -2749,7 +2836,8 @@
       "dt_headers_s": 3.0,
       "saturated_headers": true,
       "res_usage_headers": -200,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 200
      },
      {
       "p": "P6/router/sequential",
@@ -2765,7 +2853,8 @@
       "dt_headers_s": 3.002,
       "saturated_headers": true,
       "res_usage_headers": -200,
-      "res_admission_headers": 0
+      "res_admission_headers": 0,
+      "idle_extra": 200
      }
     ],
     "fit": {
@@ -2831,6 +2920,45 @@
       "median": -0.6,
       "min": -0.6,
       "max": 5.2
+     }
+    },
+    "admission_extra_after_idle": {
+     "_what": "limit - prompt_tokens - x-ratelimit-remaining-tokens on calls admitted into a full bucket: tokens admission held beyond the prompt",
+     "all": {
+      "n": 11,
+      "p50": 200,
+      "p90": 200,
+      "min": 200,
+      "max": 500
+     },
+     "by_max_tokens": {
+      "200": {
+       "n": 10,
+       "p50": 200,
+       "min": 200,
+       "max": 200,
+       "values": [
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200,
+        200
+       ]
+      },
+      "500": {
+       "n": 1,
+       "p50": 500,
+       "min": 500,
+       "max": 500,
+       "values": [
+        500
+       ]
+      }
      }
     }
    },
@@ -3730,9 +3858,9 @@
   "- PASS tokens_window gpt-oss-120b: expected bucket, got 'refilling bucket'",
   "- PASS requests_window gpt-oss-20b: expected bucket, got 'refilling bucket (a request was readmitted within seconds)'",
   "- PASS requests_window gpt-oss-120b: expected bucket, got 'refilling bucket (a request was readmitted within seconds)'",
-  "- PASS admission gpt-oss-20b: expected 'max_tokens', got 'max_tokens reserved at admission'",
-  "- PASS admission gpt-oss-120b: expected 'max_tokens', got 'max_tokens reserved at admission'",
-  "- PASS admission qwen3.8-27b: expected 'max_tokens', got 'max_tokens reserved at admission'",
+  "- PASS admission gpt-oss-20b: expected 'max_tokens reserved', got 'max_tokens reserved at admission'",
+  "- PASS admission gpt-oss-120b: expected 'max_tokens reserved', got 'max_tokens reserved at admission'",
+  "- PASS admission qwen3.8-27b: expected 'max_tokens reserved', got 'max_tokens reserved at admission'",
   "- PASS pooling: expected 'per model', got 'per model (each model hit its own wall; the bystander model was never refused)'"
  ]
 }
