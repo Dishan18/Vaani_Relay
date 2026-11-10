@@ -1,0 +1,5 @@
+# Byte-exact data files: their sha256 is recorded (MANIFEST.json, blocks_audit.json).
+*.jsonl text eol=lf
+*.json text eol=lf
+*.csv text eol=lf
+*.pdf binary

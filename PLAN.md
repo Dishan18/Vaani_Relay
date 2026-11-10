@@ -197,7 +197,7 @@ Vaani_Relay/
 
 | Package | Why we need it | Stdlib alternative and why not |
 |---|---|---|
-| `aiohttp` | Async HTTP **client** (streaming SSE from Groq) **and server** (stand-in) in one dependency; works on Windows' Proactor loop | asyncio streams + `ssl` would mean hand-writing HTTP/1.1, chunked encoding and TLS handling. Too much risk for no gain. |
+| ~~`aiohttp`~~ *(dropped in M2)* | Planned for the async HTTP client and the stand-in server. | **Replaced by stdlib** `asyncio` streams + `ssl`. HTTP/1.1 POST with chunked/SSE parsing is about 150 lines and tested offline. Owning the read loop means every network read gets its own timestamp, which is exactly what the latency measurements need. The stand-in server will use `asyncio.start_server` the same way. |
 | `pypdf==7.0.0` *(added in M1)* | The brief names PDF versions. Its text visitor gives each run's font, size and position. Without those, `2.3·10^19` flattens to `1019`, `d_model` to `dmodel`, and headings and running headers can't be told from body text. | No stdlib PDF parser. arXiv HTML doesn't exist for all three versions, and LaTeX source would need its own parser and loses page numbers for citations. |
 
 Everything else is stdlib: `tomllib`, `csv`, `json`, `statistics`, `asyncio`, `unittest`, `hashlib`, `re`. No numpy or pandas; percentiles are computed with an explicit nearest-rank function so reviewers can reproduce them.
@@ -218,7 +218,7 @@ Everything else is stdlib: `tomllib`, `csv`, `json`, `statistics`, `asyncio`, `u
 |---|---|---|---|
 | M0 | 11-10 | Repo, `CLAUDE.md`, `PLAN.md`, `.gitignore`, remote | 0 |
 | M1 | 11-10 | Fetch papers at exact versions (+sha256); inspect PDF vs HTML vs LaTeX; choose parser and citation granularity (G17); chunker + BM25; offline retrieval sanity checks. **M1a done:** `fetch_papers.py`, `extract_papers.py`, `audit_blocks.py` (see §8). **M1b next:** chunker + BM25. | 0 |
-| M2 | 11-10 | Streaming client, ledger, hard cap, limiter; stand-in v0 with placeholder parameters; trace spans; results.csv writer | 0 |
+| M2 | 11-10 | Streaming client, ledger, hard cap, limiter; stand-in v0 with placeholder parameters; trace spans; results.csv writer. **Client done:** `relay/llm.py` + offline tests (§9). | 0 |
 | M3 | 11-10 / 11-11 | Record documented limits as hypotheses → **probe (R1)**: latency sample, size sweep, RPM burst to 429, recovery, concurrency steps. **Measurement-first gate: no ladder thresholds, timeouts or retry policy get fixed before this.** | ≤ 15% |
 | M4 | 11-11 | Calibrate stand-in from R1; validate (R2) with quantile comparison; write down where it differs | 0 |
 | M5 | 11-11 | Full pipeline + governor + ladder against the stand-in; author writes questions + gold; grader; unit tests | 0 |
@@ -280,3 +280,40 @@ retriever":
    break and cites both pages.
 5. **Some glyphs have no Unicode mapping, and inline footnote or citation markers remain.**
    These are harmless for retrieval, but an answer must not invent a symbol.
+
+---
+
+## 9. Streaming client (M2): `relay/llm.py`
+
+- **What one class does.** One `LLMClient` handles any OpenAI-compatible endpoint. The Groq and
+  stand-in endpoints differ only in base URL and the `source` label written into each record.
+- **What every call records.** Every call returns a `CallRecord`, and `record_sink` sees it even
+  when the caller cancels. It holds:
+  - times: connect, headers, first body byte, first reasoning delta, first visible token, total;
+  - every SSE chunk;
+  - all `x-ratelimit-*` and `retry-after` headers, verbatim and in order;
+  - the whole body of any non-200 response, with `org_…` redacted;
+  - usage, finish reason, and the partial text kept so far.
+- **Timeouts and retries.** Three timeouts, each of which aborts the TCP connection: no first
+  visible token in time, a stall once the body has started, and an overall deadline. A timeout
+  record names the stage it fired in: connect, send, headers or body. There are no retries inside
+  the client; retrying is the caller's policy.
+- **What counts as "visible".** Content outside `<think>…</think>` and outside the
+  `reasoning`/`reasoning_content` fields, containing a non-space character. Whitespace after
+  `</think>` is not a first token.
+- **Offline tests.** `tests/test_llm.py` runs against the scripted local server in
+  `tests/fake_openai_server.py`. It covers normal and chunked framing, 429 bodies, all three
+  timeouts (including that the server sees the client leave), caller cancellation, connect
+  errors, truncated streams, mid-stream error events, and think-tags split across chunks.
+  Run: `.venv\Scripts\python -m unittest discover -s tests -t .`
+
+Windows facts found while testing. Both matter for the measurement design:
+- **Timer granularity.** asyncio timers run on `time.monotonic`, which ticks about every
+  15.6 ms on Windows, so a timeout can fire up to one tick early. Recorded times use
+  `perf_counter` and are unaffected. Never set timeouts finer than about 20 ms.
+- **Refused connections.** A refused TCP connect to localhost takes about 2 s on Windows
+  (SYN retries). Stand-in failure modes should answer with HTTP errors, not by refusing
+  connections, or the 2 s will pollute latency results.
+
+Still open in M2: ledger + daily hard cap wired to `record_sink`, client-side limiter, stand-in
+v0, results.csv writer.
