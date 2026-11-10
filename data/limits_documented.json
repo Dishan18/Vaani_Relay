@@ -1,0 +1,42 @@
+{
+  "_what": "What Groq's documentation CLAIMS. Hypotheses, not measurements (CLAUDE.md rule 1). The probe confirms or refutes each claim and writes its findings elsewhere.",
+  "retrieved_at": "2026-11-10",
+  "sources": {
+    "limits": "https://console.groq.com/docs/rate-limits",
+    "models": "https://console.groq.com/docs/models"
+  },
+  "plan": "free",
+  "scope_claim": "Rate limits apply at the organization level, not to individual users. 'You can hit any limit type depending on which threshold you reach first.'",
+  "models": {
+    "openai/gpt-oss-20b": {"status": "production", "rpm": 30, "rpd": 1000, "tpm": 8000, "tpd": 200000,
+                           "context_window": 131072, "max_completion_tokens": 65536},
+    "openai/gpt-oss-120b": {"status": "production", "rpm": 30, "rpd": 1000, "tpm": 8000, "tpd": 200000,
+                            "context_window": 131072, "max_completion_tokens": 65536},
+    "qwen/qwen3.8-27b": {"status": "preview", "rpm": 30, "rpd": 1000, "tpm": 8000, "tpd": 200000,
+                         "context_window": 131072, "max_completion_tokens": 16384}
+  },
+  "headers_claimed": {
+    "retry-after": "seconds; only set on 429",
+    "x-ratelimit-limit-requests": "always RPD",
+    "x-ratelimit-remaining-requests": "always RPD",
+    "x-ratelimit-reset-requests": "always RPD",
+    "x-ratelimit-limit-tokens": "always TPM",
+    "x-ratelimit-remaining-tokens": "always TPM",
+    "x-ratelimit-reset-tokens": "always TPM",
+    "note": "the docs call their example header values illustrative"
+  },
+  "other_claims": {
+    "429": "exceeding a limit returns 429 Too Many Requests",
+    "cached_tokens": "cached tokens do not count towards rate limits"
+  },
+  "not_documented": [
+    "fixed window vs refilling bucket, for any limit",
+    "whether TPM/TPD are charged on max_tokens at admission or on actual usage",
+    "whether a 429-rejected request counts toward RPD or TPM",
+    "whether a cancelled stream is charged in full",
+    "any concurrency limit",
+    "whether the daily window is fixed (which time zone) or rolling",
+    "no header exposes RPM or TPD",
+    "how stable preview-model limits are"
+  ]
+}

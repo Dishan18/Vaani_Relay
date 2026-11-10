@@ -1,0 +1,26 @@
+# Caps on real Groq calls, enforced by relay/ledger.py. Each cap is a fraction of the documented
+# daily allowance in data/limits_documented.json (RPD for requests, TPD for tokens), counted over
+# a rolling window. A model not listed under a cap is refused under that cap.
+
+window_hours = 24
+
+# Halt every real call if the server says fewer than this fraction of a model's daily requests
+# remain. The key is shared, so this catches someone else draining it, or a wrong cap.
+[server_floor]
+min_remaining_requests_fraction = 0.5
+
+# Safety net over ALL real calls, whatever script makes them.
+[[cap]]
+name = "account"
+scope = "*"
+fraction_of_documented = 0.9
+models = ["openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.8-27b"]
+
+# The limits probe (docs/probe_plan.md): at most 10% of each model's daily allowance and at most
+# 220 requests in total.
+[[cap]]
+name = "probe"
+scope = "probe"
+fraction_of_documented = 0.10
+total_requests = 220
+models = ["openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3.8-27b"]

@@ -14,3 +14,6 @@ venv/
 
 # regenerable
 data/index/
+
+# ledger lock (held while a budgeted process runs)
+results/ledger/*.lock

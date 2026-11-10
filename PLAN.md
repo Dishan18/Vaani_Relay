@@ -315,5 +315,9 @@ Windows facts found while testing. Both matter for the measurement design:
   (SYN retries). Stand-in failure modes should answer with HTTP errors, not by refusing
   connections, or the 2 s will pollute latency results.
 
-Still open in M2: ledger + daily hard cap wired to `record_sink`, client-side limiter, stand-in
-v0, results.csv writer.
+**Ledger + caps done** (`relay/ledger.py`, `config/budget.toml`, `relay/real.py`): rolling-24 h caps
+derived from `data/limits_documented.json`, reservation before send, conservative charging,
+server-floor halt for the shared key, one-process file lock, `--real` opt-in. Probe design:
+`docs/probe_plan.md` (awaiting approval; nothing spent).
+
+Still open in M2: probe script, client-side limiter, stand-in v0, results.csv writer.
