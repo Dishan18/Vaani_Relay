@@ -145,6 +145,8 @@
    },
    "hold_cap": 200.0,
    "out_hold_cap": null,
+   "admission_extra_samples": [],
+   "admission_extra_source": [],
    "count_429_toward_rpd": false,
    "concurrency_limit": null,
    "latency_vs_in_flight": [
@@ -324,6 +326,34 @@
    },
    "hold_cap": 200.0,
    "out_hold_cap": null,
+   "admission_extra_samples": [
+    87.0,
+    104.0,
+    556.0
+   ],
+   "admission_extra_source": [
+    {
+     "extra": 104.0,
+     "max_tokens": 1200,
+     "prompt_tokens": 1795,
+     "requested": 2099,
+     "file": "retrieval-part1-20261110.calls.jsonl"
+    },
+    {
+     "extra": 556.0,
+     "max_tokens": 1200,
+     "prompt_tokens": 1480,
+     "requested": 2236,
+     "file": "retrieval-part1b-small-20261110.calls.jsonl"
+    },
+    {
+     "extra": 87.0,
+     "max_tokens": 1200,
+     "prompt_tokens": 798,
+     "requested": 1085,
+     "file": "retrieval-part2-lean-20261110.calls.jsonl"
+    }
+   ],
    "count_429_toward_rpd": false,
    "concurrency_limit": null,
    "latency_vs_in_flight": [
@@ -478,6 +508,8 @@
    },
    "hold_cap": 200.0,
    "out_hold_cap": 198.0,
+   "admission_extra_samples": [],
+   "admission_extra_source": [],
    "count_429_toward_rpd": false,
    "concurrency_limit": null,
    "latency_vs_in_flight": [

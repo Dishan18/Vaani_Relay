@@ -78,3 +78,6 @@ Numbers here point at the generated files that hold them (rule 3); nothing is ty
 - **answer_grade holds only the brief's four values.** Stand-in rows leave it empty; the reason is
   in `grade_note` (after the brief's columns), including when a stand-in answer replays a real one.
 - **No real_steady / real_burst until 120b's budget is back** (`results/quality/budget_plan.md`).
+
+## Iterate rounds (stand-in only; one change per round, 2 seeds, kept only if better)
+

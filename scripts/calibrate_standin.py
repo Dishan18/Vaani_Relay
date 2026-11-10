@@ -56,6 +56,29 @@ def ols3(rows):
     return [M[i][3] / M[i][i] for i in range(3)]
 
 
+def admission_extras(hold_caps: dict) -> dict:
+    """Per model: tokens Groq held at admission beyond prompt + hold_cap, measured from real TPM 429s whose
+    request was retried with the identical prompt (Requested - that retry's prompt_tokens - hold_cap)."""
+    import re
+    out: dict[str, list] = {}
+    runs = ROOT / "results" / "raw" / "answers"
+    for p in sorted(runs.glob("*.calls.jsonl")) if runs.exists() else []:
+        calls = [json.loads(x) for x in p.read_text(encoding="utf-8").splitlines() if x.strip()]
+        for i, c in enumerate(calls):
+            r = c["record"]
+            if r.get("source") != "real" or r.get("status") != 429 or "(TPM)" not in (r.get("error_body") or ""):
+                continue
+            m = re.search(r"Requested (\d+)", r["error_body"])
+            same = [d for d in calls[i + 1:] if d.get("request_id") == c.get("request_id") and d["phase"] == c["phase"]
+                    and d["record"]["status"] == 200 and d["record"]["prompt_chars"] == r["prompt_chars"]]
+            if m and same:
+                pt = same[0]["record"]["usage"]["prompt_tokens"]
+                extra = int(m.group(1)) - pt - (hold_caps.get(r["model"]) or 0)
+                out.setdefault(r["model"], []).append({"extra": extra, "max_tokens": r["max_tokens"], "prompt_tokens": pt,
+                                                       "requested": int(m.group(1)), "file": p.name})
+    return out
+
+
 def main() -> int:
     cal = json.loads(CAL.read_text(encoding="utf-8"))
     doc = json.loads(DOC.read_text(encoding="utf-8"))["models"]
@@ -64,6 +87,7 @@ def main() -> int:
     calls = [c for c in raw if c.get("type") == "call" and c.get("mode") == "real" and c["record"]["status"] == 200]
     keys = ("reasoning_effort", "reasoning_format", "include_reasoning")
     models = {}
+    extras = admission_extras({m: st.hold_cap for m, st in lim.models.items()})
     for m, v in cal["models"].items():
         want = lim.settings.get(m, {})
         mine = [c for c in calls if c["model"] == m and all(c["payload"].get(k) == want.get(k) for k in keys)
@@ -107,6 +131,10 @@ def main() -> int:
             "buckets": buckets,
             "hold_cap": st.hold_cap,
             "out_hold_cap": st.out_hold_cap,       # output-token limits (qwen OTPM): from real-run 429 bodies
+            # measured from real TPM 429s (Requested - the identical retry's prompt - hold_cap): admission held
+            # more than prompt + hold_cap on long drafts; the stand-in samples one of these per admission
+            "admission_extra_samples": sorted(x["extra"] for x in extras.get(m, [])),
+            "admission_extra_source": extras.get(m, []),
             "count_429_toward_rpd": False,
             "concurrency_limit": None,
             "latency_vs_in_flight": v.get("latency_vs_in_flight"),

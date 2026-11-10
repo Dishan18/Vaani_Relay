@@ -49,6 +49,7 @@ import time
 import tomllib
 import uuid
 from contextlib import contextmanager
+from collections import deque
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Awaitable, Callable
@@ -343,7 +344,46 @@ def names_a_paper(question: str) -> bool:
 
 # ----------------------------------------------------------------------------- pipeline
 class _Step(Exception):
-    """Internal: a model step could not run (budget, deadline, every model failed)."""
+    """Internal: a model step could not run (budget, deadline, every model failed). ``rec`` is the
+    CallRecord when a request was actually sent and failed (a 429, 5xx, timeout), else None."""
+
+    def __init__(self, msg: str, rec: CallRecord | None = None) -> None:
+        super().__init__(msg)
+        self.rec = rec
+
+
+def is_daily_limit(rec: CallRecord | None) -> bool:
+    """A 429 naming a per-day limit (RPD, TPD, ...): retrying another minute won't help."""
+    if rec is None or rec.status != 429:
+        return False
+    from relay.limiter import parse_limit_body
+    info = parse_limit_body(rec.error_body)
+    return bool(info and (info.get("period_s") or 0) >= 3600)
+
+
+class RetryBudget:
+    """Global retry budget: retries may be at most ``fraction`` of the sent attempts in the last
+    ``window_s`` seconds (at least ``min_retries``), so retries can't multiply load in an overload."""
+
+    def __init__(self, fraction: float, window_s: float = 60.0, min_retries: int = 1) -> None:
+        self.fraction, self.window_s, self.min_retries = fraction, window_s, min_retries
+        self.attempts: deque = deque()
+        self.retries: deque = deque()
+
+    def _trim(self, now: float) -> None:
+        for d in (self.attempts, self.retries):
+            while d and d[0] < now - self.window_s:
+                d.popleft()
+
+    def note_attempt(self, now: float) -> None:
+        self.attempts.append(now)
+
+    def allow(self, now: float) -> bool:
+        self._trim(now)
+        return len(self.retries) < max(self.min_retries, self.fraction * len(self.attempts))
+
+    def note_retry(self, now: float) -> None:
+        self.retries.append(now)
 
 
 class Pipeline:
@@ -353,11 +393,20 @@ class Pipeline:
         self.models = self.cfg["models"]
         self.max_tokens = self.cfg["max_tokens"]
         self.timeouts = {k: Timeouts(**v) for k, v in self.cfg.get("timeouts", {}).items()}
+        rp = self.cfg.get("retry") or {}
+        self.retry_policy = rp if rp.get("enabled") else None
+        self.retry_budget = RetryBudget(float(rp.get("global_budget_fraction", 0.10)),
+                                        float(rp.get("window_s", 60.0))) if self.retry_policy else None
+        lc = self.cfg.get("limiter") or {}
+        if "token_margin" in lc and hasattr(self.lim, "token_margin"):
+            self.lim.token_margin = float(lc["token_margin"])
 
     # ------------------------------------------------------------ public
-    async def answer(self, question: str, request_id: str | None = None, patience_s: float | None = None) -> Reply:
+    async def answer(self, question: str, request_id: str | None = None, patience_s: float | None = None,
+                     trace: Trace | None = None) -> Reply:
+        """``trace``: pass your own to keep the spans of a request that is cancelled (a person who left)."""
         rid = request_id or uuid.uuid4().hex[:12]
-        tr = Trace()
+        tr = trace if trace is not None else Trace()
         arrival = self.lim.now()
         deadline = arrival + min(self.cfg["ladder"]["deadline_s"], patience_s or 1e9)
         calls: list[ModelCall] = []
@@ -629,21 +678,54 @@ class Pipeline:
                                else -(-len(rec.text or "") // 3),
                                est, rec.total_ms, round(g.waited_s, 3)))
         if rec.status != 200 or rec.outcome != "ok":
-            raise _Step(f"{model}: {rec.status} {rec.outcome}")
+            raise _Step(f"{model}: {rec.status} {rec.outcome}", rec)
         return rec
 
     async def _try_models(self, step: str, models: list[str], messages, tr, calls, wait_limit_s, deadline,
                           exclude: tuple[str, ...] = ()) -> tuple[CallRecord, str]:
+        """Each model in fallback order. With [retry] enabled (config/pipeline.toml): after a request
+        that was sent and failed, at most max_per_step retries for the step (counted across the
+        request, lean step-down included), each on a model not yet failed (a different bucket), never
+        after a daily-limit 429, none for best-effort steps, and only within the global retry budget.
+        Moving on because the limiter predicts no room is not a retry: nothing was sent."""
         errs = []
+        pol = self.retry_policy
+        state = tr.meta.setdefault("retry", {}).setdefault(step, {"sent_failures": 0, "retries": 0, "failed": []})
         for m in models:
-            if m in exclude:
+            if m in exclude or (pol and m in state["failed"]):
                 continue
             if self.lim.now() >= deadline:
                 break
+            if pol and state["sent_failures"] > 0:
+                why = None
+                if step in pol.get("best_effort_steps", []):
+                    why = "best-effort step: no retry"
+                elif state["retries"] >= int(pol.get("max_per_step", 1)):
+                    why = f"retry limit ({pol.get('max_per_step', 1)} per step) used"
+                elif state.get("daily"):
+                    why = "never retry after a daily-limit 429"
+                elif not self.retry_budget.allow(self.lim.now()):
+                    why = "global retry budget used"
+                if why:
+                    errs.append(why)
+                    state.setdefault("refused", []).append(why)
+                    break
+                state["retries"] += 1
+                self.retry_budget.note_retry(self.lim.now())
+            n_before = len(calls)
             try:
-                return await self._call(step, m, messages, tr, calls, wait_limit_s, deadline), m
+                rec = await self._call(step, m, messages, tr, calls, wait_limit_s, deadline)
+                if pol and len(calls) > n_before:
+                    self.retry_budget.note_attempt(self.lim.now())
+                return rec, m
             except _Step as e:
                 errs.append(str(e))
+                if pol and len(calls) > n_before:          # it was sent, and failed
+                    self.retry_budget.note_attempt(self.lim.now())
+                    state["sent_failures"] += 1
+                    state["failed"].append(m)
+                    if is_daily_limit(e.rec):
+                        state["daily"] = True
         raise _Step("; ".join(errs) or "deadline")
 
     async def _understand(self, question, tr, calls, deadline):

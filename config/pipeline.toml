@@ -66,3 +66,21 @@ verify = { first_visible_s = 8.0, stall_s = 4.0, deadline_s = 12.0 }
 # small_lean setting turns the router off).
 router = true
 verifier = true
+
+[limiter]
+# Admit a call only if a total-token bucket keeps this many tokens to spare (not charged). (iterate
+# round 1 decides: real TPM 429s showed Groq holding 87-556 tokens more than prompt + 200 on long drafts)
+token_margin = 0
+
+[retry]
+# After a request that was sent and failed (429, 5xx, timeout): at most max_per_step retries per step,
+# each on a different model's bucket; never after a daily-limit 429; none for best-effort steps (the
+# router falls back to the raw question, the verifier is skipped); and retries stay within
+# global_budget_fraction of the sent attempts in the last window_s seconds. Moving on because the
+# limiter predicts no room is not a retry (nothing was sent). enabled = false: the old behaviour (try
+# every model in the fallback order). (decided by the author, 2026-11-11)
+enabled = false     # set by iterate round 4 (the retry policy) if it is kept
+max_per_step = 1
+global_budget_fraction = 0.10
+window_s = 60.0
+best_effort_steps = ["understand", "verify"]

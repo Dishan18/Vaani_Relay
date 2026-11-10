@@ -50,7 +50,7 @@ sys.path.insert(0, str(ROOT))
 
 from relay.limiter import Grant, Limiter, Prompt  # noqa: E402
 from relay.llm import Endpoint, LLMClient  # noqa: E402
-from relay.pipeline import Pipeline, load_config  # noqa: E402
+from relay.pipeline import Pipeline, Trace, load_config  # noqa: E402
 from relay.retrieve import Retriever  # noqa: E402
 from standin.server import Replay, StandIn, Switches, load_calibration  # noqa: E402
 
@@ -167,9 +167,21 @@ CURRENT = contextvars.ContextVar("current_request", default=None)
 NOTE = contextvars.ContextVar("run_note", default="")
 
 
+def apply_overrides(cfg: dict, overrides: dict | None) -> dict:
+    """{"ladder.max_wait_s": 3, "timeouts.draft.first_visible_s": 3, "limiter.token_margin": 560, ...}"""
+    cfg = copy.deepcopy(cfg)
+    for key, val in (overrides or {}).items():
+        node = cfg
+        parts = key.split(".")
+        for k in parts[:-1]:
+            node = node.setdefault(k, {})
+        node[parts[-1]] = val
+    return cfg
+
+
 async def run_scenario(sc: Scenario, duration_s: float, seed: int, calibration: dict, questions: list[dict],
                        retriever: Retriever, run_stamp: str, replay: Replay, rows_path: Path,
-                       detail_path: Path) -> dict:
+                       detail_path: Path, overrides: dict | None = None, label: str = "") -> dict:
     sw = copy.deepcopy(sc.switches)
     stable = int(hashlib.sha256(f"{seed}:{sc.name}".encode()).hexdigest()[:8], 16)   # hash() is salted per process
     async with StandIn(calibration, sw, replay, seed=stable) as s:
@@ -191,18 +203,20 @@ async def run_scenario(sc: Scenario, duration_s: float, seed: int, calibration: 
                                      "completion_tokens": u.get("completion_tokens") or 0,
                                      "replay": rec.other_headers.get("x-standin-replay")})
             return rec
-        cfg = load_config()
+        cfg = apply_overrides(load_config(), overrides)
         real_lim = Limiter.from_probe()
         if sc.naive:
             cfg = copy.deepcopy(cfg)
             cfg["models"]["understand"] = cfg["models"]["understand"][:1]
             cfg["models"]["draft"] = cfg["models"]["draft"][:1]
+            cfg["retry"] = {"enabled": False}          # the naive client retries on its own (naive_retry)
+            cfg.setdefault("limiter", {})["token_margin"] = 0
             lim, chat_fn = NaiveLimiter(real_lim), naive_retry(chat)
         else:
             lim, chat_fn = real_lim, chat
         pipe = Pipeline(chat_fn, lim, retriever, cfg)
         arr = arrivals(sc, duration_s, seed, questions)
-        run_id = f"{sc.name}-{run_stamp}"
+        run_id = f"{sc.name}-{run_stamp}" + (f"-{label}" if label else "")
         t_start = time.perf_counter()
         wall0 = datetime.now(timezone.utc)
         rows_f = rows_path.open("w", encoding="utf-8", newline="\n")
@@ -210,7 +224,7 @@ async def run_scenario(sc: Scenario, duration_s: float, seed: int, calibration: 
                                  "duration_s": duration_s, "seed": seed, "arrivals": len(arr),
                                  "switches": sw.__dict__, "naive": sc.naive, "patience": PATIENCE,
                                  "naive_retry": NAIVE if sc.naive else None, "exhaust_daily": sc.exhaust_daily,
-                                 "note": NOTE.get(),
+                                 "note": NOTE.get(), "overrides": overrides or {},
                                  "started": wall0.isoformat(timespec="milliseconds")}) + "\n")
         detail_rows = []
 
@@ -222,7 +236,8 @@ async def run_scenario(sc: Scenario, duration_s: float, seed: int, calibration: 
             rid = f"{run_id}-{i:04d}"
             cur = {"t0": time.perf_counter(), "calls": []}
             token = CURRENT.set(cur)
-            task = asyncio.ensure_future(pipe.answer(a["question"], request_id=rid))
+            trace = Trace()
+            task = asyncio.ensure_future(pipe.answer(a["question"], request_id=rid, trace=trace))
             CURRENT.reset(token)
             gave_up, reply, err = False, None, None
             try:
@@ -250,7 +265,12 @@ async def run_scenario(sc: Scenario, duration_s: float, seed: int, calibration: 
                      "released_ms": None, "budget_wait_ms": None, "notice": err or "the person left",
                      "model_calls": attempts,
                      "tokens_in": sum(c["prompt_tokens"] for c in cur["calls"]),
-                     "tokens_out": sum(c["completion_tokens"] for c in cur["calls"]), "spans": [], "checks": {}}
+                     "tokens_out": sum(c["completion_tokens"] for c in cur["calls"]), "checks": {},
+                     # the spans up to the moment the person left; any still open end then
+                     "spans": [{"name": sp.name, "start_ms": sp.start_ms,
+                                "end_ms": sp.end_ms if sp.end_ms is not None else waited_ms,
+                                "model": sp.model, "outcome": sp.outcome or "open when the person left"}
+                               for sp in trace.spans]}
             row = {"type": "answer", "run_id": run_id, "scenario": sc.name, "source": "stand-in", "setting": "large",
                    "setting_def": {"piece_chars": cfg["retrieval"]["piece_chars"], "k": cfg["retrieval"]["k_full"],
                                    "rerank": cfg["retrieval"]["rerank"], "router": True},
@@ -275,7 +295,8 @@ async def run_scenario(sc: Scenario, duration_s: float, seed: int, calibration: 
         for d in detail_rows:
             k = "gave_up" if d["gave_up"] else d["kind"]
             kinds[k] = kinds.get(k, 0) + 1
-        return {"scenario": sc.name, "requests": len(detail_rows), "outcomes": kinds, "stand_in": s.stats,
+        return {"scenario": sc.name, "run_id": run_id, "requests": len(detail_rows), "outcomes": kinds,
+                "stand_in": dict(s.stats), "overrides": overrides or {}, "detail_rows": detail_rows,
                 "wall_s": round(time.perf_counter() - t_start, 1)}
 
 
@@ -301,7 +322,8 @@ async def main_async(a) -> int:
     for n in names:
         paths[n].with_suffix(".jsonl.partial").replace(paths[n])
     summary = {"_generated_by": "scripts/run_load.py", "stamp": stamp, "duration_s": a.duration_s, "seed": a.seed,
-               "replay": {"router": len(replay.router), "drafts": len(replay.draft)}, "scenarios": results}
+               "replay": {"router": len(replay.router), "drafts": len(replay.draft)},
+               "scenarios": [{k: v for k, v in r.items() if k != "detail_rows"} for r in results]}
     (a.out_dir / f"summary-{stamp}.json").write_text(json.dumps(summary, indent=1) + "\n", encoding="utf-8",
                                                     newline="\n")
     for r in results:

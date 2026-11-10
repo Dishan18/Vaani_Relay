@@ -324,6 +324,9 @@ class Limiter:
         self.findings_changed: list[dict] = []
         self.settings: dict[str, dict] = {}     # reasoning settings the estimator was calibrated for
         self.completions: dict[tuple[str, int], deque] = {}    # (model, max_tokens) -> recent completion_tokens
+        # Admit only with this many tokens to spare in a total-token bucket (TPM/TPD). Not charged: it
+        # covers what Groq holds beyond prompt + hold_cap on long drafts (real TPM 429s: 87-556 extra).
+        self.token_margin = 0.0
 
     def now(self) -> float:
         return self.clock()
@@ -523,7 +526,7 @@ class Limiter:
             need = self._needs(st, pt, mx)
             start, limiting = t, None
             for n, b in st.buckets.items():
-                short = need[n] - lv[n]
+                short = need[n] + (self.token_margin if b.unit == TOKENS else 0.0) - lv[n]
                 if short > EPS:
                     s = t + short / b.rate
                     if s > start:
@@ -538,7 +541,8 @@ class Limiter:
 
     def _feasible_now(self, st: ModelState, prompt_tokens: int, max_tokens: int, now: float) -> bool:
         need = self._needs(st, prompt_tokens, max_tokens)
-        return all(b.level(st.events, now) + EPS >= need[n] for n, b in st.buckets.items())
+        return all(b.level(st.events, now) + EPS >= need[n] + (self.token_margin if b.unit == TOKENS else 0.0)
+                   for n, b in st.buckets.items())
 
     def _grant(self, st: ModelState, prompt: Prompt | None, prompt_tokens: int, max_tokens: int, now: float,
                waited: float) -> Grant:

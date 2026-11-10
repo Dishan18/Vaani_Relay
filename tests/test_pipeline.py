@@ -176,6 +176,72 @@ class LadderTests(unittest.TestCase):
         self.assertRegex(r.text, r"retry in \d+ s")
 
 
+class RetryPolicyTests(unittest.TestCase):
+    def rpd_429(self, model):
+        return 429, ""
+
+    def test_at_most_one_retry_per_step_on_another_model(self):
+        def script(step, model, payload):
+            if step == "draft":
+                return 503, ""
+            return default_script(step, model, payload)
+        chat = ScriptedChat(script)
+        r = run(Pipeline(chat, make_limiter(), RETRIEVER, cfg()).answer(QUESTION))
+        drafts = [c for c in chat.calls if c[0] == "draft"]
+        self.assertEqual(drafts, [("draft", Q120), ("draft", Q20)])          # 1 retry, different model
+        self.assertEqual(r.kind, "passages")
+        self.assertIn("retry limit", r.notice)
+
+    def test_no_retry_after_a_daily_limit_429(self):
+        class DailyChat(ScriptedChat):
+            async def __call__(self, payload, *, phase, timeouts=None):
+                r = await super().__call__(payload, phase=phase, timeouts=timeouts)
+                if phase == "draft":
+                    r.status, r.outcome = 429, "rate_limited"
+                    r.error_body = json.dumps({"error": {"message": (
+                        f"Rate limit reached for model `{payload['model']}` in organization `org_REDACTED` service "
+                        "tier `on_demand` on requests per day (RPD): Limit 1000, Used 1000, Requested 1. Please try "
+                        "again in 1m26.4s. Need more"), "type": "requests", "code": "rate_limit_exceeded"}})
+                    r.usage, r.text = None, ""
+                return r
+        chat = DailyChat(default_script)
+        r = run(Pipeline(chat, make_limiter(), RETRIEVER, cfg()).answer(QUESTION))
+        self.assertEqual([c for c in chat.calls if c[0] == "draft"], [("draft", Q120)])
+        self.assertIn("daily-limit", r.notice)
+
+    def test_router_is_best_effort_no_retry(self):
+        def script(step, model, payload):
+            if step == "understand":
+                return 503, ""
+            return default_script(step, model, payload)
+        chat = ScriptedChat(script)
+        r = run(Pipeline(chat, make_limiter(), RETRIEVER, cfg()).answer(QUESTION))
+        self.assertEqual([c for c in chat.calls if c[0] == "understand"], [("understand", QW)])
+        self.assertEqual(r.kind, "answer")                                    # heuristic query, still answered
+
+    def test_global_budget(self):
+        from relay.pipeline import RetryBudget
+        b = RetryBudget(0.10, window_s=60, min_retries=1)
+        for _ in range(30):
+            b.note_attempt(0.0)
+        self.assertTrue(b.allow(0.0))
+        for _ in range(3):
+            b.note_retry(0.0)
+        self.assertFalse(b.allow(0.0))                                        # 3 retries = 10% of 30
+        self.assertTrue(b.allow(61.0))                                        # the window moved on
+
+    def test_old_behaviour_when_disabled(self):
+        def script(step, model, payload):
+            if step == "draft":
+                return 503, ""
+            return default_script(step, model, payload)
+        c = cfg()
+        c["retry"] = {"enabled": False}
+        chat = ScriptedChat(script)
+        run(Pipeline(chat, make_limiter(), RETRIEVER, c).answer(QUESTION))
+        self.assertGreaterEqual(len([x for x in chat.calls if x[0] == "draft"]), 3)   # every model, and lean again
+
+
 class DecideAndCheckTests(unittest.TestCase):
     def test_off_topic_refused_by_router_without_draft(self):
         def script(step, model, payload):
