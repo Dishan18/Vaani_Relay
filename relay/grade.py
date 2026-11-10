@@ -11,6 +11,8 @@ Labels (as in results.csv): correct | wrong | refused_correctly | refused_wrongl
                      answer to an unanswerable question, or (unsure) a missing gold fact
   refused_correctly  unanswerable, the reply clearly says the papers don't have it, no guessed number
   refused_wrongly    answerable, but refused
+Passages-only and busy replies are graded like any answer (it is what the person got): gold facts
+present and cited -> correct; an unanswerable question answered without saying it isn't covered -> wrong.
 How each check works:
   * a gold fact is present when all of its `match` patterns match the answer (they encode the
     fact; scripts/check_gold.py checks them against the fact's own wording);
@@ -38,7 +40,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from relay.pipeline import cited_ids, split_sentences
+from relay.pipeline import cited_ids, normalize_citations, split_sentences
 from relay.retrieve import tokenize
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -74,7 +76,7 @@ def normalize(text: str) -> str:
     """What the model writes -> plain text the gold patterns can match (added after the first real
     run, which used LaTeX, superscripts and non-breaking hyphens): unicode hyphens and spaces,
     superscript/subscript digits (10¹⁹ -> 10^19), and inline LaTeX (\\(O(n^{2}\\,d)\\) -> O(n^2 d))."""
-    t = _HYPHENS.sub("-", _SPACES.sub(" ", text))
+    t = _HYPHENS.sub("-", _SPACES.sub(" ", normalize_citations(text)))
     t = re.sub(r"([⁰¹²³⁴⁵⁶⁷⁸⁹⁻⁺]+)", lambda m: "^" + m.group(1).translate(_SUP), t)
     t = t.translate(_SUB)
     t = re.sub(r"\\[()\[\]]", " ", t)                          # \( \) \[ \]
@@ -119,7 +121,10 @@ def grade(q: dict, reply: dict, pieces: dict[str, dict]) -> dict:
     kind, text = reply.get("kind"), normalize(reply.get("text") or "")
     out = {"qid": q["qid"], "answer_id": answer_id(q["qid"], reply), "label": None, "sure": True,
            "reasons": [], "facts": [], "wrong_paper_citations": [], "borrowed": []}
-    if kind not in ("answer", "refusal"):
+    # passages-only and busy replies are graded like any answer: it is what the person got
+    # (gold facts present and cited -> correct; an unanswerable question without saying it isn't
+    # covered -> wrong). Decided by the author, 2026-11-10.
+    if kind not in ("answer", "refusal", "passages", "busy"):
         out.update(label=None, sure=False, reasons=[f"no gradable reply (kind={kind})"])
         return out
     refusal_words = bool(REFUSAL.search(text))
@@ -150,7 +155,8 @@ def grade(q: dict, reply: dict, pieces: dict[str, dict]) -> dict:
         out.update(label="refused_wrongly", reasons=["refused an answerable question"])
         return out
     sources = {s["sid"]: s for s in reply.get("sources") or []}
-    sents = split_sentences(text)
+    # a passages reply tags each quoted excerpt once, at the start of its line: the line is the cited unit
+    sents = ([ln for ln in text.splitlines() if cited_ids(ln)] if kind == "passages" else split_sentences(text))
     cites = [[f"S{i}" for i in cited_ids(s)] for s in sents]
     for s, cs in zip(sents, cites):
         for sid in cs:

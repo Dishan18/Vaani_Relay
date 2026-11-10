@@ -96,9 +96,33 @@ class UnanswerableTests(unittest.TestCase):
         g = grade(QS["Q18"], reply("The papers don't say. They report 1.3B-parameter models only.", kind="refusal"), PIECES)
         self.assertEqual((g["label"], g["sure"]), ("refused_correctly", False))
 
-    def test_passages_reply_is_not_gradable(self):
-        g = grade(QS["Q6"], reply("No written answer this time...", HEADS, kind="passages"), PIECES)
-        self.assertIsNone(g["label"])
+    def test_passages_reply_to_unanswerable_is_wrong(self):
+        g = grade(QS["Q6"], reply("No written answer this time: here are the most relevant passages.\n"
+                                  "[S1] 1706.03762v7 p.5: \"we employ h = 8 parallel attention layers\"", HEADS,
+                                  kind="passages"), PIECES)
+        self.assertEqual(g["label"], "wrong")
+
+    def test_busy_reply_is_wrong(self):
+        self.assertEqual(grade(QS["Q6"], reply("Sorry, the service is busy. Please retry in 10 s.", kind="busy"),
+                               PIECES)["label"], "wrong")
+        self.assertEqual(grade(QS["Q2"], reply("Sorry, the service is busy. Please retry in 10 s.", kind="busy"),
+                               PIECES)["label"], "wrong")
+
+
+class CitationNormalisationTests(unittest.TestCase):
+    def test_fullwidth_citations_count(self):
+        g = grade(QS["Q2"], reply(Q2_OK.replace("[S1]", "【S1】"), HEADS), PIECES)
+        self.assertEqual(g["label"], "correct", g["reasons"])
+
+    def test_passages_reply_with_gold_facts_is_correct(self):
+        text = ("No written answer this time: here are the most relevant passages from the papers.\n"
+                "[S1] 1706.03762v7: \"Multi-head attention allows the model to jointly attend to information from "
+                "different representation subspaces at different positions.\"\n"
+                "[S1] 1706.03762v7: \"In this work we employ h = 8 parallel attention layers, or heads. For each of these "
+                "we use d_k = d_v = d_model/h = 64. Due to the reduced dimension of each head, the total computational "
+                "cost is similar to that of single-head attention with full dimensionality.\"")
+        g = grade(QS["Q2"], reply(text, HEADS, kind="passages"), PIECES)
+        self.assertEqual(g["label"], "correct", g["reasons"])
 
 
 class OverrideTests(unittest.TestCase):

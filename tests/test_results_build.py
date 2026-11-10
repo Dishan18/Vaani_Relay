@@ -29,7 +29,7 @@ def row(source, rid, text, start):
 
 
 class StandInGrades(unittest.TestCase):
-    def test_replay_inherits_grade_placeholder_does_not(self):
+    def test_stand_in_rows_never_graded_replay_noted(self):
         with tempfile.TemporaryDirectory() as d:
             raw, out = Path(d) / "raw", Path(d) / "out"
             raw.mkdir()
@@ -41,13 +41,15 @@ class StandInGrades(unittest.TestCase):
             with (out / "results.csv").open(encoding="utf-8", newline="") as f:
                 got = {r["request_id"]: r for r in csv.DictReader(f)}
             self.assertEqual(got["real-1"]["answer_grade"], "correct")
-            self.assertEqual((got["si-1"]["answer_grade"], got["si-1"]["grade_source"]), ("correct", "replay:real-1"))
-            self.assertEqual((got["si-2"]["answer_grade"], got["si-2"]["grade_source"]), ("", "not_graded:stand-in"))
+            self.assertEqual((got["si-1"]["answer_grade"], got["si-1"]["grade_note"]),
+                             ("", "not graded: stand-in; replays real real-1, graded correct"))
+            self.assertEqual((got["si-2"]["answer_grade"], got["si-2"]["grade_note"]), ("", "not graded: stand-in"))
+            self.assertEqual(list(got["real-1"])[:12], build_results.COLUMNS[:12])
             make_tables.main(["--results", str(out / "results.csv"), "--out", str(out / "tables.md")])
             md = (out / "tables.md").read_text(encoding="utf-8")
-            self.assertIn("| steady | stand-in | 2 | 1 | not_graded:stand-in 1 |", md)
+            self.assertIn("| steady | stand-in | 2 | 0 | not graded: stand-in 2 |", md)
 
-    def test_tables_refuse_a_stand_in_grade_without_replay(self):
+    def test_tables_refuse_any_stand_in_grade(self):
         with tempfile.TemporaryDirectory() as d:
             p = Path(d) / "results.csv"
             with p.open("w", encoding="utf-8", newline="") as f:
@@ -55,7 +57,7 @@ class StandInGrades(unittest.TestCase):
                 w.writeheader()
                 w.writerow({c: "" for c in build_results.COLUMNS} | {
                     "request_id": "x", "scenario": "steady", "source": "stand-in", "answer_grade": "correct",
-                    "grade_source": "auto", "superseded": "0", "tokens_in": "1", "tokens_out": "1"})
+                    "grade_note": "auto", "superseded": "0", "tokens_in": "1", "tokens_out": "1"})
             with self.assertRaises(SystemExit):
                 make_tables.main(["--results", str(p), "--out", str(Path(d) / "t.md")])
 

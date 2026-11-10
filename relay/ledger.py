@@ -55,6 +55,20 @@ DEFAULT_BUDGET = ROOT / "config" / "budget.toml"
 DOCUMENTED = ROOT / "data" / "limits_documented.json"
 
 
+REPORTED = "reported usage (findings Q2: Groq releases the admission hold down to what was used)"
+
+
+def charge_of(e: dict[str, Any]) -> int:
+    """Tokens a ledger entry counts against the caps. The file is append-only, so entries written
+    under the earlier rule (max(estimate + max_tokens, usage)) are re-read with the current one:
+    a completed 200 that reported its usage counts that usage; anything else keeps its conservative
+    charge. Changed 2026-11-10 at the author's request (it was ~2x real usage on long drafts)."""
+    u = e.get("usage_total_tokens")
+    if e.get("status") == 200 and e.get("outcome") == "ok" and isinstance(u, int):
+        return u
+    return int(e.get("charged_tokens") or 0)
+
+
 class BudgetExceeded(Exception):
     """Raised instead of sending a call that could break a cap."""
 
@@ -239,7 +253,7 @@ class Ledger:
                 continue
             p = per.setdefault(e["model"], {"requests": 0, "tokens": 0})
             p["requests"] += e["charged_requests"]
-            p["tokens"] += e["charged_tokens"]
+            p["tokens"] += charge_of(e)
             total += e["charged_requests"]
         for r in self.inflight.values():
             if not cap.applies(r.scope):
@@ -288,7 +302,11 @@ class Ledger:
         elif rec.status is not None and 400 <= rec.status < 500:
             # rejected before any generation (429 limit, 413 too large, 400 bad params)
             req, tok, basis = 1, r.est_prompt_tokens, f"{rec.status}: rejected, prompt estimate only (assumption; probe P2/P3 check)"
+        elif rec.status == 200 and rec.outcome == "ok" and isinstance(usage_total, int):
+            # Groq releases what admission held down to real usage (findings Q2), so charge that
+            req, tok, basis = 1, usage_total, REPORTED
         else:
+            # no usage reported (timeout, stall, cancelled, stream error): we can't know, stay conservative
             req = 1
             tok = max(r.reserved_tokens, int(usage_total or 0))
             basis = "max(prompt estimate + max_tokens, reported usage)"

@@ -210,6 +210,17 @@ class DecideAndCheckTests(unittest.TestCase):
         self.assertEqual(r.checks["attempts"], 2)
         self.assertEqual([c for c in chat.calls if c[0] == "draft"], [("draft", Q120), ("draft", Q120)])
 
+    def test_fullwidth_citations_pass_the_gate_and_are_normalised(self):
+        def script(step, model, payload):
+            if step == "draft":
+                return cited_answer(payload["messages"][-1]["content"]).replace("[S1]", "【S1】")
+            return default_script(step, model, payload)
+        chat = ScriptedChat(script)
+        r = run(Pipeline(chat, make_limiter(), RETRIEVER, cfg()).answer(QUESTION))
+        self.assertEqual((r.kind, r.checks["attempts"]), ("answer", 1))
+        self.assertIn("[S1]", r.text)
+        self.assertNotIn("【", r.text)
+
     def test_invented_number_twice_falls_back_to_passages(self):
         def script(step, model, payload):
             if step == "draft":

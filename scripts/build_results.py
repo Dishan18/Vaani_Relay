@@ -1,6 +1,7 @@
 """Build results/results.csv and the grade files from the raw answer files. Nothing here is typed by hand.
 
-    .venv\\Scripts\\python scripts\\build_results.py [--raw-dir results/raw/answers] [--out-dir results]
+    .venv\\Scripts\\python scripts\\build_results.py [--raw-dir DIR ...] [--out-dir results]
+        (default raw dirs: results/raw/answers for the evals, results/raw/runs for load runs)
         ->  <out>/results.csv, <out>/quality/grades.jsonl, <out>/quality/unsure.md
 
 Every answer row in <raw-dir>/*.jsonl is graded by relay.grade against data/questions.jsonl. An
@@ -14,14 +15,15 @@ results.csv: the brief's columns in order, then ours:
   gave_up, degraded_level, queue_wait_ms, model, calls, grade_sure, answer_id, superseded
   * first_token_ms = total_ms = arrival to release: the reply is buffered until checked (PLAN G2).
   * status: ok for an answer or refusal; rate_limited for a passages-only reply (budget); error for
-    busy. retries = model calls that failed (each was followed by another model or gave up).
-  * answer_grade is empty for an ungraded row; grade_source says why. Real rows: "auto" (relay.grade),
-    "override" (results/grade_overrides.jsonl), or "not_graded:<kind>" (a passages-only or busy
-    reply has no answer to grade). Stand-in rows are NEVER graded by the grader (their text is a
-    placeholder or a replay): a stand-in row gets a grade only when its answer is byte-identical to
-    a graded real answer (same answer id: question, kind, text, sources), and then grade_source =
-    "replay:<real request_id>"; otherwise "not_graded:stand-in". make_tables.py counts and shows
-    every ungraded row and refuses a stand-in grade without a replay source.
+    busy or a failed request; timeout (gave_up = 1) when the simulated person's patience ran out first:
+    then total_ms = how long they waited and first_token_ms is empty. retries = model calls that
+    failed (each was followed by another model, a retry, or giving up).
+  * answer_grade holds only the brief's four values. Every real reply is graded, passages-only and
+    busy replies included (it is what the person got). Stand-in rows always leave it empty (their
+    text is a placeholder or a replay of a real one); grade_note says why: "auto", "override: ...",
+    or "not graded: stand-in" (plus "; replays real <request_id>, graded <label>" when its answer is
+    byte-identical to a graded real answer). make_tables.py stops if a stand-in row carries a grade,
+    and shows grading coverage for every scenario and source.
   * degraded rows (level > 0) are graded like any other and keep their degraded_level.
   * superseded = 1 (eval scenarios only) when a later run answered the same (scenario, setting, drafter,
     question); the
@@ -43,7 +45,7 @@ from relay.retrieve import Retriever  # noqa: E402
 
 COLUMNS = ["request_id", "scenario", "source", "start_time", "first_token_ms", "total_ms", "status", "retries",
            "tokens_in", "tokens_out", "retrieval_setting", "answer_grade",
-           "gave_up", "degraded_level", "queue_wait_ms", "model", "calls", "grade_sure", "answer_id", "grade_source",
+           "gave_up", "degraded_level", "queue_wait_ms", "model", "calls", "grade_sure", "answer_id", "grade_note",
            "superseded"]
 
 
@@ -64,13 +66,14 @@ def read_answers(raw_dir: Path) -> list[dict]:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--raw-dir", type=Path, default=ROOT / "results" / "raw" / "answers")
+    ap.add_argument("--raw-dir", type=Path, action="append", default=None)
     ap.add_argument("--out-dir", type=Path, default=ROOT / "results")
     ap.add_argument("--overrides", type=Path, default=OVERRIDES)
     a = ap.parse_args(argv)
     qs = load_questions()
     overrides = load_overrides(a.overrides)
-    rows = read_answers(a.raw_dir)
+    raw_dirs = a.raw_dir or [ROOT / "results" / "raw" / "answers", ROOT / "results" / "raw" / "runs"]
+    rows = [r for d in raw_dirs if d.exists() for r in read_answers(d)]
     rows.sort(key=lambda r: (r["source"] != "real", r["start_time"], r["request_id"]))   # real first
     latest = {}
     for r in rows:
@@ -88,16 +91,16 @@ def main(argv: list[str] | None = None) -> int:
             g = grade(qs[r["qid"]], reply, pieces_by_size[size])
             ov = overrides.get(g["answer_id"])
             final = ov["label"] if ov else g["label"]
-            source = "override" if ov else ("auto" if final else f"not_graded:{reply['kind']}")
+            source = (f"override: {ov['reason']}" if ov else ("auto" if final else f"not graded: {g['reasons'][0]}"))
             if final:
                 real_graded[g["answer_id"]] = (final, r["request_id"], bool(g["sure"]) or bool(ov))
         else:
             aid = answer_id(r["qid"], reply)
             ov = None
             hit = real_graded.get(aid)
-            final = hit[0] if hit else None
-            source = f"replay:{hit[1]}" if hit else "not_graded:stand-in"
-            g = {"answer_id": aid, "label": final, "sure": hit[2] if hit else True, "reasons": [source],
+            final = None                                   # stand-in rows are never graded
+            source = "not graded: stand-in" + (f"; replays real {hit[1]}, graded {hit[0]}" if hit else "")
+            g = {"answer_id": aid, "label": None, "sure": True, "reasons": [source],
                  "facts": [], "wrong_paper_citations": [], "borrowed": []}
         # only the evals answer each question once per setting; load runs repeat questions and every request counts
         superseded = int(r["scenario"].startswith("eval:")
@@ -108,22 +111,24 @@ def main(argv: list[str] | None = None) -> int:
                "reasons": g["reasons"], "facts": g["facts"], "wrong_paper_citations": g["wrong_paper_citations"],
                "borrowed": g["borrowed"], "final_label": final,
                "override": ({"label": ov["label"], "reason": ov["reason"], "by": ov["by"], "at": ov["at"]} if ov else None),
-               "superseded": bool(superseded), "source": r["source"], "grade_source": source}
+               "superseded": bool(superseded), "source": r["source"], "grade_note": source}
         grades.append(rec)
-        if not g["sure"] and not ov and not superseded:
+        if r["source"] == "real" and not g["sure"] and not ov and not superseded:
             unsure.append((rec, reply))
         calls = reply.get("model_calls") or []
-        status = {"answer": "ok", "refusal": "ok", "passages": "rate_limited"}.get(reply["kind"], "error")
+        gave_up = bool(r.get("gave_up"))
+        status = "timeout" if gave_up else {"answer": "ok", "refusal": "ok", "passages": "rate_limited"}.get(
+            reply["kind"], "error")
         out_rows.append({
             "request_id": r["request_id"], "scenario": r["scenario"], "source": r["source"],
-            "start_time": r["start_time"], "first_token_ms": reply.get("released_ms"),
-            "total_ms": reply.get("released_ms"), "status": status,
+            "start_time": r["start_time"], "first_token_ms": "" if gave_up else reply.get("released_ms"),
+            "total_ms": r.get("waited_ms") if gave_up else reply.get("released_ms"), "status": status,
             "retries": sum(1 for c in calls if c.get("status") != 200 or c.get("outcome") != "ok"),
             "tokens_in": reply.get("tokens_in"), "tokens_out": reply.get("tokens_out"),
             "retrieval_setting": r["setting"], "answer_grade": final or "",
-            "gave_up": 0, "degraded_level": reply.get("level"), "queue_wait_ms": reply.get("budget_wait_ms"),
+            "gave_up": int(gave_up), "degraded_level": reply.get("level"), "queue_wait_ms": reply.get("budget_wait_ms"),
             "model": r["drafter"], "calls": len(calls), "grade_sure": int(bool(g["sure"]) or bool(ov)),
-            "answer_id": g["answer_id"], "grade_source": source, "superseded": superseded})
+            "answer_id": g["answer_id"], "grade_note": source, "superseded": superseded})
     (a.out_dir / "quality").mkdir(parents=True, exist_ok=True)
     with (a.out_dir / "results.csv").open("w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=COLUMNS)

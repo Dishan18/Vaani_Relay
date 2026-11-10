@@ -101,9 +101,9 @@ class LedgerTests(unittest.TestCase):
             p = payload(max_tokens=100)
             est = estimate_prompt_tokens(p)
             e = led.settle(led.reserve(p, "probe", "p"), record(usage_total=20))
-            self.assertEqual((e["charged_requests"], e["charged_tokens"]), (1, est + 100))  # reservation > usage
+            self.assertEqual((e["charged_requests"], e["charged_tokens"]), (1, 20))       # what Groq reports
             e = led.settle(led.reserve(p, "probe", "p"), record(usage_total=est + 500))
-            self.assertEqual(e["charged_tokens"], est + 500)  # usage > reservation
+            self.assertEqual(e["charged_tokens"], est + 500)
             e = led.settle(led.reserve(p, "probe", "p"), record("rate_limited", 429))
             self.assertEqual((e["charged_requests"], e["charged_tokens"]), (1, est))
         with self.ledger() as led:  # fresh caps window not needed: M2 has room
@@ -111,6 +111,22 @@ class LedgerTests(unittest.TestCase):
             self.assertEqual((e["charged_requests"], e["charged_tokens"]), (0, 0))
             e = led.settle(led.reserve(payload(M2, max_tokens=70), "probe", "p"), record("timeout_stall", 200))
             self.assertEqual(e["charged_tokens"], estimate_prompt_tokens(payload(M2)) + 70)
+
+    def test_old_entries_are_reread_with_the_reported_usage_rule(self):
+        from relay.ledger import charge_of
+        old = {"status": 200, "outcome": "ok", "usage_total_tokens": 1700, "charged_tokens": 3100,
+               "charge_basis": "max(prompt estimate + max_tokens, reported usage)"}
+        self.assertEqual(charge_of(old), 1700)
+        self.assertEqual(charge_of({**old, "outcome": "timeout_stall"}), 3100)
+        self.assertEqual(charge_of({**old, "status": 429, "usage_total_tokens": None, "charged_tokens": 900}), 900)
+
+    def test_inflight_reservations_still_count(self):
+        with self.ledger() as led:
+            p = payload(max_tokens=100)
+            before = led.headroom("probe", payload()["model"])["tokens"]
+            r = led.reserve(p, "probe", "p")
+            self.assertEqual(before - led.headroom("probe", p["model"])["tokens"], r.reserved_tokens)
+            led.release(r)
 
     def test_rolling_window(self):
         with self.ledger() as led:

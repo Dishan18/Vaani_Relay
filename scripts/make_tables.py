@@ -13,8 +13,8 @@ configuration). Latest answer per question only (superseded = 0).
   TTFT = total here: the reply is released only after its checks. Both include budget waits; the
   eval waits for budget rather than degrade, so latency here is not a serving-latency result.
   Percentiles are nearest-rank, with n.
-Quality comes from real rows only. A stand-in row may carry a grade only as an exact replay of a
-graded real answer (grade_source "replay:..."); anything else stops this script. Every table that
+Quality comes from real rows only. A stand-in row never carries a grade (its reason is in
+grade_note); one that does stops this script. Every table that
 reports quality shows the ungraded share, and the coverage table lists every scenario and source with
 how many rows are graded and why the rest aren't, so an ungraded row can't drop out of sight.
 Choosing (the author's rule): only settings with every question answered are eligible; settings within one correct answer of the best are a tie (noise at
@@ -80,10 +80,13 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     with a.results.open(encoding="utf-8", newline="") as f:
         allrows = list(csv.DictReader(f))
-    bad = [r["request_id"] for r in allrows if r["source"] != "real" and r["answer_grade"]
-           and not r.get("grade_source", "").startswith("replay:")]
+    bad = [r["request_id"] for r in allrows if r["source"] != "real" and r["answer_grade"]]
     if bad:
-        sys.exit(f"stand-in rows carry grades that are not replays of real answers: {bad[:5]}")
+        sys.exit(f"stand-in rows carry a grade (only real rows are graded): {bad[:5]}")
+    wrong_value = [r["request_id"] for r in allrows
+                   if r["answer_grade"] not in ("", "correct", "wrong", "refused_correctly", "refused_wrongly")]
+    if wrong_value:
+        sys.exit(f"answer_grade outside the brief's four values: {wrong_value[:5]}")
     latest = [r for r in allrows if r["superseded"] == "0"]
     rows = [r for r in latest if r["source"] == "real"]
     n_questions = 18
@@ -152,7 +155,7 @@ def main(argv=None) -> int:
     for r in latest:
         key = (r["scenario"], r["source"])
         cov[key]["rows"] += 1
-        cov[key]["graded" if r["answer_grade"] else (r.get("grade_source") or "not_graded")] += 1
+        cov[key]["graded" if r["answer_grade"] else (r.get("grade_note") or "not graded").split(";")[0]] += 1
     L += ["## Grading coverage (every scenario and source)", "",
           "| scenario | source | rows | graded | not graded, by reason |", "|---|---|---|---|---|"]
     for (sc, src), c in sorted(cov.items()):

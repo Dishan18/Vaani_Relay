@@ -184,6 +184,20 @@ def numbers_grounded(text: str, sources: list[Hit]) -> bool:
     return all(n in pool for n in _NUM.findall(_digits_norm(_CITE_ANY.sub("", text))))
 
 
+_FULLWIDTH_CITE = re.compile(r"【\s*((?:S\s*)?\d+(?:\s*[,;]\s*(?:S\s*)?\d+)*)[^】]*】")
+
+
+def normalize_citations(text: str) -> str:
+    """Citation styles the drafter uses -> [S#]. Found in the first real run: gpt-oss writes
+    【S3】 (sometimes 【S3†...】) instead of the [S3] the prompt asks for, and "[ S2 ]" with spaces.
+    Lists become [S1][S3]."""
+    def fw(m):
+        ids = re.findall(r"\d+", m.group(1))
+        return "".join(f"[S{i}]" for i in ids)
+    text = _FULLWIDTH_CITE.sub(fw, text)
+    return re.sub(r"\[\s*S\s*(\d+)\s*\]", r"[S\1]", text)
+
+
 def split_sentences(text: str) -> list[str]:
     out = []
     for line in text.splitlines():
@@ -437,6 +451,7 @@ class Pipeline:
                 lean_hits = hits[: rc["k_lean"]]
                 return self._passages(rid, question, lean_hits, self._eta(rc["k_lean"], question, lean_hits),
                                       f"no drafter available ({e})")
+            text = normalize_citations(text)     # gpt-oss writes 【S3】; the gate and the person see [S3]
             if level == LEAN and len(hits) > rc["k_lean"]:
                 hits = hits[: rc["k_lean"]]
             if text.strip().upper().startswith(NOT_IN_PAPERS):

@@ -339,7 +339,7 @@ def _standin_responder(p: dict) -> str:
 
 
 async def run_answers(settings: list[str], drafters: list[str], real: bool, out_dir: Path, scenario: str,
-                      run_id: str, qids: list[str] | None = None) -> Path:
+                      run_id: str, qids: list[str] | None = None, note: str = "") -> Path:
     import asyncio
     import contextvars
     import datetime as dt
@@ -365,7 +365,7 @@ async def run_answers(settings: list[str], drafters: list[str], real: bool, out_
 
     fa.write(json.dumps({"type": "run", "run_id": run_id, "scenario": scenario, "source": "real" if real else "stand-in",
                          "settings": {s: ANSWER_SETTINGS[s] for s in settings}, "drafters": drafters,
-                         "questions": [q["qid"] for q in qs], "git": _git_commit(),
+                         "questions": [q["qid"] for q in qs], "git": _git_commit(), "note": note,
                          "started": dt.datetime.now(dt.timezone.utc).isoformat(timespec="milliseconds")}) + "\n")
     fa.flush()
     lim = Limiter.from_probe()
@@ -443,6 +443,7 @@ def main(argv: list[str] | None = None) -> int:
         a.add_argument("--out-dir", type=Path, help="required without --real (dry runs never write results/)")
         a.add_argument("--run-id")
         a.add_argument("--qids", help="comma list (default: all 18)")
+        a.add_argument("--note", default="", help="why this run exists (kept in the run header)")
         if name == "answers":
             a.add_argument("--settings", default=",".join(ANSWER_SETTINGS))
             a.add_argument("--drafter", default="openai/gpt-oss-120b")
@@ -475,7 +476,7 @@ def main(argv: list[str] | None = None) -> int:
         if s not in ANSWER_SETTINGS:
             ap.error(f"unknown setting {s}")
     run_id = a.run_id or f"{scenario.split(':')[1]}-{stamp}"
-    path = asyncio.run(run_answers(settings, drafters, a.real, out_dir, scenario, run_id, qids))
+    path = asyncio.run(run_answers(settings, drafters, a.real, out_dir, scenario, run_id, qids, a.note))
     print(f"wrote {path}")
     return 0
 
