@@ -14,9 +14,3 @@ venv/
 
 # regenerable
 data/index/
-
-# paper PDFs and their full extracted text: not ours to redistribute.
-# Re-create byte-identically with scripts/fetch_papers.py (sha256-pinned in MANIFEST.json)
-# and scripts/extract_papers.py (deterministic; blocks_audit.json records the output sha256).
-data/papers/*.pdf
-data/blocks.jsonl
