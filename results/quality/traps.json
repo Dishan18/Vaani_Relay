@@ -134,11 +134,17 @@
    {
     "setting": "large",
     "drafter": "qwen/qwen3.8-27b",
-    "label": "wrong",
-    "router": null,
+    "label": "refused_correctly",
+    "router": {
+     "papers": [
+      "moshi"
+     ],
+     "query": "word error rate WER noisy channel conditions What is Moshi's word error rate on noisy Indian English telephone calls?",
+     "alt_query": "operational error metrics accented speech robustness What is Moshi's word error rate on noisy Indian English telephone calls?"
+    },
     "gold_in_sources": "n/a",
     "borrowed": [],
-    "wrong_paper_sources": 1
+    "wrong_paper_sources": 0
    },
    {
     "setting": "medium",
@@ -221,7 +227,13 @@
     "setting": "large",
     "drafter": "qwen/qwen3.8-27b",
     "label": "correct",
-    "router": null,
+    "router": {
+     "papers": [
+      "dynamic_chunking"
+     ],
+     "query": "H-Net encoder decoder resolution hierarchical end-to-end In H-Net, what do the encoder and decoder networks do, and at what resolution do they run?",
+     "alt_query": "network architecture feature extraction reconstruction scale dynamic chunking In H-Net, what do the encoder and decoder networks do, and at what resolution do they run?"
+    },
     "gold_in_sources": "yes",
     "borrowed": [],
     "wrong_paper_sources": 0
@@ -307,7 +319,13 @@
     "setting": "large",
     "drafter": "qwen/qwen3.8-27b",
     "label": "wrong",
-    "router": null,
+    "router": {
+     "papers": [
+      "dynamic_chunking"
+     ],
+     "query": "dynamic chunking byte stream segmentation decision How does H-Net decide where to cut the byte stream into pieces?",
+     "alt_query": "adaptive split points hierarchical sequence modeling How does H-Net decide where to cut the byte stream into pieces?"
+    },
     "gold_in_sources": "no",
     "borrowed": [],
     "wrong_paper_sources": 1
@@ -388,11 +406,17 @@
    {
     "setting": "large",
     "drafter": "qwen/qwen3.8-27b",
-    "label": "wrong",
-    "router": null,
+    "label": "refused_correctly",
+    "router": {
+     "papers": [
+      "dynamic_chunking"
+     ],
+     "query": "p95 latency 1000 concurrent requests hierarchical sequence model inference throughput What is H-Net's p95 latency serving 1,000 simultaneous requests?",
+     "alt_query": "tail latency high concurrency serving performance dynamic chunking H-Net What is H-Net's p95 latency serving 1,000 simultaneous requests?"
+    },
     "gold_in_sources": "n/a",
     "borrowed": [],
-    "wrong_paper_sources": 2
+    "wrong_paper_sources": 0
    },
    {
     "setting": "medium",

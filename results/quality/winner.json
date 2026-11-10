@@ -119,10 +119,11 @@
  "drafter": {
   "chosen": "openai/gpt-oss-120b",
   "tied": [
-   "openai/gpt-oss-120b"
+   "openai/gpt-oss-120b",
+   "qwen/qwen3.8-27b"
   ],
   "best_correct": 11,
-  "why": "best correct = 11; within one of it (tie): openai/gpt-oss-120b; among those, fewest wrong then lowest total p50: openai/gpt-oss-120b",
+  "why": "best correct = 11; within one of it (tie): openai/gpt-oss-120b, qwen/qwen3.8-27b; among those, fewest wrong then lowest total p50: openai/gpt-oss-120b",
   "stats": {
    "openai/gpt-oss-20b": {
     "n": 18,
@@ -147,24 +148,24 @@
    },
    "qwen/qwen3.8-27b": {
     "n": 18,
-    "correct": 7,
-    "wrong": 11,
+    "correct": 10,
+    "wrong": 4,
     "refused_wrongly": 0,
-    "refused_correctly": 0,
+    "refused_correctly": 4,
     "ungraded": 0,
-    "unsure": 5,
-    "correct_pct": 38.888888888888886,
-    "wrong_pct": 61.111111111111114,
-    "refused_pct": 0.0,
+    "unsure": 4,
+    "correct_pct": 55.55555555555556,
+    "wrong_pct": 22.22222222222222,
+    "refused_pct": 22.22222222222222,
     "ungraded_pct": 0.0,
-    "tokens_per_answer": 530.6666666666666,
-    "ttft_p50": 4.7,
-    "ttft_p95": 22057.5,
-    "total_p50": 4.7,
-    "total_p95": 22057.5,
-    "wait_p50": 0.0,
-    "degraded": 13,
-    "retries": 0
+    "tokens_per_answer": 1846.888888888889,
+    "ttft_p50": 5268.4,
+    "ttft_p95": 19217.0,
+    "total_p50": 5268.4,
+    "total_p95": 19217.0,
+    "wait_p50": 4220.7,
+    "degraded": 1,
+    "retries": 2
    },
    "openai/gpt-oss-120b": {
     "n": 18,

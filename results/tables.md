@@ -25,10 +25,10 @@ Same configuration for each (verifier off). Rows for the fixed drafter come from
 | drafter | questions asked | correct and cited % | wrong % | correctly refused % | ungraded % | unsure | tokens per answer | total p50 / p95 (ms) | budget wait p50 (ms) | retries |
 |---|---|---|---|---|---|---|---|---|---|---|
 | openai/gpt-oss-120b | 18 | 61.1 | 16.7 | 22.2 | 0.0 | 7 | 1948 | 4622 / 16558 | 3552 | 0 |
+| qwen/qwen3.8-27b | 18 | 55.6 | 22.2 | 22.2 | 0.0 | 4 | 1847 | 5268 / 19217 | 4221 | 2 |
 | openai/gpt-oss-20b | 18 | 44.4 | 33.3 | 22.2 | 0.0 | 7 | 2348 | 14422 / 36072 | 12354 | 1 |
-| qwen/qwen3.8-27b | 18 | 38.9 | 61.1 | 0.0 | 0.0 | 5 | 531 | 5 / 22058 | 0 | 0 |
 
-**First drafter: openai/gpt-oss-120b.** best correct = 11; within one of it (tie): openai/gpt-oss-120b; among those, fewest wrong then lowest total p50: openai/gpt-oss-120b.
+**First drafter: openai/gpt-oss-120b.** best correct = 11; within one of it (tie): openai/gpt-oss-120b, qwen/qwen3.8-27b; among those, fewest wrong then lowest total p50: openai/gpt-oss-120b.
 
 ## Grading coverage (every scenario and source)
 

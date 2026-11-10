@@ -89,16 +89,15 @@ def main() -> int:
         p = est["settings"][setting]["draft_prompt_mean"].get(model, ref_prompt)
         return draft_ref * (p + 300) / (ref_prompt + 300)
 
-    jobs = [{"job": "reruns after the gate fix (large Q8, Q15; medium Q7, Q8, Q11)",
-             "tokens": {M120: draft(ref, M120) * 5, MQ: router * 5}}]
-    left_small = 18 - answered.get("small", 0)
-    if left_small > 0:
-        jobs.append({"job": f"finish small ({left_small} questions)",
-                     "tokens": {M120: draft("small", M120) * left_small, MQ: router * left_small}})
-    jobs.append({"job": "drafter step at the winner (20b, qwen; 120b reused)",
-                 "tokens": {M20: draft(ref, M20) * 18, MQ: draft(ref, MQ) * 18 + router * 36}})
-    jobs.append({"job": "sweep part 2: medium+rerank", "tokens": {M120: draft("medium+rerank", M120) * 18, MQ: router * 18}})
-    jobs.append({"job": "sweep part 2: small_lean", "tokens": {M120: draft("small_lean", M120) * 18}})
+    # only what is still to do: each sweep setting until all 18 questions are answered (latest per question)
+    jobs = []
+    for setting in ("large", "medium", "small", "medium+rerank", "small_lean"):
+        left = 18 - answered.get(setting, 0)
+        if left > 0:
+            cost = {M120: draft(setting, M120) * left}
+            if est["settings"][setting]["router"]:
+                cost[MQ] = router * left
+            jobs.append({"job": f"sweep: {setting}, {left} questions left", "tokens": cost})
     for name, spec in LOAD.items():
         k = spec["requests"]
         jobs.append({"job": f"{name} ({spec['how']})",

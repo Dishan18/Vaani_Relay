@@ -1,0 +1,151 @@
+{
+ "_generated_by": "scripts/run_load.py",
+ "stamp": "20261110T183422Z",
+ "duration_s": 300.0,
+ "seed": 7,
+ "replay": {
+  "router": 18,
+  "drafts": 94
+ },
+ "scenarios": [
+  {
+   "scenario": "steady",
+   "requests": 24,
+   "outcomes": {
+    "answer": 22,
+    "refusal": 2
+   },
+   "stand_in": {
+    "requests": 67,
+    "ok": 67,
+    "429": 0,
+    "503": 0,
+    "413": 0,
+    "stalls": 0,
+    "replay_hits": 36,
+    "replay_misses": 31
+   },
+   "wall_s": 294.1
+  },
+  {
+   "scenario": "burst",
+   "requests": 34,
+   "outcomes": {
+    "answer": 22,
+    "refusal": 2,
+    "passages": 10
+   },
+   "stand_in": {
+    "requests": 56,
+    "ok": 54,
+    "429": 2,
+    "503": 0,
+    "413": 0,
+    "stalls": 0,
+    "replay_hits": 33,
+    "replay_misses": 21
+   },
+   "wall_s": 279.9
+  },
+  {
+   "scenario": "overload",
+   "requests": 78,
+   "outcomes": {
+    "refusal": 4,
+    "answer": 68,
+    "passages": 5,
+    "gave_up": 1
+   },
+   "stand_in": {
+    "requests": 135,
+    "ok": 134,
+    "429": 0,
+    "503": 0,
+    "413": 0,
+    "stalls": 0,
+    "replay_hits": 77,
+    "replay_misses": 58
+   },
+   "wall_s": 303.6
+  },
+  {
+   "scenario": "overload_naive_retry",
+   "requests": 78,
+   "outcomes": {
+    "answer": 33,
+    "refusal": 2,
+    "passages": 42,
+    "gave_up": 1
+   },
+   "stand_in": {
+    "requests": 569,
+    "ok": 126,
+    "429": 440,
+    "503": 0,
+    "413": 0,
+    "stalls": 0,
+    "replay_hits": 86,
+    "replay_misses": 43
+   },
+   "wall_s": 303.3
+  },
+  {
+   "scenario": "rpm_halved",
+   "requests": 36,
+   "outcomes": {
+    "refusal": 2,
+    "answer": 32,
+    "passages": 2
+   },
+   "stand_in": {
+    "requests": 61,
+    "ok": 61,
+    "429": 0,
+    "503": 0,
+    "413": 0,
+    "stalls": 0,
+    "replay_hits": 34,
+    "replay_misses": 27
+   },
+   "wall_s": 300.7
+  },
+  {
+   "scenario": "daily_exhausted",
+   "requests": 14,
+   "outcomes": {
+    "passages": 14
+   },
+   "stand_in": {
+    "requests": 3,
+    "ok": 0,
+    "429": 3,
+    "503": 0,
+    "413": 0,
+    "stalls": 0,
+    "replay_hits": 0,
+    "replay_misses": 0
+   },
+   "wall_s": 277.4
+  },
+  {
+   "scenario": "chaos",
+   "requests": 27,
+   "outcomes": {
+    "answer": 25,
+    "passages": 1,
+    "refusal": 1
+   },
+   "stand_in": {
+    "requests": 81,
+    "ok": 69,
+    "429": 1,
+    "503": 11,
+    "413": 0,
+    "stalls": 1,
+    "replay_hits": 38,
+    "replay_misses": 31
+   },
+   "wall_s": 287.3
+  }
+ ]
+}

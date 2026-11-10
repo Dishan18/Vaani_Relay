@@ -1,6 +1,6 @@
 {
  "_generated_by": "scripts/budget_plan.py",
- "now": "2026-11-10 18:14 UTC",
+ "now": "2026-11-10 18:39 UTC",
  "accounting": "ledger: reported usage, rolling 24 h, no refill assumed",
  "measured_tokens_per_request": {
   "large": {
@@ -12,81 +12,54 @@
    "draft:openai/gpt-oss-120b": 2094.5
   },
   "small": {
-   "understand:qwen/qwen3.8-27b": 273.75,
-   "draft:openai/gpt-oss-120b": 1873.5
+   "understand:qwen/qwen3.8-27b": 264.22222222222223,
+   "draft:openai/gpt-oss-120b": 1693.1666666666667
+  },
+  "small_lean": {
+   "draft:openai/gpt-oss-120b": 1155.7272727272727
+  },
+  "medium+rerank": {
+   "understand:qwen/qwen3.8-27b": 275.05555555555554,
+   "draft:openai/gpt-oss-120b": 1494.0
   }
  },
  "answered": {
   "large": 18,
   "medium": 18,
-  "small": 4
+  "small": 18,
+  "small_lean": 11,
+  "medium+rerank": 18
  },
  "models": {
   "openai/gpt-oss-120b": {
-   "used_24h": 91351,
-   "room_now": 88649,
+   "used_24h": 173370,
+   "room_now": 6630,
    "cap": 180000.0,
    "first_spend_returns": "11-11 13:58 UTC",
-   "all_back": "11-11 17:57 UTC"
+   "all_back": "11-11 18:26 UTC"
   },
   "openai/gpt-oss-20b": {
-   "used_24h": 11227,
-   "room_now": 168773,
+   "used_24h": 49510,
+   "room_now": 130490,
    "cap": 180000.0,
    "first_spend_returns": "11-11 13:58 UTC",
-   "all_back": "11-11 14:03 UTC"
+   "all_back": "11-11 18:32 UTC"
   },
   "qwen/qwen3.8-27b": {
-   "used_24h": 18524,
-   "room_now": 161476,
+   "used_24h": 69508,
+   "room_now": 110492,
    "cap": 180000.0,
    "first_spend_returns": "11-11 13:58 UTC",
-   "all_back": "11-11 17:57 UTC"
+   "all_back": "11-11 18:33 UTC"
   }
  },
  "jobs": [
   {
-   "job": "reruns after the gate fix (large Q8, Q15; medium Q7, Q8, Q11)",
+   "job": "sweep: small_lean, 7 questions left",
    "tokens": {
-    "openai/gpt-oss-120b": 8991,
-    "qwen/qwen3.8-27b": 1340
+    "openai/gpt-oss-120b": 7761
    },
-   "start": "11-10 18:14 UTC",
-   "fits_now": true
-  },
-  {
-   "job": "finish small (14 questions)",
-   "tokens": {
-    "openai/gpt-oss-120b": 22757,
-    "qwen/qwen3.8-27b": 3751
-   },
-   "start": "11-10 18:19 UTC",
-   "fits_now": true
-  },
-  {
-   "job": "drafter step at the winner (20b, qwen; 120b reused)",
-   "tokens": {
-    "openai/gpt-oss-20b": 32750,
-    "qwen/qwen3.8-27b": 42396
-   },
-   "start": "11-10 18:24 UTC",
-   "fits_now": true
-  },
-  {
-   "job": "sweep part 2: medium+rerank",
-   "tokens": {
-    "openai/gpt-oss-120b": 27249,
-    "qwen/qwen3.8-27b": 4823
-   },
-   "start": "11-10 18:29 UTC",
-   "fits_now": false
-  },
-  {
-   "job": "sweep part 2: small_lean",
-   "tokens": {
-    "openai/gpt-oss-120b": 19957
-   },
-   "start": "11-10 18:34 UTC",
+   "start": "11-11 14:04 UTC",
    "fits_now": false
   },
   {
@@ -104,7 +77,7 @@
     "openai/gpt-oss-120b": 35962,
     "qwen/qwen3.8-27b": 34129
    },
-   "start": "11-11 18:01 UTC",
+   "start": "11-11 18:16 UTC",
    "fits_now": false
   }
  ],
@@ -119,7 +92,7 @@
   }
  },
  "load_run_120b_room_after_all_jobs": {
-  "real_steady": "11-10 18:14 UTC",
-  "real_burst": "11-10 18:14 UTC"
+  "real_steady": "11-11 17:54 UTC",
+  "real_burst": "11-11 17:54 UTC"
  }
 }

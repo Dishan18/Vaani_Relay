@@ -457,6 +457,12 @@
      "unit": "output_tokens",
      "source": "measured (real run 429 body (drafter-large-20261110.calls.jsonl))"
     },
+    "ITPM": {
+     "capacity": 7000.0,
+     "period_s": 60.0,
+     "unit": "input_tokens",
+     "source": "measured (real run 429 body (drafter-large-qwen-rerun-otpm-20261111.calls.jsonl))"
+    },
     "RPM": {
      "capacity": 30,
      "period_s": 60.0,
@@ -471,7 +477,7 @@
     }
    },
    "hold_cap": 200.0,
-   "out_hold_cap": 184.0,
+   "out_hold_cap": 198.0,
    "count_429_toward_rpd": false,
    "concurrency_limit": null,
    "latency_vs_in_flight": [

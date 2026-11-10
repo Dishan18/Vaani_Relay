@@ -31,6 +31,30 @@ Numbers here point at the generated files that hold them (rule 3); nothing is ty
    overrides go to `results/grade_overrides.jsonl`. Q9 and Q10 (medium) were confirmed wrong by the
    author (2026-11-10); the reasons are in the overrides file.
 
+## Found in the real runs
+
+- **qwen has an undocumented output-token limit.** The drafter step got "output tokens per minute
+  (OTPM): Limit 1000, Used 820, Requested 184" (`results/raw/answers/drafter-large-20261110.calls.jsonl`).
+  No header shows it. The limiter created the bucket at runtime but charged it like total tokens
+  (prompt + hold), so a 1726-token qwen draft "could never fit" in a 1000 bucket and Q6-Q18 of
+  qwen's drafter run fell back to passages without a call. Fixed: limits on input tokens are charged
+  the prompt only, limits on output tokens an output hold at admission (learned from the 429's
+  Requested; 184 for max_tokens 300) released to the real completion; limits found in real-run 429
+  bodies now seed `Limiter.from_probe` and the stand-in's calibration. qwen's drafter step Q6-Q18
+  was rerun (run header says why); its first Q1-Q5 stand. The rerun then met qwen's second hidden
+  limit, "input tokens per minute (ITPM): Limit 7000, Used 5101, Requested 1918"
+  (`drafter-large-qwen-rerun-otpm-20261111.calls.jsonl`); the fixed limiter made it an input-only
+  bucket and the request stepped down to lean instead of being locked out. Both now seed the limiter
+  and the stand-in. 120b's only 429s were TPM, a limit the limiter models (see candidate 3: they keep
+  recurring near a full bucket).
+- **Stand-in replay gaps.** The first stand-in load run (`results/raw/runs/*-20261110T181851Z.jsonl`)
+  never replayed refusals (stored under a different key than the lookup), and its placeholder could
+  copy a paragraph label ("Metrics."), which the citation gate rightly rejects; it also lacked qwen's
+  OTPM. All seven scenarios were rerun on the fixed stand-in; the newer run supersedes the older in
+  results.csv and the old files stay.
+- **small_lean is incomplete** (11/18): the stop rule halted it when 120b's 24 h ledger window was
+  full. The rest waits for 120b's spends to leave the window (`results/quality/budget_plan.md`).
+
 ## Decisions taken (2026-11-10)
 
 - **Ledger charges what Groq reports.** A completed call counts its reported usage (findings Q2:
