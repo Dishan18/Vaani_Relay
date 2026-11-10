@@ -1,0 +1,182 @@
+{
+ "_generated_by": "scripts/eval_retrieval.py estimate",
+ "scope": "eval",
+ "step2_drafter": "openai/gpt-oss-120b",
+ "step3_drafters": [
+  "openai/gpt-oss-20b",
+  "qwen/qwen3.8-27b"
+ ],
+ "settings": {
+  "small": {
+   "router": true,
+   "questions": 18,
+   "draft_prompt_mean": {
+    "openai/gpt-oss-120b": 1301,
+    "openai/gpt-oss-20b": 1319,
+    "qwen/qwen3.8-27b": 1315
+   },
+   "router_prompt_mean": 257
+  },
+  "medium": {
+   "router": true,
+   "questions": 18,
+   "draft_prompt_mean": {
+    "openai/gpt-oss-120b": 1426,
+    "openai/gpt-oss-20b": 1446,
+    "qwen/qwen3.8-27b": 1446
+   },
+   "router_prompt_mean": 257
+  },
+  "large": {
+   "router": true,
+   "questions": 18,
+   "draft_prompt_mean": {
+    "openai/gpt-oss-120b": 1471,
+    "openai/gpt-oss-20b": 1492,
+    "qwen/qwen3.8-27b": 1492
+   },
+   "router_prompt_mean": 257
+  },
+  "medium+rerank": {
+   "router": true,
+   "questions": 18,
+   "draft_prompt_mean": {
+    "openai/gpt-oss-120b": 1191,
+    "openai/gpt-oss-20b": 1207,
+    "qwen/qwen3.8-27b": 1199
+   },
+   "router_prompt_mean": 257
+  },
+  "small_lean": {
+   "router": false,
+   "questions": 18,
+   "draft_prompt_mean": {
+    "openai/gpt-oss-120b": 792,
+    "openai/gpt-oss-20b": 801,
+    "qwen/qwen3.8-27b": 781
+   },
+   "router_prompt_mean": 0
+  }
+ },
+ "assumptions": {
+  "completion_tokens_expected": {
+   "draft": 400,
+   "understand": 120
+  },
+  "redraft_rate_expected": 0.25,
+  "worst": "every completion at max_tokens and every draft redrafted",
+  "prompt_tokens": "the limiter's upper-bound estimator on the raw-question retrieval (the router's rewrite changes the pieces, not their size)",
+  "tpm": "8000 per model per minute (measured)"
+ },
+ "plan": {
+  "expected": {
+   "step2": {
+    "openai/gpt-oss-120b": {
+     "requests": 112,
+     "tokens": 184085
+    },
+    "qwen/qwen3.8-27b": {
+     "requests": 72,
+     "tokens": 27172
+    }
+   },
+   "step3": {
+    "openai/gpt-oss-20b": {
+     "requests": 22,
+     "tokens": 42561
+    },
+    "qwen/qwen3.8-27b": {
+     "requests": 58,
+     "tokens": 56165
+    }
+   },
+   "step3_assumed_setting": "large",
+   "total": {
+    "openai/gpt-oss-120b": {
+     "requests": 112,
+     "tokens": 184085
+    },
+    "qwen/qwen3.8-27b": {
+     "requests": 130,
+     "tokens": 83337
+    },
+    "openai/gpt-oss-20b": {
+     "requests": 22,
+     "tokens": 42561
+    }
+   }
+  },
+  "worst": {
+   "step2": {
+    "openai/gpt-oss-120b": {
+     "requests": 180,
+     "tokens": 438536
+    },
+    "qwen/qwen3.8-27b": {
+     "requests": 72,
+     "tokens": 40132
+    }
+   },
+   "step3": {
+    "openai/gpt-oss-20b": {
+     "requests": 36,
+     "tokens": 96898
+    },
+    "qwen/qwen3.8-27b": {
+     "requests": 72,
+     "tokens": 116992
+    }
+   },
+   "step3_assumed_setting": "large",
+   "total": {
+    "openai/gpt-oss-120b": {
+     "requests": 180,
+     "tokens": 438536
+    },
+    "qwen/qwen3.8-27b": {
+     "requests": 144,
+     "tokens": 157124
+    },
+    "openai/gpt-oss-20b": {
+     "requests": 36,
+     "tokens": 96898
+    }
+   }
+  }
+ },
+ "per_model": {
+  "qwen/qwen3.8-27b": {
+   "headroom_tokens": 162164,
+   "headroom_requests": 865,
+   "expected_tokens": 83337,
+   "worst_tokens": 157124,
+   "expected_requests": 130,
+   "worst_requests": 144,
+   "expected_fits": true,
+   "worst_fits": true,
+   "minutes_at_tpm_expected": 10.4
+  },
+  "openai/gpt-oss-120b": {
+   "headroom_tokens": 161176,
+   "headroom_requests": 834,
+   "expected_tokens": 184085,
+   "worst_tokens": 438536,
+   "expected_requests": 112,
+   "worst_requests": 180,
+   "expected_fits": false,
+   "worst_fits": false,
+   "minutes_at_tpm_expected": 23.0
+  },
+  "openai/gpt-oss-20b": {
+   "headroom_tokens": 161300,
+   "headroom_requests": 830,
+   "expected_tokens": 42561,
+   "worst_tokens": 96898,
+   "expected_requests": 22,
+   "worst_requests": 36,
+   "expected_fits": true,
+   "worst_fits": true,
+   "minutes_at_tpm_expected": 5.3
+  }
+ }
+}

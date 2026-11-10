@@ -60,3 +60,9 @@ busy_retry_s = 10                 # (assumption) "retry in N s" after an interna
 understand = { first_visible_s = 6.0, stall_s = 4.0, deadline_s = 10.0 }
 draft = { first_visible_s = 15.0, stall_s = 6.0, deadline_s = 25.0 }
 verify = { first_visible_s = 8.0, stall_s = 4.0, deadline_s = 12.0 }
+
+[steps]
+# Switch steps off (the retrieval sweep keeps the verifier off so only retrieval changes; the
+# small_lean setting turns the router off).
+router = true
+verifier = true

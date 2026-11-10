@@ -66,6 +66,19 @@ def check(questions: list[dict], blocks_list: list[dict]) -> tuple[list[dict], l
                 evs = f.get("evidence") or []
                 if not evs:
                     errs.append(f"fact {i} has no evidence: {f.get('fact')!r}")
+                # grading patterns (relay/grade.py): each must compile and match this fact's own
+                # wording or its evidence quotes, so a typo can't silently make a fact unmatchable
+                own = " ".join([f.get("fact", "")] + [ev.get("quote", "") for ev in evs])
+                if not f.get("match"):
+                    errs.append(f"fact {i} has no grading `match` patterns")
+                for pat in f.get("match") or []:
+                    try:
+                        rx = re.compile(pat, re.I)
+                    except re.error as e:
+                        errs.append(f"fact {i}: bad pattern {pat!r}: {e}")
+                        continue
+                    if not rx.search(own):
+                        errs.append(f"fact {i}: pattern {pat!r} matches neither the fact nor its evidence")
                 for ev in evs:
                     n_quotes += 1
                     e = check_quote(blocks, paper, ev)
@@ -83,6 +96,11 @@ def check(questions: list[dict], blocks_list: list[dict]) -> tuple[list[dict], l
                     if b["paper"] == paper and b["kind"] != "reference" and rx.search(b["text"]):
                         hits.append(f"/{pat}/ matches {b['block_id']}")
             errs.extend(hits)
+        for pat in [w.get("pattern", "") for w in q.get("wrong_match") or []] + list(q.get("distractor_match") or []):
+            try:
+                re.compile(pat, re.I)
+            except re.error as e:
+                errs.append(f"bad wrong/distractor pattern {pat!r}: {e}")
         for key in ("wrong_if", "distractors"):
             for item in q.get(key) or []:
                 for ev in item.get("evidence") or []:

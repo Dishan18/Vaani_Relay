@@ -12,9 +12,9 @@ BLOCKS = [
 ]
 
 
-def ans(evs):
+def ans(evs, match=(r"h\s*=\s*8",)):
     return {"qid": "A", "paper": "attention", "arxiv_id": "1706.03762v7", "answerable": True,
-            "facts": [{"fact": "h=8", "evidence": evs}]}
+            "facts": [{"fact": "h=8", "evidence": evs, "match": list(match)}]}
 
 
 class CheckGold(unittest.TestCase):
@@ -23,6 +23,13 @@ class CheckGold(unittest.TestCase):
 
     def test_verbatim_quote_passes(self):
         self.assertEqual(self.errors(ans([{"block_id": "attention-p1-b1", "quote": "h = 8 parallel"}])), [])
+
+    def test_grading_pattern_must_match_its_fact_or_evidence(self):
+        ev = [{"block_id": "attention-p1-b1", "quote": "h = 8 parallel"}]
+        self.assertEqual(self.errors(ans(ev, match=(r"8 parallel",))), [])
+        self.assertTrue(self.errors(ans(ev, match=(r"sixteen heads",))))
+        self.assertTrue(self.errors(ans(ev, match=())))
+        self.assertTrue(self.errors(ans(ev, match=(r"(unclosed",))))
 
     def test_paraphrased_quote_fails(self):
         self.assertTrue(self.errors(ans([{"block_id": "attention-p1-b1", "quote": "h=8 heads"}])))

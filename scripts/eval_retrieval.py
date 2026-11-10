@@ -1,6 +1,18 @@
-"""Gold-in-top-k for the retrieval settings, no model calls.
+"""Retrieval evaluation: gold-in-top-k offline, and answer quality through the real pipeline.
 
-    .venv\\Scripts\\python scripts\\eval_retrieval.py   ->  data/retrieval/topk.json, data/retrieval/topk.md
+    python scripts/eval_retrieval.py [topk]                       offline, no model calls
+        ->  data/retrieval/topk.json, data/retrieval/topk.md
+    python scripts/eval_retrieval.py estimate                      requests/tokens vs the ledger caps
+        ->  results/quality/estimate.json (+ printed)
+    python scripts/eval_retrieval.py answers [--settings ...] [--drafter M] [--real]
+        all 18 questions through the pipeline per setting, drafter fixed, verifier off
+        ->  results/raw/answers/<run_id>.jsonl (+ .calls.jsonl: every model call, as the ledger saw it)
+    python scripts/eval_retrieval.py drafters --setting S [--drafters a,b] [--real]
+        the same at one setting for each drafter (run in parallel: limits are per model)
+Without --real the pipeline talks to the stand-in (relay/fake_groq.py) and writes under
+--out-dir (required), never to results/ or the real ledger.
+
+Offline gold-in-top-k (topk):
 
 Query = the raw question (no rewrite), all three papers searched. A gold fact counts as retrieved
 when one of its evidence quotes (data/questions.jsonl) is inside a top-k piece that holds the
@@ -160,7 +172,7 @@ def render(results) -> str:
     return "\n".join(L) + "\n"
 
 
-def main() -> int:
+def topk_main() -> int:
     questions = load_questions()
     results = [run_setting(*s, questions) for s in SETTINGS]
     OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -171,6 +183,296 @@ def main() -> int:
     md = render(results)
     (OUT_DIR / "topk.md").write_text(md, encoding="utf-8", newline="\n")
     print(md)
+    return 0
+
+
+# ============================================================================ the real pipeline
+# name -> (piece chars, k, rerank, router). Drafter fixed and verifier off, so only retrieval changes.
+ANSWER_SETTINGS = {
+    "small": (600, 8, False, True),
+    "medium": (1200, 5, False, True),
+    "large": (2400, 3, False, True),
+    "medium+rerank": (1200, 4, True, True),
+    "small_lean": (600, 4, False, False),
+}
+RAW_ANSWERS = ROOT / "results" / "raw" / "answers"
+EST_OUT = ROOT / "results" / "quality" / "estimate.json"
+EVAL_SCOPE = "eval"
+# Completion tokens per call for the estimate (measured: data/probe/probe_raw.jsonl, P6 drafts with
+# 4 passages: gpt-oss-120b 166-314, gpt-oss-20b 105, qwen 130-212; router-sized calls 15-80).
+# Expected = a little above the largest seen; worst = max_tokens.
+EXPECTED_COMPLETION = {"draft": 400, "understand": 120}
+REDRAFT_RATE_EXPECTED = 0.25     # (assumption) share of drafts that fail the gate once
+
+
+def eval_config(setting: str, drafter: str) -> dict:
+    import copy
+    from relay.pipeline import load_config
+    size, k, rerank, router = ANSWER_SETTINGS[setting]
+    c = copy.deepcopy(load_config())
+    c["retrieval"].update({"piece_chars": size, "k_full": k, "k_lean": k, "rerank": rerank})
+    c["models"]["draft"] = [drafter]
+    c["steps"] = {"router": router, "verifier": False}
+    # quality, not latency: wait for budget rather than degrade (a degraded reply is flagged)
+    c["ladder"].update({"preferred_free_within_s": 600.0, "router_free_within_s": 600.0,
+                        "max_wait_s": 600.0, "deadline_s": 900.0})
+    return c
+
+
+def _git_commit() -> str | None:
+    import subprocess
+    try:
+        return subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True,
+                              text=True, timeout=10).stdout.strip() or None
+    except Exception:
+        return None
+
+
+def estimate(settings: list[str], step2_drafter: str, step3_drafters: list[str]) -> dict:
+    """Requests and tokens per model for step 2 (every setting, one drafter) and step 3 (the
+    winning setting, other drafters; the most expensive setting is assumed), against the ledger."""
+    from relay.ledger import Ledger, load_budget
+    from relay.limiter import Limiter
+    from relay.pipeline import ROUTER_SYSTEM, draft_messages, load_config
+    lim = Limiter.from_probe()
+    qs = load_questions()
+    router_model = load_config()["models"]["understand"][0]
+    mx = load_config()["max_tokens"]
+    per_setting = {}
+    for name in settings:
+        size, k, rerank, router = ANSWER_SETTINGS[name]
+        r = Retriever.from_blocks(size)
+        rows = []
+        for q in qs:
+            hits = r.search(q["question"], k, use_rerank=rerank)
+            msgs = draft_messages(q["question"], hits)
+            rmsgs = [{"role": "system", "content": ROUTER_SYSTEM}, {"role": "user", "content": q["question"]}]
+            rows.append({"draft_prompt": {m: lim.estimate(m, msgs).tokens for m in [step2_drafter] + step3_drafters},
+                         "router_prompt": lim.estimate(router_model, rmsgs).tokens if router else 0})
+        per_setting[name] = {"router": router, "questions": len(rows),
+                             "draft_prompt_mean": {m: round(sum(x["draft_prompt"][m] for x in rows) / len(rows))
+                                                   for m in rows[0]["draft_prompt"]},
+                             "router_prompt_mean": round(sum(x["router_prompt"] for x in rows) / len(rows)),
+                             "rows": rows}
+
+    def cost(name, drafter, worst):
+        s = per_setting[name]
+        n = s["questions"]
+        comp = mx["draft"] if worst else EXPECTED_COMPLETION["draft"]
+        drafts = 2.0 if worst else 1.0 + REDRAFT_RATE_EXPECTED
+        d_tok = sum(x["draft_prompt"][drafter] + comp for x in s["rows"]) * drafts
+        out = {drafter: {"requests": n * drafts, "tokens": d_tok}}
+        if s["router"]:
+            rc = mx["understand"] if worst else EXPECTED_COMPLETION["understand"]
+            r_tok = sum(x["router_prompt"] + rc for x in s["rows"])
+            out.setdefault(router_model, {"requests": 0, "tokens": 0})
+            out[router_model]["requests"] += n
+            out[router_model]["tokens"] += r_tok
+        return out
+
+    def add(acc, more):
+        for m, v in more.items():
+            a = acc.setdefault(m, {"requests": 0.0, "tokens": 0.0})
+            a["requests"] += v["requests"]
+            a["tokens"] += v["tokens"]
+    plan = {}
+    for worst in (False, True):
+        key = "worst" if worst else "expected"
+        step2, step3 = {}, {}
+        for name in settings:
+            add(step2, cost(name, step2_drafter, worst))
+        dear = max(settings, key=lambda n: per_setting[n]["draft_prompt_mean"][step2_drafter])
+        for d in step3_drafters:
+            add(step3, cost(dear, d, worst))
+        total = {}
+        add(total, step2)
+        add(total, step3)
+        plan[key] = {"step2": step2, "step3": step3, "step3_assumed_setting": dear, "total": total}
+    with Ledger(load_budget()) as led:
+        head = {m: led.headroom(EVAL_SCOPE, m) for m in {step2_drafter, router_model, *step3_drafters}}
+    tpm = 8000
+    verdict = {}
+    for m, h in head.items():
+        e = plan["expected"]["total"].get(m, {"requests": 0, "tokens": 0})
+        w = plan["worst"]["total"].get(m, {"requests": 0, "tokens": 0})
+        verdict[m] = {"headroom_tokens": h["tokens"], "headroom_requests": h["requests"],
+                      "expected_tokens": round(e["tokens"]), "worst_tokens": round(w["tokens"]),
+                      "expected_requests": round(e["requests"]), "worst_requests": round(w["requests"]),
+                      "expected_fits": e["tokens"] <= h["tokens"] and e["requests"] <= h["requests"],
+                      "worst_fits": w["tokens"] <= h["tokens"] and w["requests"] <= h["requests"],
+                      "minutes_at_tpm_expected": round(e["tokens"] / tpm, 1)}
+    for s in per_setting.values():
+        s.pop("rows")
+    return {"_generated_by": "scripts/eval_retrieval.py estimate", "scope": EVAL_SCOPE,
+            "step2_drafter": step2_drafter, "step3_drafters": step3_drafters, "settings": per_setting,
+            "assumptions": {"completion_tokens_expected": EXPECTED_COMPLETION, "redraft_rate_expected":
+                            REDRAFT_RATE_EXPECTED, "worst": "every completion at max_tokens and every draft redrafted",
+                            "prompt_tokens": "the limiter's upper-bound estimator on the raw-question retrieval "
+                                             "(the router's rewrite changes the pieces, not their size)",
+                            "tpm": "8000 per model per minute (measured)"},
+            "plan": {k: {kk: ({m: {"requests": round(x["requests"]), "tokens": round(x["tokens"])}
+                                   for m, x in vv.items()} if isinstance(vv, dict) else vv)
+                         for kk, vv in v.items()} for k, v in plan.items()},
+            "per_model": verdict}
+
+
+def _standin_responder(p: dict) -> str:
+    """Dry-run replies shaped like real ones (plumbing only; says nothing about quality)."""
+    from relay.pipeline import NOT_IN_PAPERS
+    sysmsg, user = p["messages"][0]["content"], p["messages"][-1]["content"]
+    if sysmsg.startswith("You route"):
+        ql = user.lower()
+        paper = ("moshi" if "moshi" in ql else "dynamic_chunking" if "h-net" in ql else "attention")
+        return json.dumps({"papers": [paper], "query": user[:80], "alt_query": user[-60:]})
+    if sysmsg.startswith("You check"):
+        return '{"unsupported": []}'
+    q = user.split("\n", 1)[0].lower()
+    if any(w in q for w in ("latency", "word error", "energy", "kwh", "p95")):
+        return f"{NOT_IN_PAPERS}: the sources don't report this."
+    m = re.search(r"\[S1\] \([^\n]*\)\n(.*?)(?:\n\n\[S2\]|\Z)", user, re.S)
+    first = re.split(r"(?<=[.!?])\s+", (m.group(1) if m else "").replace("\n", " "))[0]
+    return f"{first} [S1]"
+
+
+async def run_answers(settings: list[str], drafters: list[str], real: bool, out_dir: Path, scenario: str,
+                      run_id: str, qids: list[str] | None = None) -> Path:
+    import asyncio
+    import contextvars
+    import datetime as dt
+    from relay.fake_groq import FakeGroq
+    from relay.ledger import BudgetedClient, Ledger, load_budget
+    from relay.limiter import Limiter
+    from relay.llm import Endpoint, LLMClient
+    from relay.pipeline import FULL, Pipeline
+    from relay.real import open_real
+
+    qs = [q for q in load_questions() if not qids or q["qid"] in qids]
+    out_dir.mkdir(parents=True, exist_ok=True)
+    ans_path = out_dir / f"{run_id}.jsonl"
+    calls_path = out_dir / f"{run_id}.calls.jsonl"
+    meta = contextvars.ContextVar("meta", default={})
+    fa = ans_path.open("a", encoding="utf-8", newline="\n")
+    fc = calls_path.open("a", encoding="utf-8", newline="\n")
+
+    def sink(entry: dict) -> None:
+        entry = {"type": "call", "run_id": run_id, **meta.get(), **entry}
+        fc.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        fc.flush()
+
+    fa.write(json.dumps({"type": "run", "run_id": run_id, "scenario": scenario, "source": "real" if real else "stand-in",
+                         "settings": {s: ANSWER_SETTINGS[s] for s in settings}, "drafters": drafters,
+                         "questions": [q["qid"] for q in qs], "git": _git_commit(),
+                         "started": dt.datetime.now(dt.timezone.utc).isoformat(timespec="milliseconds")}) + "\n")
+    fa.flush()
+    lim = Limiter.from_probe()
+    retrievers = {}
+
+    async def one_drafter(bc, drafter):
+        for setting in settings:
+            size = ANSWER_SETTINGS[setting][0]
+            r = retrievers.setdefault(size, Retriever.from_blocks(size))
+
+            async def chat(payload, *, phase, timeouts=None):
+                return await bc.stream_chat(payload, phase=phase, timeouts=timeouts, extra=dict(meta.get()))
+            cfg = eval_config(setting, drafter)
+            pipe = Pipeline(chat, lim, r, cfg)
+            for q in qs:
+                # stop rule: never start a request the ledger might refuse halfway (that reply would
+                # come back degraded); worst case = a draft and a redraft at max_tokens, plus the router
+                worst = 2 * (2500 + cfg["max_tokens"]["draft"])
+                left = bc.ledger.headroom(EVAL_SCOPE, drafter)["tokens"]
+                if left < worst:
+                    fa.write(json.dumps({"type": "stopped", "run_id": run_id, "setting": setting, "drafter": drafter,
+                                         "before_qid": q["qid"], "ledger_tokens_left": left,
+                                         "needed_worst": worst}) + "\n")
+                    fa.flush()
+                    print(f"  STOP {setting} {drafter}: ledger has {left} tokens left, a request may need {worst}")
+                    return
+                rid = f"{run_id}-{setting}-{drafter.split('/')[-1]}-{q['qid']}"
+                token = meta.set({"request_id": rid, "setting": setting, "drafter": drafter, "qid": q["qid"]})
+                start = dt.datetime.now(dt.timezone.utc).isoformat(timespec="milliseconds")
+                try:
+                    reply = await pipe.answer(q["question"], request_id=rid)
+                finally:
+                    meta.reset(token)
+                d = reply.to_dict()
+                row = {"type": "answer", "run_id": run_id, "scenario": scenario,
+                       "source": "real" if real else "stand-in", "setting": setting,
+                       "setting_def": dict(zip(("piece_chars", "k", "rerank", "router"), ANSWER_SETTINGS[setting])),
+                       "drafter": drafter, "qid": q["qid"], "request_id": rid, "start_time": start,
+                       "degraded": reply.level != FULL, "reply": d}
+                fa.write(json.dumps(row, ensure_ascii=False, default=str) + "\n")
+                fa.flush()
+                print(f"  {setting:<14} {drafter.split('/')[-1]:<14} {q['qid']:<4} {reply.kind:<9} "
+                      f"level={reply.level} tokens={reply.tokens_in}+{reply.tokens_out} {reply.released_ms:.0f} ms",
+                      flush=True)
+
+    try:
+        if real:
+            with open_real(scope=EVAL_SCOPE, allow_real=True, raw_sink=sink) as bc:
+                await asyncio.gather(*(one_drafter(bc, d) for d in drafters))
+        else:
+            async with FakeGroq(responder=_standin_responder) as fake:
+                with Ledger(load_budget(), out_dir / "standin_ledger.jsonl") as led:
+                    bc = BudgetedClient(LLMClient(Endpoint(fake.base_url, source="stand-in")), led, EVAL_SCOPE, sink)
+                    await asyncio.gather(*(one_drafter(bc, d) for d in drafters))
+    finally:
+        fa.close()
+        fc.close()
+    return ans_path
+
+
+def main(argv: list[str] | None = None) -> int:
+    import argparse
+    import asyncio
+    import datetime as dt
+    ap = argparse.ArgumentParser(prog="eval_retrieval.py")
+    sub = ap.add_subparsers(dest="cmd")
+    sub.add_parser("topk")
+    e = sub.add_parser("estimate")
+    e.add_argument("--settings", default=",".join(ANSWER_SETTINGS))
+    e.add_argument("--drafter", default="openai/gpt-oss-120b")
+    e.add_argument("--step3-drafters", default="openai/gpt-oss-20b,qwen/qwen3.8-27b")
+    for name in ("answers", "drafters"):
+        a = sub.add_parser(name)
+        a.add_argument("--real", action="store_true", help="real Groq calls through the ledger")
+        a.add_argument("--out-dir", type=Path, help="required without --real (dry runs never write results/)")
+        a.add_argument("--run-id")
+        a.add_argument("--qids", help="comma list (default: all 18)")
+        if name == "answers":
+            a.add_argument("--settings", default=",".join(ANSWER_SETTINGS))
+            a.add_argument("--drafter", default="openai/gpt-oss-120b")
+        else:
+            a.add_argument("--setting", required=True, choices=list(ANSWER_SETTINGS))
+            a.add_argument("--drafters", default="openai/gpt-oss-20b,qwen/qwen3.8-27b")
+    a = ap.parse_args(argv)
+    if a.cmd in (None, "topk"):
+        return topk_main()
+    if a.cmd == "estimate":
+        res = estimate(a.settings.split(","), a.drafter, [d for d in a.step3_drafters.split(",") if d])
+        EST_OUT.parent.mkdir(parents=True, exist_ok=True)
+        EST_OUT.write_text(json.dumps(res, indent=1) + "\n", encoding="utf-8", newline="\n")
+        print(json.dumps({"plan": res["plan"], "per_model": res["per_model"],
+                          "draft_prompt_mean": {k: v["draft_prompt_mean"] for k, v in res["settings"].items()}},
+                         indent=1))
+        return 0
+    if not a.real and not a.out_dir:
+        ap.error("--out-dir is required for a stand-in (dry) run")
+    out_dir = RAW_ANSWERS if a.real else a.out_dir
+    if a.real and a.out_dir:
+        ap.error("real runs always write to results/raw/answers")
+    stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    qids = a.qids.split(",") if a.qids else None
+    if a.cmd == "answers":
+        settings, drafters, scenario = a.settings.split(","), [a.drafter], "eval:retrieval"
+    else:
+        settings, drafters, scenario = [a.setting], a.drafters.split(","), "eval:drafter"
+    for s in settings:
+        if s not in ANSWER_SETTINGS:
+            ap.error(f"unknown setting {s}")
+    run_id = a.run_id or f"{scenario.split(':')[1]}-{stamp}"
+    path = asyncio.run(run_answers(settings, drafters, a.real, out_dir, scenario, run_id, qids))
+    print(f"wrote {path}")
     return 0
 
 

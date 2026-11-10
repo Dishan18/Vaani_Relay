@@ -94,6 +94,7 @@ class Trace:
     def __init__(self) -> None:
         self.t0 = time.perf_counter()
         self.spans: list[Span] = []
+        self.meta: dict = {}          # what the router and retrieval chose, copied into Reply.checks
 
     def ms(self) -> float:
         return (time.perf_counter() - self.t0) * 1000
@@ -358,6 +359,8 @@ class Pipeline:
                           notice=f"internal failure: {type(e).__name__}", eta_s=float(n))
         with tr.span("send") as s:
             s.outcome = reply.kind
+        for k, v in tr.meta.items():
+            reply.checks.setdefault(k, v)
         reply.model_calls = calls
         reply.spans = tr.spans
         reply.released_ms = round(tr.ms(), 1)
@@ -383,17 +386,20 @@ class Pipeline:
         # understand
         papers, query, alt = None, question, None
         router_note = ""
-        if level in (FULL, FULL_OTHER):
+        steps = self.cfg.get("steps", {})
+        if level in (FULL, FULL_OTHER) and steps.get("router", True):
             with tr.span("understand") as s:
                 try:
                     papers, query, alt = await self._understand(question, tr, calls, deadline)
                     s.outcome = "router"
+                    tr.meta["router"] = {"papers": papers, "query": query, "alt_query": alt}
                 except _Step as e:
                     s.outcome = f"heuristic ({e})"
                     router_note = "no router"
+                    tr.meta["router"] = {"failed": str(e)}
         else:
             with tr.span("understand") as s:
-                s.outcome = "skipped (lean)"
+                s.outcome = "skipped (lean)" if level not in (FULL, FULL_OTHER) else "off (config)"
 
         # decide (router): about none of the papers
         if papers == [] and not names_a_paper(question):
@@ -405,6 +411,8 @@ class Pipeline:
 
         k = rc["k_full"] if level in (FULL, FULL_OTHER) else rc["k_lean"]
         hits = self._retrieve(tr, query, question, papers or None, k, alt)
+        tr.meta["retrieval"] = {"query": query, "papers": papers or None, "k": k,
+                                "pids": [h.piece.pid for h in hits]}
 
         with tr.span("decide") as s:
             ev = self.retriever.evidence(question, hits)
@@ -655,6 +663,9 @@ class Pipeline:
                 {"role": "user", "content": f"SOURCES:\n{render_sources(hits)}\n\nANSWER SENTENCES:\n{numbered}"}]
         frac = self.cfg["ladder"]["verify_min_tpm_left_fraction"]
         with tr.span("verify") as s:
+            if not self.cfg.get("steps", {}).get("verifier", True):
+                s.outcome = "off (config)"
+                return None
             for m in self.models["verify"]:
                 if m == drafter:
                     continue
