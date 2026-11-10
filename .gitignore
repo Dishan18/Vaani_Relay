@@ -1,0 +1,16 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# assignment brief (not ours to publish)
+The_Relay_Assignment_Brief.pdf
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# regenerable
+data/index/
