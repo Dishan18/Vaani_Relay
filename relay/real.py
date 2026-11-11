@@ -54,6 +54,20 @@ def account_label(key: str | None = None, path: Path = ACCOUNTS) -> str:
     return known[fp]
 
 
+def set_account_label(label: str, path: Path = ACCOUNTS) -> str:
+    """Label the key now in .env (e.g. "key1" when the original key is put back), so the ledger counts it
+    against that key's own history. Refuses to relabel a key that already has a different label."""
+    import hashlib
+    fp = hashlib.sha256(groq_api_key().encode("utf-8")).hexdigest()[:16]
+    known = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    if fp in known and known[fp] != label:
+        raise SystemExit(f"the key in .env is already labelled {known[fp]}; not relabelling it {label}")
+    known[fp] = label
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(known, indent=1) + "\n", encoding="utf-8")
+    return label
+
+
 def groq_api_key() -> str:
     key = os.environ.get("GROQ_API_KEY") or read_env_file(ROOT / ".env").get("GROQ_API_KEY")
     if not key:
@@ -70,3 +84,12 @@ def open_real(scope: str, allow_real: bool, timeouts: Timeouts = Timeouts(),
     with Ledger(load_budget(), ledger_path, account=account_label()) as ledger:
         client = LLMClient(Endpoint(GROQ_BASE_URL, api_key=groq_api_key(), source="real"), timeouts)
         yield BudgetedClient(client, ledger, scope, raw_sink)
+
+
+if __name__ == "__main__":
+    # .venv\Scripts\python -m relay.real label key1   (label the key now in .env; prints the label only)
+    import sys
+    if len(sys.argv) == 3 and sys.argv[1] == "label":
+        print(set_account_label(sys.argv[2]))
+    else:
+        print(account_label())

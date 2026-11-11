@@ -55,6 +55,18 @@ Numbers here point at the generated files that hold them (rule 3); nothing is ty
 - **small_lean is incomplete** (11/18): the stop rule halted it when 120b's 24 h ledger window was
   full. The rest waits for 120b's spends to leave the window (`results/quality/budget_plan.md`).
 
+## One budget: the key2 runs are excluded (2026-11-11)
+
+The author briefly switched .env to a second API key ("key2", a separate Groq organization: fresh,
+999/1000 daily requests on each model) and the remaining jobs ran on it: small_lean Q12-Q18, the Q14
+decide-gate rerun, real_steady (31 requests) and real_burst (20). The brief allows one budget, so the
+author put the original key back and every reported real result uses key1 only. The key2 runs stay
+in the raw files and in results.csv (superseded, with the reason in the `excluded` column; list in
+`results/excluded_runs.json`) but count in no table. The ledger now keeps one account per key
+(entries before labels = key1; a fingerprint -> label map stays in a gitignored local file, no key
+material is committed), so key2's calls never counted against key1's caps. The key1 jobs wait for
+key1's 24 h window (`results/quality/budget_plan.md`, `--account key1`).
+
 ## Decisions taken (2026-11-10)
 
 - **Ledger charges what Groq reports.** A completed call counts its reported usage (findings Q2:

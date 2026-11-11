@@ -1,6 +1,6 @@
 {
  "_generated_by": "scripts/budget_plan.py",
- "now": "2026-11-10 19:29 UTC",
+ "now": "2026-11-11 04:56 UTC",
  "accounting": "ledger: reported usage, rolling 24 h, no refill assumed",
  "measured_tokens_per_request": {
   "qwen/qwen3.8-27b": 688.8235294117648,
@@ -11,7 +11,7 @@
   "large": 18,
   "medium": 18,
   "small": 18,
-  "small_lean": 11,
+  "small_lean": 18,
   "medium+rerank": 18
  },
  "models": {
@@ -43,7 +43,7 @@
    "tokens": {
     "openai/gpt-oss-120b": 7761
    },
-   "start": "11-11 14:04 UTC",
+   "start": "11-11 14:06 UTC",
    "fits_now": false
   },
   {
@@ -52,7 +52,7 @@
     "openai/gpt-oss-120b": 1798,
     "qwen/qwen3.8-27b": 268
    },
-   "start": "11-11 14:09 UTC",
+   "start": "11-11 14:11 UTC",
    "fits_now": false
   },
   {
@@ -62,7 +62,7 @@
     "openai/gpt-oss-120b": 39555,
     "openai/gpt-oss-20b": 15786
    },
-   "start": "11-11 17:54 UTC",
+   "start": "11-11 17:56 UTC",
    "fits_now": false
   },
   {
@@ -72,7 +72,7 @@
     "openai/gpt-oss-120b": 13118,
     "openai/gpt-oss-20b": 5677
    },
-   "start": "11-11 17:59 UTC",
+   "start": "11-11 18:01 UTC",
    "fits_now": false
   }
  ],
@@ -89,8 +89,8 @@
   }
  },
  "load_run_120b_room_after_all_jobs": {
-  "real_steady": "11-11 17:54 UTC",
-  "real_burst": "11-11 17:54 UTC"
+  "real_steady": "11-11 17:56 UTC",
+  "real_burst": "11-11 17:51 UTC"
  },
  "load_cost_basis": {
   "real_steady": {

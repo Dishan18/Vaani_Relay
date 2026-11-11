@@ -190,6 +190,15 @@
     "gold_in_sources": "n/a",
     "borrowed": [],
     "wrong_paper_sources": 1
+   },
+   {
+    "setting": "small_lean",
+    "drafter": "openai/gpt-oss-120b",
+    "label": "refused_correctly",
+    "router": null,
+    "gold_in_sources": "n/a",
+    "borrowed": [],
+    "wrong_paper_sources": 0
    }
   ],
   "Q13": [
@@ -282,9 +291,33 @@
     "gold_in_sources": "not shown (refusal)",
     "borrowed": [],
     "wrong_paper_sources": 0
+   },
+   {
+    "setting": "small_lean",
+    "drafter": "openai/gpt-oss-120b",
+    "label": "correct",
+    "router": null,
+    "gold_in_sources": "yes",
+    "borrowed": [],
+    "wrong_paper_sources": 0
    }
   ],
   "Q14": [
+   {
+    "setting": "large",
+    "drafter": "openai/gpt-oss-120b",
+    "label": "wrong",
+    "router": {
+     "papers": [
+      "dynamic_chunking"
+     ],
+     "query": "dynamic chunking boundary detection variable length segments How does H-Net decide where to cut the byte stream into pieces?",
+     "alt_query": "adaptive segmentation policy cut points hierarchical sequence modeling How does H-Net decide where to cut the byte stream into pieces?"
+    },
+    "gold_in_sources": "no",
+    "borrowed": [],
+    "wrong_paper_sources": 0
+   },
    {
     "setting": "large",
     "drafter": "openai/gpt-oss-120b",
@@ -368,6 +401,15 @@
      "alt_query": "learning to split sequences chunking strategy variable length segments end-to-end How does H-Net decide where to cut the byte stream into pieces?"
     },
     "gold_in_sources": "not shown (refusal)",
+    "borrowed": [],
+    "wrong_paper_sources": 0
+   },
+   {
+    "setting": "small_lean",
+    "drafter": "openai/gpt-oss-120b",
+    "label": "wrong",
+    "router": null,
+    "gold_in_sources": "no",
     "borrowed": [],
     "wrong_paper_sources": 0
    }
@@ -462,6 +504,15 @@
     "gold_in_sources": "n/a",
     "borrowed": [],
     "wrong_paper_sources": 2
+   },
+   {
+    "setting": "small_lean",
+    "drafter": "openai/gpt-oss-120b",
+    "label": "refused_correctly",
+    "router": null,
+    "gold_in_sources": "n/a",
+    "borrowed": [],
+    "wrong_paper_sources": 1
    }
   ]
  }

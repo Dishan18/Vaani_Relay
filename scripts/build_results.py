@@ -25,6 +25,8 @@ results.csv: the brief's columns in order, then ours:
     byte-identical to a graded real answer). make_tables.py stops if a stand-in row carries a grade,
     and shows grading coverage for every scenario and source.
   * degraded rows (level > 0) are graded like any other and keep their degraded_level.
+  * excluded: why a run listed in results/excluded_runs.json counts in no table (its rows stay, with
+    superseded = 1, and never replace an earlier answer).
   * shadow_cost_usd: the request's model calls priced at Groq's published paid prices
     (data/prices.json, with URL and date); the free tier we ran on costs $0.
   * superseded = 1 when a later run replaces this row: for the evals, a later answer to the same
@@ -49,7 +51,8 @@ from relay.retrieve import Retriever  # noqa: E402
 COLUMNS = ["request_id", "scenario", "source", "start_time", "first_token_ms", "total_ms", "status", "retries",
            "tokens_in", "tokens_out", "retrieval_setting", "answer_grade",
            "gave_up", "degraded_level", "queue_wait_ms", "model", "calls", "grade_sure", "answer_id", "grade_note",
-           "superseded", "shadow_cost_usd"]
+           "superseded", "shadow_cost_usd", "excluded"]
+EXCLUDED = ROOT / "results" / "excluded_runs.json"
 PRICES = ROOT / "data" / "prices.json"
 
 
@@ -89,10 +92,13 @@ def main(argv: list[str] | None = None) -> int:
     overrides = load_overrides(a.overrides)
     raw_dirs = a.raw_dir or [ROOT / "results" / "raw" / "answers", ROOT / "results" / "raw" / "runs"]
     rows = [r for d in raw_dirs if d.exists() for r in read_answers(d)]
+    excluded = json.loads(EXCLUDED.read_text(encoding="utf-8"))["runs"] if EXCLUDED.exists() else {}
     rows.sort(key=lambda r: (r["source"] != "real", r["start_time"], r["request_id"]))   # real first
     latest = {}
     latest_run: dict[tuple, tuple] = {}              # load runs: (scenario, source) -> (first start, run_id)
     for r in rows:
+        if r["run_id"] in excluded:                  # never replaces an earlier answer or run
+            continue
         latest[(r["scenario"], r["setting"], r["drafter"], r["qid"])] = r["request_id"]
         if not r["scenario"].startswith("eval:"):
             k, v = (r["scenario"], r["source"]), (r["start_time"], r["run_id"])
@@ -125,7 +131,9 @@ def main(argv: list[str] | None = None) -> int:
             g = {"answer_id": aid, "label": None, "sure": True, "reasons": [source],
                  "facts": [], "wrong_paper_citations": [], "borrowed": []}
         # only the evals answer each question once per setting; load runs repeat questions and every request counts
-        if r["scenario"].startswith("eval:"):
+        if r["run_id"] in excluded:
+            superseded = 1
+        elif r["scenario"].startswith("eval:"):
             superseded = int(latest[(r["scenario"], r["setting"], r["drafter"], r["qid"])] != r["request_id"])
         else:   # a load run is superseded as a whole by a later run of the same scenario and source
             superseded = int(latest_run[(r["scenario"], r["source"])][1] != r["run_id"])
@@ -153,7 +161,7 @@ def main(argv: list[str] | None = None) -> int:
             "gave_up": int(gave_up), "degraded_level": reply.get("level"), "queue_wait_ms": reply.get("budget_wait_ms"),
             "model": r["drafter"], "calls": len(calls), "grade_sure": int(bool(g["sure"]) or bool(ov)),
             "answer_id": g["answer_id"], "grade_note": source, "superseded": superseded,
-            "shadow_cost_usd": round(shadow_cost(calls, prices), 7)})
+            "shadow_cost_usd": round(shadow_cost(calls, prices), 7), "excluded": excluded.get(r["run_id"], "")})
     (a.out_dir / "quality").mkdir(parents=True, exist_ok=True)
     with (a.out_dir / "results.csv").open("w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=COLUMNS)
