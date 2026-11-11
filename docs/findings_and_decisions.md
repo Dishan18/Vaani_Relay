@@ -90,6 +90,41 @@ key1's 24 h window (`results/quality/budget_plan.md`, `--account key1`).
   header, so the daily-token side is still unmeasured. The ledger keeps the rolling 24 h sum, at the
   author's request: it is at least as strict as any refill rule.
 
+## Real load runs early, on refill accounting (2026-11-11)
+
+The author asked for real_steady and real_burst now instead of at 17:55 UTC. Under the rolling 24 h
+sum key1 had no 120b room even at a 100% cap (18.8K tokens; the two runs need ~52.7K), so the author
+chose **refill accounting for these runs**: `RELAY_LEDGER_ACCOUNTING=refill` makes each model's cap
+(still 90% of the documented daily limit) drain continuously at cap / 24 h, the behaviour measured for
+Groq's daily request counter (previous section). That left 113K of 120b room. Every ledger line of the
+runs carries `ledger_accounting: refill`. Caveat: Groq shows no daily-token header, so whether its
+daily-token limit refills the same way is unmeasured; a daily-limit 429 would be handled by the ladder
+(never retried) and would show in the run. Rolling stays the default for everything else.
+
+## What the real load runs showed (2026-11-11, key1, refill accounting)
+
+Runs `real_steady-20261111T073012Z` and `real_burst-20261111T073012Z`; numbers in `results/tables.md`.
+* **real_steady's passages replies were the citation gate, not budget.** Each of the 4 had zero budget
+  wait and three model calls: router, draft, and a redraft that also failed the gate. Replaying the
+  saved drafts through `check_citations`:
+  * topic or summary sentences without a citation ("Moshi's architecture is built around three core
+    modules.");
+  * display formulas split by the sentence splitter into uncited lines (Q3's PE equations);
+  * d_model = 512 (Q2), which is in the paper but not in the 3 retrieved pieces, so the number check
+    is right to block it.
+
+  real_burst's two 3-call passages replies (both Q2) are the same pattern. The rest of real_burst's
+  passages were the ladder: no call, an instant reply when 120b's minute budget couldn't serve them
+  within 15 s.
+* **The stand-in missed this.** It replays the eval's answers, which passed the gate, so it never
+  produces a fresh draft that fails. Its twin shows real_steady at 100% success against 87.1% real.
+  Fresh-draft gate failures are a gap in the stand-in's realism.
+* **No daily-limit 429 under refill accounting.** The runs got one TPM 429, on gpt-oss-20b.
+* Candidate for the next iterate round (not changed mid-measurement): let the gate accept an
+  uncited framing or summary sentence when every factual sentence is cited, and keep a display formula
+  with the cited sentence it belongs to. The reply notice also says "no model call" when two drafts
+  were made; reword it.
+
 ## Decisions taken (2026-11-10)
 
 - **Ledger charges what Groq reports.** A completed call counts its reported usage (findings Q2:

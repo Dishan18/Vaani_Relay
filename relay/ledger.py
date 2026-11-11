@@ -17,8 +17,11 @@ The account cap's fraction can be raised for one run with the environment variab
 ``RELAY_ACCOUNT_CAP_FRACTION`` (at most 1.0, i.e. the documented limit itself). It is announced on
 stderr and every ledger line written under it carries ``account_cap_fraction``, so the override is
 on the record. The stand-in and per-run caps (e.g. the probe's) are never affected.
-They are counted over a **rolling 24 h window**. That is at least as strict as a fixed daily
-reset at any hour, and we don't yet know which one Groq uses.
+By default they are counted over a **rolling 24 h window**. ``RELAY_LEDGER_ACCOUNTING=refill``
+switches one run to a refilling bucket instead: each model's charges drain continuously at
+cap / window (the behaviour measured for Groq's daily request counter, findings 2026-11-11); also
+recorded on every ledger line (``ledger_accounting``). Per-run total-request caps stay rolling.
+The rolling window is at least as strict as a fixed daily reset at any hour or a refilling bucket.
 
 Charging is conservative until the probe tells us how Groq really counts:
   * connect error (the server was never reached): 0 requests, 0 tokens
@@ -112,9 +115,12 @@ class Budget:
     prompt_overhead_tokens: int = 16
     # set only when RELAY_ACCOUNT_CAP_FRACTION overrides the "account" cap for this run
     account_cap_fraction: float | None = None
+    # "rolling" (default: a spend counts for exactly window_hours) or "refill" (drains at cap/window)
+    accounting: str = "rolling"
 
 
 ACCOUNT_CAP_ENV = "RELAY_ACCOUNT_CAP_FRACTION"
+ACCOUNTING_ENV = "RELAY_LEDGER_ACCOUNTING"
 
 
 def load_budget(budget_path: Path = DEFAULT_BUDGET, documented_path: Path = DOCUMENTED) -> Budget:
@@ -137,8 +143,14 @@ def load_budget(budget_path: Path = DEFAULT_BUDGET, documented_path: Path = DOCU
                   for m in c["models"]}
         caps.append(Cap(c["name"], c.get("scope", "*"), models, c.get("total_requests")))
     floor = cfg.get("server_floor", {}).get("min_remaining_requests_fraction")
+    accounting = os.environ.get(ACCOUNTING_ENV, "").strip() or str(cfg.get("accounting", "rolling"))
+    if accounting not in ("rolling", "refill"):
+        raise ValueError(f"{ACCOUNTING_ENV}={accounting}: must be 'rolling' or 'refill'")
+    if accounting != "rolling":
+        print(f"ledger: {accounting} accounting (caps drain continuously at cap/window) "
+              f"({ACCOUNTING_ENV}); recorded on every ledger line", file=sys.stderr)
     return Budget(caps, float(cfg.get("window_hours", 24)), floor,
-                  int(cfg.get("prompt_overhead_tokens", 16)), override)
+                  int(cfg.get("prompt_overhead_tokens", 16)), override, accounting)
 
 
 def prompt_chars(payload: dict[str, Any]) -> int:
@@ -273,6 +285,34 @@ class Ledger:
                 tot = min(tot, cap.total_requests - u["total_requests"])
         return {"requests": req, "tokens": tok, "total_requests": tot}
 
+    def _refill_levels(self, cap: Cap) -> dict[str, dict[str, int]]:
+        """Per-model level of a bucket that every charge fills and that drains continuously at
+        cap / window (never below 0), replayed over this account's entries up to now."""
+        w = self.budget.window_hours * 3600
+        now = self.clock()
+        lv: dict[str, list[float]] = {}           # model -> [requests, tokens, ts of last update]
+        mine = [e for e in self.entries
+                if (self.account is None or e.get("account", LEGACY_ACCOUNT) == self.account)
+                and cap.applies(e["scope"])]
+        for e in sorted(mine, key=lambda e: e["ts"]):
+            mc = cap.models.get(e["model"])
+            r = lv.setdefault(e["model"], [0.0, 0.0, e["ts"]])
+            if mc is not None:
+                dt = max(0.0, e["ts"] - r[2])
+                r[0] = max(0.0, r[0] - mc.requests * dt / w)
+                r[1] = max(0.0, r[1] - mc.tokens * dt / w)
+            r[0] += requests_of(e)
+            r[1] += charge_of(e)
+            r[2] = e["ts"]
+        per = {m: {"requests": 0, "tokens": 0} for m in cap.models}
+        for m, (rq, tk, t) in lv.items():
+            mc = cap.models.get(m)
+            if mc is not None:
+                dt = max(0.0, now - t)
+                rq, tk = max(0.0, rq - mc.requests * dt / w), max(0.0, tk - mc.tokens * dt / w)
+            per[m] = {"requests": math.ceil(rq), "tokens": math.ceil(tk)}
+        return per
+
     def _in_window(self) -> list[dict[str, Any]]:
         cutoff = self.clock() - self.budget.window_hours * 3600
         return [e for e in self.entries if e["ts"] >= cutoff
@@ -289,6 +329,8 @@ class Ledger:
             p["requests"] += requests_of(e)
             p["tokens"] += charge_of(e)
             total += requests_of(e)
+        if self.budget.accounting == "refill":
+            per = self._refill_levels(cap)
         for r in self.inflight.values():
             if not cap.applies(r.scope):
                 continue
@@ -356,6 +398,7 @@ class Ledger:
             "account": self.account,
             **({"account_cap_fraction": self.budget.account_cap_fraction}
                if self.budget.account_cap_fraction is not None else {}),
+            **({"ledger_accounting": self.budget.accounting} if self.budget.accounting != "rolling" else {}),
             "model": r.model,
             "call_id": rec.call_id,
             "source": rec.source,

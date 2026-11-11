@@ -49,6 +49,10 @@ Load runs only (the evals wait for budget on purpose). TTFT = first checked toke
 | daily_exhausted | stand-in | 14 | 261 | 3.2 | 4 / 9 / 9 (= max, n<100) | 4 / 9 / 9 (= max, n<100) | 14 / 14 |
 | overload | stand-in | 78 | 299 | 15.6 | 1730 / 14043 / 28404 (= max, n<100) | 1961 / 16453 / 30882 (= max, n<100) | 74 / 78 |
 | overload_naive_retry | stand-in | 78 | 294 | 15.9 | 6271 / 11547 / 18414 (= max, n<100) | 6271 / 11547 / 18414 (= max, n<100) | 77 / 78 |
+| real_burst | real | 20 | 21 | 56.1 | 1006 / 11419 / 11419 (= max, n<100) | 1257 / 11419 / 15963 (= max, n<100) | 18 / 20 |
+| real_burst | stand-in | 20 | 17 | 72.3 | 718 / 7117 / 7117 (= max, n<100) | 718 / 7117 / 9219 (= max, n<100) | 19 / 20 |
+| real_steady | real | 31 | 849 | 2.2 | 2320 / 4192 / 5549 (= max, n<100) | 2320 / 4192 / 5549 (= max, n<100) | 31 / 31 |
+| real_steady | stand-in | 31 | 850 | 2.2 | 1495 / 8248 / 9004 (= max, n<100) | 1495 / 8248 / 9004 (= max, n<100) | 31 / 31 |
 | rpm_halved | stand-in | 36 | 289 | 7.5 | 3135 / 12601 / 16205 (= max, n<100) | 3522 / 12601 / 16205 (= max, n<100) | 34 / 36 |
 | steady | stand-in | 24 | 264 | 5.4 | 2029 / 9630 / 16001 (= max, n<100) | 2029 / 9630 / 16001 (= max, n<100) | 24 / 24 |
 
@@ -63,6 +67,10 @@ Succeeded = status ok (a checked answer or refusal, any degrade level); rate-lim
 | daily_exhausted | stand-in | 0.0 | 100.0 | 0.0 | 0.0 | 0.21 | 1 | 0 | $0 / $0.00 |
 | overload | stand-in | 87.2 | 7.7 | 5.1 | 0.0 | 0.01 | 5 | 1483 | $0 / $0.51 |
 | overload_naive_retry | stand-in | 46.2 | 52.6 | 1.3 | 0.0 | 5.81 | 1 | 1032 | $0 / $0.66 |
+| real_burst | real | 45.0 | 45.0 | 10.0 | 0.0 | 0.05 | 4 | 1385 | $0 / $0.64 |
+| real_burst | stand-in | 65.0 | 30.0 | 5.0 | 0.0 | 0.00 | 4 | 1355 | $0 / $0.58 |
+| real_steady | real | 87.1 | 12.9 | 0.0 | 0.0 | 0.00 | 1 | 3713 | $0 / $1.86 |
+| real_steady | stand-in | 100.0 | 0.0 | 0.0 | 0.0 | 0.00 | 1 | 3252 | $0 / $1.77 |
 | rpm_halved | stand-in | 86.1 | 8.3 | 5.6 | 0.0 | 0.03 | 3 | 1352 | $0 / $0.69 |
 | steady | stand-in | 100.0 | 0.0 | 0.0 | 0.0 | 0.04 | 1 | 3130 | $0 / $1.50 |
 
@@ -78,6 +86,10 @@ Succeeded = status ok (a checked answer or refusal, any degrade level); rate-lim
 | eval:retrieval | real | 90 | 90 | - |
 | overload | stand-in | 78 | 0 | not graded: stand-in 78 |
 | overload_naive_retry | stand-in | 78 | 0 | not graded: stand-in 78 |
+| real_burst | real | 20 | 18 | not graded: no gradable reply (kind=gave_up) 2 |
+| real_burst | stand-in | 20 | 0 | not graded: stand-in 20 |
+| real_steady | real | 31 | 31 | - |
+| real_steady | stand-in | 31 | 0 | not graded: stand-in 31 |
 | rpm_halved | stand-in | 36 | 0 | not graded: stand-in 36 |
 | steady | stand-in | 24 | 0 | not graded: stand-in 24 |
 

@@ -1,0 +1,57 @@
+{
+ "_generated_by": "scripts/run_load.py",
+ "stamp": "20261111T074532Z",
+ "duration_s": null,
+ "seed": 7,
+ "replay": {
+  "router": 18,
+  "drafts": 102
+ },
+ "scenarios": [
+  {
+   "scenario": "real_steady",
+   "run_id": "real_steady-20261111T074532Z",
+   "requests": 31,
+   "outcomes": {
+    "answer": 26,
+    "refusal": 5
+   },
+   "source": "stand-in",
+   "stand_in": {
+    "requests": 88,
+    "ok": 88,
+    "429": 0,
+    "503": 0,
+    "413": 0,
+    "stalls": 0,
+    "replay_hits": 49,
+    "replay_misses": 39
+   },
+   "overrides": {},
+   "wall_s": 896.8
+  },
+  {
+   "scenario": "real_burst",
+   "run_id": "real_burst-20261111T074532Z",
+   "requests": 20,
+   "outcomes": {
+    "answer": 13,
+    "passages": 6,
+    "gave_up": 1
+   },
+   "source": "stand-in",
+   "stand_in": {
+    "requests": 27,
+    "ok": 27,
+    "429": 0,
+    "503": 0,
+    "413": 0,
+    "stalls": 0,
+    "replay_hits": 12,
+    "replay_misses": 15
+   },
+   "overrides": {},
+   "wall_s": 18.9
+  }
+ ]
+}

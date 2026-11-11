@@ -1,6 +1,6 @@
 {
  "_generated_by": "scripts/budget_plan.py",
- "now": "2026-11-11 07:25 UTC",
+ "now": "2026-11-11 08:00 UTC",
  "accounting": "ledger: reported usage, rolling 24 h, no refill assumed",
  "measured_tokens_per_request": {
   "qwen/qwen3.8-27b": 688.8235294117648,
@@ -16,25 +16,25 @@
  },
  "models": {
   "openai/gpt-oss-120b": {
-   "used_24h": 181203,
-   "room_now": -1203,
+   "used_24h": 262144,
+   "room_now": -82144,
    "cap": 180000.0,
    "first_spend_returns": "11-11 13:58 UTC",
-   "all_back": "11-12 07:24 UTC"
+   "all_back": "11-12 07:45 UTC"
   },
   "openai/gpt-oss-20b": {
-   "used_24h": 49609,
-   "room_now": 130391,
+   "used_24h": 62786,
+   "room_now": 117214,
    "cap": 180000.0,
    "first_spend_returns": "11-11 13:58 UTC",
-   "all_back": "11-12 07:23 UTC"
+   "all_back": "11-12 07:45 UTC"
   },
   "qwen/qwen3.8-27b": {
-   "used_24h": 69776,
-   "room_now": 110224,
+   "used_24h": 121146,
+   "room_now": 58854,
    "cap": 180000.0,
    "first_spend_returns": "11-11 13:58 UTC",
-   "all_back": "11-12 07:24 UTC"
+   "all_back": "11-12 07:45 UTC"
   }
  },
  "jobs": [
@@ -45,7 +45,7 @@
     "openai/gpt-oss-120b": 39555,
     "openai/gpt-oss-20b": 15786
    },
-   "start": "11-11 17:55 UTC",
+   "start": "11-11 18:20 UTC",
    "fits_now": false
   },
   {
@@ -55,7 +55,7 @@
     "openai/gpt-oss-120b": 13118,
     "openai/gpt-oss-20b": 5677
    },
-   "start": "11-11 18:00 UTC",
+   "start": "11-11 18:25 UTC",
    "fits_now": false
   }
  ],
@@ -72,8 +72,8 @@
   }
  },
  "load_run_120b_room_after_all_jobs": {
-  "real_steady": "11-11 17:55 UTC",
-  "real_burst": "11-11 17:50 UTC"
+  "real_steady": "11-11 18:20 UTC",
+  "real_burst": "11-11 18:20 UTC"
  },
  "load_cost_basis": {
   "real_steady": {

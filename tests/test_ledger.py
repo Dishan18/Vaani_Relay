@@ -151,6 +151,22 @@ class LedgerTests(unittest.TestCase):
             self.clock.t += 0.2 * 3600
             led.reserve(payload(), "probe", "p")
 
+    def test_refill_accounting_drains_at_cap_per_window(self):
+        from dataclasses import replace
+        self.budget = replace(self.budget, accounting="refill")
+        with self.ledger() as led:
+            for _ in range(3):        # probe cap for M1: 3 requests, 1000 tokens per 24 h
+                led.settle(led.reserve(payload(), "probe", "p"), record(usage_total=300))
+            self.assertEqual(led.headroom("probe", M1)["requests"], 0)
+            self.clock.t += 8 * 3600 + 1   # a third of the window: 1 request drained
+            self.assertEqual(led.headroom("probe", M1)["requests"], 1)
+            self.clock.t += 16 * 3600      # a whole window: requests and the 900 tokens all drained
+            h = led.headroom("probe", M1)
+            self.assertEqual(h["requests"], 3)
+            self.assertEqual(h["tokens"], 1000)
+            e = led.settle(led.reserve(payload(), "probe", "p"), record(usage_total=10))
+            self.assertEqual(e["ledger_accounting"], "refill")
+
     def test_persists_across_processes(self):
         with self.ledger() as led:
             for _ in range(3):
