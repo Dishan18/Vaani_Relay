@@ -853,3 +853,73 @@ My answer:
 ~~~~text
 dont say anything about key2 since it can be ignored
 ~~~~
+
+## 48. 2026-11-11T12:18:31.464Z (prompt)
+
+~~~~text
+<pasted_content id="fdc6">
+I've reviewed the updated writeup(1).pdf, including both rendered pages.
+
+This version is substantially better. I would keep it as the final version, with just 2 small wording changes.
+What Claude fixed correctly
+Daily-budget response now has no unsupported reset estimate.
+
+Retrieved passages are explicitly labelled unchecked.
+
+Stand-in streaming is now mentioned.
+
+TTFT and total-time differences are explained.
+
+The slow-request breakdown accounts for all 3 ms of local work.
+
+All required sections and tables fit into two pages.
+
+
+Two final wording changes
+1. Page 1: Avoid an absolute claim
+
+Currently:
+
+"The floor costs no budget, so nobody is left without a reply."
+
+But your overload experiment shows that 5.1% gave up waiting.
+
+Replace it with:
+
+"The floor costs no model budget, so the system can still return a fallback even when the daily allowance is exhausted."
+
+2. Page 2: Change one sentence
+
+Currently:
+
+"Here they miss the figures asked for (graded wrong), which only a model could tell."
+
+Replace with:
+
+"Here they miss the figures asked for (graded wrong), something a simple word-overlap check cannot detect."
+
+This is more technically precise because a human can also recognise the mismatch.
+Final document check
+Requirement	Status
+Two-page limit	Pass
+Required headings and ordering	Pass
+Results tables	Present
+Retrieval comparison	5 settings
+Quality evaluation	18 questions
+Stand-in and real measurements	Present
+Vaani feedback	Present
+Assistant interaction section	Present
+Visual layout	Clean
+
+writeup(1).pdf
+My verdict: 9/10 as a write-up.
+
+I would make those two wording changes and freeze the PDF.
+
+One limitation: I have verified the document, not independently rerun the code or recomputed the CSV figures. Make sure results.csv, code.zip, prompts.md and README.txt accompany it.
+
+You're at the point where further cosmetic edits are unlikely to improve the submission. Focus on being able to defend the engineering decisions in the live discussion.
+</pasted_content id="fdc6">
+
+make these changes if needed
+~~~~

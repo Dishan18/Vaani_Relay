@@ -20,7 +20,7 @@ results.csv
   superseded = 1 with the reason in the "excluded" column.
 
 code.zip
-  The repository at commit 274daca (git archive; the zip's top folder carries the same name). It holds the
+  The repository at commit 85612c3 (git archive; the zip's top folder carries the same name). It holds the
   code, tests and config; my questions and their gold facts; every raw result (results/raw, real and
   stand-in, with a record of each model call); the ledger of every real Groq call; the probe log;
   the experiment results; my findings log (docs/findings_and_decisions.md); and the write-up's audit
