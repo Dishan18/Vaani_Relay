@@ -96,48 +96,39 @@ def table1(cal_path: Path = CAL, probe_path: Path = PROBE) -> list[str]:
               if e.get("median_refill_per_s")]
     rr = rpd_refill()
     n_daily, n_429 = daily_429s()
-
-    def per_model(bucket):
-        return "; ".join(f"{SHORT[m]} {c['buckets'][bucket]['capacity']:.0f}" for m, c in cal.items() if bucket in c["buckets"])
-
-    def how(bucket):
-        by: dict[str, list[str]] = {}
-        for m, c in cal.items():
-            if bucket in c["buckets"]:
-                by.setdefault(c["buckets"][bucket]["source"], []).append(SHORT[m])
-        return "; ".join(f"{', '.join(ms)}: {src}" for src, ms in by.items())
+    q = cal["qwen/qwen3.8-27b"]["buckets"]
+    p = first["parsed"]
 
     def span(xs, fmt):
         lo, hi = fmt.format(min(xs)), fmt.format(max(xs))
         return lo if lo == hi else f"{lo}-{hi}"
 
-    def file_of(src):
-        m = re.search(r"\(([^()]+\.jsonl)", src)
-        return m.group(1) if m else src
-    q = cal["qwen/qwen3.8-27b"]["buckets"]
-    conc = "; ".join(f"{SHORT[m]}: {v.split(';')[0]}" for m, v in ver["concurrency"].items())
-    p = first["parsed"]
+    def per_model(bucket):          # one value when every model has the same
+        vals = {m: f"{c['buckets'][bucket]['capacity']:.0f}" for m, c in cal.items() if bucket in c["buckets"]}
+        if len(set(vals.values())) == 1:
+            return f"{next(iter(vals.values()))} per model"
+        return "; ".join(f"{SHORT[m]} {v}" for m, v in vals.items())
+    qwen_rpm_doc = "documented only" in cal["qwen/qwen3.8-27b"]["buckets"]["RPM"]["source"]
+    lim_k = "; ".join(f"{SHORT[m]} k={re.search(r'k=(\d+)', v).group(1)}" for m, v in ver["concurrency"].items()
+                      if re.search(r"k=(\d+)", v))
     rows = [
-        ("Requests per minute", per_model("RPM"), how("RPM") + f"; {walls['openai/gpt-oss-120b']['ok_before_first_429']} "
-         "successes before the first 429 in a burst", "high (gpt-oss), low (qwen: documented only)"),
-        ("Tokens per minute", per_model("TPM") + f"; qwen also: output {q['OTPM']['capacity']:.0f}/min, "
-         f"input {q['ITPM']['capacity']:.0f}/min (undocumented)", how("TPM") + "; qwen's two hidden limits: "
-         f"named in real-run 429 bodies ({file_of(q['OTPM']['source'])}, {file_of(q['ITPM']['source'])})",
-         "high"),
-        ("Requests per day", per_model("RPD"), how("RPD") + (
-            f"; refills continuously: 120b's remaining went from {rr['from']} to {rr['to']} in {rr['hours']} h "
-            "with no reset (ledger headers)" if rr else ""), "high (limit), medium (refill)"),
-        ("Tokens per day", per_model("TPD"), f"documented only: no header shows it; {n_daily} of the {n_429} "
-         "real 429s saved named a per-day limit", "low"),
-        ("Requests in flight at once", "no limit found", f"stepwise concurrency in the probe: {conc}",
-         "medium (a lower bound only)"),
-        ("What it returns when a limit is hit", f"HTTP 429, retry-after: {first['retry_after']} s, and a body "
-         f"naming the limit: \"{p['what']} ({p['short']}): Limit {p['limit']}, Used {p['used']}, Requested "
-         f"{p['requested']}. Please try again in {p['try_again_in']}\"", "probe burst past the RPM wall; real-run 429 bodies",
-         "high"),
-        ("Time until it recovers", f"next request admitted {span(rec, '{:.1f}')} s after the first 429; "
-         f"tokens refill at {span(refill, '{:.0f}')} per s (TPM/60): buckets, not minute windows",
-         "recovery polls after the RPM wall; remaining-tokens headers after a draft", "high (minute), medium (day)"),
+        ("Requests per minute", per_model("RPM"), f"429 body \"Limit {p['limit']}\" after "
+         f"{walls['openai/gpt-oss-120b']['ok_before_first_429']} successes in a probe burst"
+         + ("; qwen never hit, documented" if qwen_rpm_doc else ""), "high" + (" (qwen low)" if qwen_rpm_doc else "")),
+        ("Tokens per minute", per_model("TPM") + f"; qwen also output {q['OTPM']['capacity']:.0f}, "
+         f"input {q['ITPM']['capacity']:.0f} (undocumented)", "x-ratelimit-limit-tokens; qwen's two only in real-run 429 "
+         "bodies", "high"),
+        ("Requests per day", per_model("RPD"), "x-ratelimit-limit-requests" + (
+            f"; refills: 120b remaining {rr['from']} to {rr['to']} in {rr['hours']} h, same day" if rr else ""),
+         "high (refill medium)"),
+        ("Tokens per day", per_model("TPD") + " (documented)", f"no header; {n_daily} of {n_429} real 429s named a "
+         "daily limit", "low"),
+        ("Requests in flight at once", f"none found ({lim_k})", "stepwise concurrency in the probe",
+         "medium (lower bound)"),
+        ("What it returns when a limit is hit", f"429, retry-after {first['retry_after']} s, body naming the limit "
+         f"(\"{p['short']}: Limit {p['limit']}, Used {p['used']}\")", "probe burst; real-run 429 bodies", "high"),
+        ("Time until it recovers", f"{span(rec, '{:.1f}')} s to the next admission; tokens refill "
+         f"{span(refill, '{:.0f}')}/s (TPM/60)", "recovery polls; token headers after a draft", "high"),
     ]
     L = ["## Table 1: limits found in the real service", "",
          "Free tier, per model (each model hit its own wall). From data/calibration.json, data/probe/calibration.json "

@@ -114,13 +114,15 @@ class LimitTests(unittest.TestCase):
 
     def test_hold_released_to_actual_usage(self):
         async def go():
-            async with StandIn(fast_cal(), seed=6) as s:
+            # a frozen clock: the bucket must not refill during the call, or a slow (loaded) machine
+            # refills a few tokens more than the delta allows (seen in full-suite runs)
+            async with StandIn(fast_cal(), seed=6, clock=lambda: 1000.0) as s:
                 b = s.models[M20].buckets["TPM"]
                 before = b.sync()
                 r = await call(s, payload(max_tokens=1000))
                 return before - b.sync(), r
         used, r = run(go())
-        self.assertAlmostEqual(used, r.usage["prompt_tokens"] + r.usage["completion_tokens"], delta=3.0)
+        self.assertAlmostEqual(used, r.usage["prompt_tokens"] + r.usage["completion_tokens"], delta=1.0)
 
     def test_halved_limits_show_in_headers(self):
         async def go():

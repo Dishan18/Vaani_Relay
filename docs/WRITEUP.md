@@ -11,15 +11,15 @@ Python/asyncio on Groq's free tier: qwen3.8-27b routes, BM25 fetches 3 pieces of
 
 | limit | value found | how found | confidence |
 |---|---|---|---|
-| Requests per minute | 20b 30; 120b 30; qwen 30 | 20b, 120b: measured (probe: 429 body Limit 30, try again in 2s); qwen: documented only (the probe never hit this model's RPM); 30 successes before the first 429 in a burst | high (gpt-oss), low (qwen: documented only) |
-| Tokens per minute | 20b 8000; 120b 8000; qwen 8000; qwen also: output 1000/min, input 7000/min (undocumented) | 20b, 120b, qwen: measured (probe: x-ratelimit-limit-tokens; period 60 s x reset ratio 1.0); qwen's two hidden limits: named in real-run 429 bodies (drafter-large-20261110.calls.jsonl, drafter-large-qwen-rerun-otpm-20261111.calls.jsonl) | high |
-| Requests per day | 20b 1000; 120b 1000; qwen 1000 | 20b, 120b, qwen: measured (probe: x-ratelimit-limit-requests; period from reset-requests (86400 s)); refills continuously: 120b's remaining went from 942 to 999 in 3.76 h with no reset (ledger headers) | high (limit), medium (refill) |
-| Tokens per day | 20b 200000; 120b 200000; qwen 200000 | documented only: no header shows it; 0 of the 22 real 429s saved named a per-day limit | low |
-| Requests in flight at once | no limit found | stepwise concurrency in the probe: 20b: no limit up to k=8; 120b: no limit up to k=8; qwen: no limit up to k=4 | medium (a lower bound only) |
-| What it returns when a limit is hit | HTTP 429, retry-after: 2 s, and a body naming the limit: "requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s" | probe burst past the RPM wall; real-run 429 bodies | high |
-| Time until it recovers | next request admitted 2.0 s after the first 429; tokens refill at 133 per s (TPM/60): buckets, not minute windows | recovery polls after the RPM wall; remaining-tokens headers after a draft | high (minute), medium (day) |
+| Requests per minute | 30 per model | 429 body "Limit 30" after 30 successes in a probe burst; qwen never hit, documented | high (qwen low) |
+| Tokens per minute | 8000 per model; qwen also output 1000, input 7000 (undocumented) | x-ratelimit-limit-tokens; qwen's two only in real-run 429 bodies | high |
+| Requests per day | 1000 per model | x-ratelimit-limit-requests; refills: 120b remaining 942 to 999 in 3.76 h, same day | high (refill medium) |
+| Tokens per day | 200000 per model (documented) | no header; 0 of 22 real 429s named a daily limit | low |
+| Requests in flight at once | none found (20b k=8; 120b k=8; qwen k=4) | stepwise concurrency in the probe | medium (lower bound) |
+| What it returns when a limit is hit | 429, retry-after 2 s, body naming the limit ("RPM: Limit 30, Used 30") | probe burst; real-run 429 bodies | high |
+| Time until it recovers | 2.0 s to the next admission; tokens refill 133/s (TPM/60) | recovery polls; token headers after a draft | high |
 
-From a probe of 171 real calls and real 429 bodies. The stand-in speaks Groq's API, headers and 429 wording with the same buckets, a first-byte lognormal fitted to 13 probe calls, 473 tokens/s streaming, load slowdown, stalls and failures, and replays real model replies. **Least like Groq:** it replays only drafts that passed the check, so it never shows a gate failure: on identical arrivals the real steady run gave 87.1% a written answer, its twin 100.0%.
+From a probe of 171 real calls and real 429 bodies. The stand-in speaks Groq's API, headers and 429 wording with the same buckets, first-byte and streaming rates fitted per model to the probe (gpt-oss-120b: 13 calls, 473 tokens/s), load slowdown, stalls and failures, and replays real replies. **Least like Groq:** it replays only drafts that passed the check, so it never shows a gate failure: on identical arrivals the real steady run gave 87.1% a written answer, its twin 100.0%.
 
 ## Results
 
@@ -63,7 +63,7 @@ real_burst-20261111T073012Z-0009 (Q14) took 15963 ms and the person left at 15.9
 
 ## When a limit is hit
 
-**Per minute** (stand-in overload): 87.2% written (61.5% from a fallback model or the lean step, the weaker answers), 7.7% passages, 5.1% gave up; others are delayed up to the ladder's limit (queue wait p95 10572 ms); nobody is turned away. Real burst: 45.0% written, 35.0% passages, 10.0% gave up. **Per day:** 0.0% written, 100.0% passages: straight to the floor rather than holding people until a reset.
+**Per minute** (stand-in overload): 87.2% written (61.5% from a fallback model or the lean step, the weaker answers), 7.7% passages, 5.1% gave up; others are delayed up to the ladder's limit (queue wait p95 10572 ms); nobody is turned away. **Per day:** 0.0% written, 100.0% passages: straight to the floor rather than holding people until a reset.
 
 ## Retrieval: quality versus cost
 
@@ -82,13 +82,13 @@ real_burst-20261111T073012Z-0009 (Q14) took 15963 ms and the person left at 15.9
 ## How this library will mislead a naive retriever
 
 Plain BM25, raw question (data/retrieval/traps.md):
-- **Different words:** "How does H-Net decide where to cut the byte stream into pieces?" shares 0 of 7 terms with its answer; 0 of 5 settings answered it.
+- **Different words:** "How does H-Net decide where to cut the byte stream into pieces?" shares 0 of 7 terms with its answer; 0 of 5 settings got it right.
 - **Text about a table outranks it:** for "What training cost in FLOPs does Table 2 report for the big Transformer?" the table is rank 2.
 - **Unanswerable but plausible:** "What is H-Net's p95 latency serving 1,000 simultaneous requests?" tops with moshi on "latency"; the decide gate refused it in 5 of 5 settings.
 
 ## Retries
 
-**Ships:** a failed call (429, 5xx, timeout) moves to the next model in the fallback order, each at most once per step, then down the ladder; no resend to the same model. **Rejected:** 1 retry per step within 10% of recent calls left 13 and 14 people without a written answer against 12 and 10 (stand-in, two seeds). **Worse:** a naive client (3 same-model retries, no limiter) left 25 and 23 of 47 without one against 0 and 0, drawing 274 and 264 rejections.
+**Ships:** a failed call (429, 5xx, timeout) moves to the next model in the fallback order, each at most once per step, then down the ladder; no resend to the same model. **Rejected:** 1 retry per step within 10% of recent calls left 13 and 14 people without a written answer against 12 and 10 (stand-in, two seeds). **Worse:** a naive client (3 same-model retries, no limiter; stand-in) left 25 and 23 of 47 without one against 0 and 0, drawing 274 and 264 rejections.
 
 ## What the person sees
 
@@ -102,11 +102,11 @@ Honest and immediate but, without the router, the passages miss the figures aske
 
 ## What I'm unsure about, what I left out, what I learned
 
-**Least certain:** Groq's daily token limit; no header or 429 shows it. Our key was charged 263495 gpt-oss-120b tokens in one 24 h window, over the documented 200000, unrefused, so it is not that rolling sum; if it resets at a fixed hour, the estimate above is wrong by hours. **Not built:** sentence-by-sentence release (we buffer, so first token equals total time); a model-based grader (it spends the shared budget). **Next:** a router prompt for Q14; fetching the neighbouring piece when a draft's number is missing (Q2).
+**Least certain:** Groq's daily token limit, never shown in a header or 429. Evidence says it refills: our key was charged 263495 gpt-oss-120b tokens in one rolling 24 h window, over the documented 200000, with no daily 429, and the request counter refills (Table 1). If it resets at a fixed hour instead, the estimate above is wrong by hours. **Not built:** sentence-by-sentence release (we buffer, so first token equals total); a model-based grader (it spends shared budget). **Next:** a router prompt for Q14; fetching the neighbouring piece when a draft's number is missing (Q2).
 
 **One new thing, in my own words:** [AUTHOR: to write.]
 
-**Honesty notes.** Runs as measured at e7aa65f; 11 rows later moved from rate-limited to succeeded (passages after failed checks). The fixed gate passes 127 of 165 saved real drafts instead of 119, changing 2 requests in the tables. The grader changed after I saw answers (results/quality/grade_changes_*.md) and a Q13 gold fact became optional; 37 of 177 graded real rows were never checked by hand. To avoid waiting, two eval jobs capped at the documented limit and the real load runs used refill accounting. Runs on a second key (4, one budget) and a mistyped key (2, 401s) are excluded.
+**Honesty notes.** Tables from runs measured at e7aa65f; 11 rows later moved from rate-limited to succeeded (passages after failed checks). The fixed gate passes 127 of 165 saved real drafts instead of 119, changing 2 requests in the tables; the replay is its measurement (one real rerun would be anecdotal). The grader changed after I saw answers (results/quality/grade_changes_*.md) and a Q13 gold fact became optional; 37 of 177 graded real rows were never checked by hand. To avoid waiting, two eval jobs capped at the documented limit, and the real load runs and a last Q14 check used refill accounting. Runs on a second key (4, one budget) and a mistyped key (2, 401s) are excluded.
 
 ## Your feedback on Vaani
 

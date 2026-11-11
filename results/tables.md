@@ -8,13 +8,13 @@ Free tier, per model (each model hit its own wall). From data/calibration.json, 
 
 | limit | value found | how found | confidence |
 |---|---|---|---|
-| Requests per minute | 20b 30; 120b 30; qwen 30 | 20b, 120b: measured (probe: 429 body Limit 30, try again in 2s); qwen: documented only (the probe never hit this model's RPM); 30 successes before the first 429 in a burst | high (gpt-oss), low (qwen: documented only) |
-| Tokens per minute | 20b 8000; 120b 8000; qwen 8000; qwen also: output 1000/min, input 7000/min (undocumented) | 20b, 120b, qwen: measured (probe: x-ratelimit-limit-tokens; period 60 s x reset ratio 1.0); qwen's two hidden limits: named in real-run 429 bodies (drafter-large-20261110.calls.jsonl, drafter-large-qwen-rerun-otpm-20261111.calls.jsonl) | high |
-| Requests per day | 20b 1000; 120b 1000; qwen 1000 | 20b, 120b, qwen: measured (probe: x-ratelimit-limit-requests; period from reset-requests (86400 s)); refills continuously: 120b's remaining went from 942 to 999 in 3.76 h with no reset (ledger headers) | high (limit), medium (refill) |
-| Tokens per day | 20b 200000; 120b 200000; qwen 200000 | documented only: no header shows it; 0 of the 22 real 429s saved named a per-day limit | low |
-| Requests in flight at once | no limit found | stepwise concurrency in the probe: 20b: no limit up to k=8; 120b: no limit up to k=8; qwen: no limit up to k=4 | medium (a lower bound only) |
-| What it returns when a limit is hit | HTTP 429, retry-after: 2 s, and a body naming the limit: "requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s" | probe burst past the RPM wall; real-run 429 bodies | high |
-| Time until it recovers | next request admitted 2.0 s after the first 429; tokens refill at 133 per s (TPM/60): buckets, not minute windows | recovery polls after the RPM wall; remaining-tokens headers after a draft | high (minute), medium (day) |
+| Requests per minute | 30 per model | 429 body "Limit 30" after 30 successes in a probe burst; qwen never hit, documented | high (qwen low) |
+| Tokens per minute | 8000 per model; qwen also output 1000, input 7000 (undocumented) | x-ratelimit-limit-tokens; qwen's two only in real-run 429 bodies | high |
+| Requests per day | 1000 per model | x-ratelimit-limit-requests; refills: 120b remaining 942 to 999 in 3.76 h, same day | high (refill medium) |
+| Tokens per day | 200000 per model (documented) | no header; 0 of 22 real 429s named a daily limit | low |
+| Requests in flight at once | none found (20b k=8; 120b k=8; qwen k=4) | stepwise concurrency in the probe | medium (lower bound) |
+| What it returns when a limit is hit | 429, retry-after 2 s, body naming the limit ("RPM: Limit 30, Used 30") | probe burst; real-run 429 bodies | high |
+| Time until it recovers | 2.0 s to the next admission; tokens refill 133/s (TPM/60) | recovery polls; token headers after a draft | high |
 
 ## Table 3: retrieval settings
 

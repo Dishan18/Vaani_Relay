@@ -11,7 +11,7 @@ Python/asyncio on Groq's free tier: qwen3.8-27b routes, BM25 fetches {{cfg.k_ful
 
 {{table:Table 1}}
 
-From a probe of {{probe.calls}} real calls and real 429 bodies. The stand-in speaks Groq's API, headers and 429 wording with the same buckets, a first-byte lognormal fitted to {{cal.ttfb_n}} probe calls, {{cal.decode_tps}} tokens/s streaming, load slowdown, stalls and failures, and replays real model replies. **Least like Groq:** it replays only drafts that passed the check, so it never shows a gate failure: on identical arrivals the real steady run gave {{real_steady.real.written_pct}}% a written answer, its twin {{real_steady.standin.written_pct}}%.
+From a probe of {{probe.calls}} real calls and real 429 bodies. The stand-in speaks Groq's API, headers and 429 wording with the same buckets, first-byte and streaming rates fitted per model to the probe (gpt-oss-120b: {{cal.ttfb_n}} calls, {{cal.decode_tps}} tokens/s), load slowdown, stalls and failures, and replays real replies. **Least like Groq:** it replays only drafts that passed the check, so it never shows a gate failure: on identical arrivals the real steady run gave {{real_steady.real.written_pct}}% a written answer, its twin {{real_steady.standin.written_pct}}%.
 
 ## Results
 
@@ -27,7 +27,7 @@ Real rows are real runs; the rest are the stand-in; percentiles nearest-rank. **
 
 ## When a limit is hit
 
-**Per minute** (stand-in overload): {{overload.standin.written_pct}}% written ({{overload.standin.weaker_pct}}% from a fallback model or the lean step, the weaker answers), {{overload.standin.passages_budget_pct}}% passages, {{overload.standin.gave_up_pct}}% gave up; others are delayed up to the ladder's limit (queue wait p95 {{overload.standin.queue_wait_p95}} ms); nobody is turned away. Real burst: {{real_burst.real.written_pct}}% written, {{real_burst.real.passages_budget_pct}}% passages, {{real_burst.real.gave_up_pct}}% gave up. **Per day:** {{daily_exhausted.standin.written_pct}}% written, {{daily_exhausted.standin.passages_budget_pct}}% passages: straight to the floor rather than holding people until a reset.
+**Per minute** (stand-in overload): {{overload.standin.written_pct}}% written ({{overload.standin.weaker_pct}}% from a fallback model or the lean step, the weaker answers), {{overload.standin.passages_budget_pct}}% passages, {{overload.standin.gave_up_pct}}% gave up; others are delayed up to the ladder's limit (queue wait p95 {{overload.standin.queue_wait_p95}} ms); nobody is turned away. **Per day:** {{daily_exhausted.standin.written_pct}}% written, {{daily_exhausted.standin.passages_budget_pct}}% passages: straight to the floor rather than holding people until a reset.
 
 ## Retrieval: quality versus cost
 
@@ -38,13 +38,13 @@ Real rows are real runs; the rest are the stand-in; percentiles nearest-rank. **
 ## How this library will mislead a naive retriever
 
 Plain BM25, raw question (data/retrieval/traps.md):
-- **Different words:** "{{trap.Q14.question}}" shares {{trap.Q14.shared}} of {{trap.Q14.terms}} terms with its answer; {{trap.Q14.correct}} of {{trap.Q14.asked}} settings answered it.
+- **Different words:** "{{trap.Q14.question}}" shares {{trap.Q14.shared}} of {{trap.Q14.terms}} terms with its answer; {{trap.Q14.correct}} of {{trap.Q14.asked}} settings got it right.
 - **Text about a table outranks it:** for "{{trap.Q5.question}}" the table is rank {{trap.Q5.rank}}.
 - **Unanswerable but plausible:** "{{trap.Q17.question}}" tops with {{trap.Q17.top_paper}} on "{{trap.Q17.shared_terms}}"; the decide gate refused it in {{trap.Q17.refused}} of {{trap.Q17.asked}} settings.
 
 ## Retries
 
-**Ships:** a failed call (429, 5xx, timeout) moves to the next model in the fallback order, each at most once per step, then down the ladder; no resend to the same model. **Rejected:** {{cfg.retry_max}} retry per step within {{cfg.retry_budget_pct}}% of recent calls left {{r4.retry_on.s7.no_written}} and {{r4.retry_on.s8.no_written}} people without a written answer against {{r4.retry_off.s7.no_written}} and {{r4.retry_off.s8.no_written}} (stand-in, two seeds). **Worse:** a naive client ({{naive.retries}} same-model retries, no limiter) left {{r4b.naive.s7.no_written}} and {{r4b.naive.s8.no_written}} of {{r4b.naive.s7.n}} without one against {{r4b.pipe.s7.no_written}} and {{r4b.pipe.s8.no_written}}, drawing {{r4b.naive.s7.http_429}} and {{r4b.naive.s8.http_429}} rejections.
+**Ships:** a failed call (429, 5xx, timeout) moves to the next model in the fallback order, each at most once per step, then down the ladder; no resend to the same model. **Rejected:** {{cfg.retry_max}} retry per step within {{cfg.retry_budget_pct}}% of recent calls left {{r4.retry_on.s7.no_written}} and {{r4.retry_on.s8.no_written}} people without a written answer against {{r4.retry_off.s7.no_written}} and {{r4.retry_off.s8.no_written}} (stand-in, two seeds). **Worse:** a naive client ({{naive.retries}} same-model retries, no limiter; stand-in) left {{r4b.naive.s7.no_written}} and {{r4b.naive.s8.no_written}} of {{r4b.naive.s7.n}} without one against {{r4b.pipe.s7.no_written}} and {{r4b.pipe.s8.no_written}}, drawing {{r4b.naive.s7.http_429}} and {{r4b.naive.s8.http_429}} rejections.
 
 ## What the person sees
 
@@ -56,11 +56,11 @@ Honest and immediate but, without the router, the passages miss the figures aske
 
 ## What I'm unsure about, what I left out, what I learned
 
-**Least certain:** Groq's daily token limit; no header or 429 shows it. Our key was charged {{ledger.max24h_120b}} gpt-oss-120b tokens in one {{budget.window_h}} h window, over the documented {{lim.tpd_120b}}, unrefused, so it is not that rolling sum; if it resets at a fixed hour, the estimate above is wrong by hours. **Not built:** sentence-by-sentence release (we buffer, so first token equals total time); a model-based grader (it spends the shared budget). **Next:** a router prompt for Q14; fetching the neighbouring piece when a draft's number is missing (Q2).
+**Least certain:** Groq's daily token limit, never shown in a header or 429. Evidence says it refills: our key was charged {{ledger.max24h_120b}} gpt-oss-120b tokens in one rolling {{budget.window_h}} h window, over the documented {{lim.tpd_120b}}, with no daily 429, and the request counter refills (Table 1). If it resets at a fixed hour instead, the estimate above is wrong by hours. **Not built:** sentence-by-sentence release (we buffer, so first token equals total); a model-based grader (it spends shared budget). **Next:** a router prompt for Q14; fetching the neighbouring piece when a draft's number is missing (Q2).
 
 **One new thing, in my own words:** [AUTHOR: to write.]
 
-**Honesty notes.** Runs as measured at {{baseline}}; {{status.relabelled}} rows later moved from rate-limited to succeeded (passages after failed checks). The fixed gate passes {{replay.new_pass}} of {{replay.drafts}} saved real drafts instead of {{replay.old_pass}}, changing {{replay.req_changed}} requests in the tables. The grader changed after I saw answers (results/quality/grade_changes_*.md) and a Q13 gold fact became optional; {{grades.unsure}} of {{grades.n}} graded real rows were never checked by hand. To avoid waiting, two eval jobs capped at the documented limit and the real load runs used refill accounting. Runs on a second key ({{excluded.key2}}, one budget) and a mistyped key ({{excluded.bad_key}}, 401s) are excluded.
+**Honesty notes.** Tables from runs measured at {{baseline}}; {{status.relabelled}} rows later moved from rate-limited to succeeded (passages after failed checks). The fixed gate passes {{replay.new_pass}} of {{replay.drafts}} saved real drafts instead of {{replay.old_pass}}, changing {{replay.req_changed}} requests in the tables; the replay is its measurement (one real rerun would be anecdotal). The grader changed after I saw answers (results/quality/grade_changes_*.md) and a Q13 gold fact became optional; {{grades.unsure}} of {{grades.n}} graded real rows were never checked by hand. To avoid waiting, two eval jobs capped at the documented limit, and the real load runs and a last Q14 check used refill accounting. Runs on a second key ({{excluded.key2}}, one budget) and a mistyped key ({{excluded.bad_key}}, 401s) are excluded.
 
 ## Your feedback on Vaani
 

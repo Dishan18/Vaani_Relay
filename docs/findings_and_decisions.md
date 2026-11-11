@@ -199,6 +199,33 @@ draft, old gate vs new, with every changed verdict, dropped sentence and joined 
   * So it starts automatically once refill room covers the real cost plus 10%.
   * `scripts/budget_plan.py` now prices a load run from its latest real run when one exists.
 
+## No more real calls: the real_steady rerun is cancelled (2026-11-11, author's decision)
+
+The rerun of real_steady on the fixed gate is cancelled and no further real calls will be made. Why:
+* **The gate fix is measured by the replay** (data/experiments/gate_replay/result.md): every saved real
+  draft from the evals and load runs, through the old and new gate. One rerun against one run would be
+  an anecdote: arrivals meet different minute budgets and the models answer differently each time.
+* **Groq's daily token bucket refills (evidence).** In the ledger, key1 shows more gpt-oss-120b tokens
+  in one rolling 24 h window (`ledger.max24h_120b` in docs/writeup/facts.json) than the documented TPD
+  of 200,000, with no daily 429 (Table 1: none of the saved real 429s named a per-day limit).
+  * A rolling 24 h sum at the documented size would have refused those calls.
+  * Taken with the request counter, which we watched refill within one UTC day, this is evidence the
+    daily bucket refills.
+  * A reset at 00:00 UTC would also fit the token numbers alone; the request counter's same-day
+    refill is what points to refilling.
+  * Another run would add to that total without adding to the evidence.
+
+**Stopping background jobs left orphans.** Every earlier stop of a waiter script ended the tool's task
+but left its bash process alive, sleeping until its start time. Five were found when the rerun was
+cancelled:
+* the 14:06 small_lean/Q14 waiter;
+* the 17:56 load-run waiter;
+* two copies of the 18:01/18:21 waiter;
+* the refill waiter.
+
+All five were killed before any of them reached a real call (the ledger's last real call is the Q14
+medium run). From here, a stopped waiter is checked in the process list, not only in the tool.
+
 ## Decisions taken (2026-11-10)
 
 - **Ledger charges what Groq reports.** A completed call counts its reported usage (findings Q2:

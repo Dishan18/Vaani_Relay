@@ -159,10 +159,13 @@ class LLMClientTests(unittest.IsolatedAsyncioTestCase):
             srv.scripts.append(script)
             rec = await (await self._client(srv, Timeouts(first_visible_s=1.0, stall_s=1.0, deadline_s=0.4))
                          ).stream_chat(PAYLOAD)
-        self.assertEqual(rec.outcome, TIMEOUT_DEADLINE)
-        self.assertGreaterEqual(rec.total_ms, 400 - TICK_MS)
-        self.assertLess(rec.total_ms, 900)
-        self.assertTrue(rec.text.startswith("x"))
+        why = f"outcome {rec.outcome}, total {rec.total_ms} ms"
+        self.assertEqual(rec.outcome, TIMEOUT_DEADLINE, why)
+        self.assertGreaterEqual(rec.total_ms, 400 - TICK_MS, why)
+        # the deadline must fire well before the scripted stream ends (60 x 50 ms = 3 s); under the full
+        # suite's load on Windows the loop can lag past the old 900 ms bound (seen once in ~10 runs)
+        self.assertLess(rec.total_ms, 2000, why)
+        self.assertTrue(rec.text.startswith("x"), why)
 
     async def test_caller_cancellation_still_reports_record(self):
         script = [("head", 200, []), ("sse", delta(content="Hi")), ("sleep", 5.0)]
