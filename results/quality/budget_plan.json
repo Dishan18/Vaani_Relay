@@ -1,11 +1,11 @@
 {
  "_generated_by": "scripts/budget_plan.py",
- "now": "2026-11-11 09:15 UTC",
+ "now": "2026-11-11 09:53 UTC",
  "accounting": "ledger: reported usage, rolling 24 h, no refill assumed",
  "measured_tokens_per_request": {
-  "qwen/qwen3.8-27b": 1285.2083333333333,
-  "openai/gpt-oss-120b": 1318.5,
-  "openai/gpt-oss-20b": 526.2083333333334
+  "qwen/qwen3.8-27b": 1366.0645161290322,
+  "openai/gpt-oss-120b": 2287.064516129032,
+  "openai/gpt-oss-20b": 60.096774193548384
  },
  "answered": {
   "large": 18,
@@ -16,11 +16,11 @@
  },
  "models": {
   "openai/gpt-oss-120b": {
-   "used_24h": 262144,
-   "room_now": -82144,
+   "used_24h": 263495,
+   "room_now": -83495,
    "cap": 180000.0,
    "first_spend_returns": "11-11 13:58 UTC",
-   "all_back": "11-12 07:45 UTC"
+   "all_back": "11-12 09:53 UTC"
   },
   "openai/gpt-oss-20b": {
    "used_24h": 62786,
@@ -30,11 +30,11 @@
    "all_back": "11-12 07:45 UTC"
   },
   "qwen/qwen3.8-27b": {
-   "used_24h": 121146,
-   "room_now": 58854,
+   "used_24h": 121391,
+   "room_now": 58609,
    "cap": 180000.0,
    "first_spend_returns": "11-11 13:58 UTC",
-   "all_back": "11-12 07:45 UTC"
+   "all_back": "11-12 09:53 UTC"
   }
  },
  "jobs": [
@@ -44,38 +44,38 @@
     "openai/gpt-oss-120b": 1752,
     "qwen/qwen3.8-27b": 268
    },
-   "start": "11-11 18:00 UTC",
+   "start": "11-11 18:18 UTC",
    "fits_now": false
   },
   {
    "job": "real_steady rerun, fixed gate (2 requests/min for 15 min)",
    "tokens": {
-    "qwen/qwen3.8-27b": 38556,
-    "openai/gpt-oss-120b": 39555,
-    "openai/gpt-oss-20b": 15786
+    "qwen/qwen3.8-27b": 42348,
+    "openai/gpt-oss-120b": 70899,
+    "openai/gpt-oss-20b": 1863
    },
-   "start": "11-11 18:20 UTC",
+   "start": "11-11 18:28 UTC",
    "fits_now": false
   }
  ],
  "load_assumptions": {
   "real_steady rerun, fixed gate": {
-   "requests": 30,
+   "requests": 31,
    "how": "2 requests/min for 15 min",
-   "like": "steady"
+   "like": "real_steady"
   }
  },
  "load_run_120b_room_after_all_jobs": {
-  "real_steady rerun, fixed gate": "11-11 18:20 UTC"
+  "real_steady rerun, fixed gate": "11-11 18:28 UTC"
  },
  "load_cost_basis": {
   "real_steady rerun, fixed gate": {
-   "stand_in_run": "steady-20261110T192348Z.jsonl",
-   "stand_in_requests": 24,
+   "stand_in_run": "real_steady-20261111T073012Z-real.jsonl",
+   "stand_in_requests": 31,
    "tokens_per_request": {
-    "qwen/qwen3.8-27b": 1285,
-    "openai/gpt-oss-120b": 1318,
-    "openai/gpt-oss-20b": 526
+    "qwen/qwen3.8-27b": 1366,
+    "openai/gpt-oss-120b": 2287,
+    "openai/gpt-oss-20b": 60
    }
   }
  }

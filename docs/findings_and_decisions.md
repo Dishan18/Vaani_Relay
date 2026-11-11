@@ -183,6 +183,22 @@ draft, old gate vs new, with every changed verdict, dropped sentence and joined 
 * Q14 on medium: the gate refused it there.
 * One real_steady rerun on the fixed gate, reported next to the e7aa65f run, not replacing it.
 
+## Q14 on medium, and the real_steady rerun (2026-11-11)
+
+* **Q14 on medium**, on the fixed gate (aefeb5a), run early at the author's request, key1, 90% cap,
+  refill accounting (`q14-medium-fixed-gate-key1-20261111`).
+  * The decide gate now lets it through. In the sweep it was refused_wrongly; now it is answered, and
+    graded wrong, sure: missing all 4 gold facts (the cosine-similarity routing rule).
+  * Its cited pieces do not hold that passage. The remaining problem is retrieval: Q14's words never
+    match the routing-module passage. That is the router-prompt next step.
+* **The rerun did not fit right away.** The budget plan priced the real_steady rerun from the stand-in
+  at about half what the real run was charged on gpt-oss-120b (`results/quality/budget_plan.md`).
+  * The cause: real drafts fail the check and get redrafted, which the stand-in never shows.
+  * Started now on 50K of refill room, the rerun would have run out of 120b partway, been drafted on
+    other models, and not be comparable to the e7aa65f run.
+  * So it starts automatically once refill room covers the real cost plus 10%.
+  * `scripts/budget_plan.py` now prices a load run from its latest real run when one exists.
+
 ## Decisions taken (2026-11-10)
 
 - **Ledger charges what Groq reports.** A completed call counts its reported usage (findings Q2:

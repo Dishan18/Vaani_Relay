@@ -51,6 +51,7 @@ Before = the retrieval sweep's answer (old gate: evidence scored against the que
 | qid | setting | drafter | before | after |
 |---|---|---|---|---|
 | Q14 | large | openai/gpt-oss-120b | wrong | wrong |
+| Q14 | medium | openai/gpt-oss-120b | refused_wrongly | wrong |
 
 ## Table 2a: latency per scenario
 
@@ -96,7 +97,7 @@ Succeeded = status ok (a checked answer or refusal, any degrade level, or cited 
 | chaos | stand-in | 27 | 0 | not graded: stand-in 27 |
 | daily_exhausted | stand-in | 14 | 0 | not graded: stand-in 14 |
 | eval:drafter | real | 36 | 36 | - |
-| eval:q14_decide_gate | real | 1 | 1 | - |
+| eval:q14_decide_gate | real | 2 | 2 | - |
 | eval:retrieval | real | 90 | 90 | - |
 | overload | stand-in | 78 | 0 | not graded: stand-in 78 |
 | overload_naive_retry | stand-in | 78 | 0 | not graded: stand-in 78 |

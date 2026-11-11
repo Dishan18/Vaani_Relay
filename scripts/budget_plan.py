@@ -39,7 +39,7 @@ MODELS = [M120, M20, MQ]
 # Load runs (assumptions): production config (router qwen, drafter 120b first, verifier on when it
 # has headroom; the verifier reads the sources plus the answer, assumed 0.8 x a draft), setting large.
 # Both ran on 2026-11-11 07:30 UTC (e7aa65f). Still to run: one real_steady rerun on the fixed gate.
-LOAD = {"real_steady rerun, fixed gate": {"requests": 30, "how": "2 requests/min for 15 min", "like": "steady"}}
+LOAD = {"real_steady rerun, fixed gate": {"requests": 31, "how": "2 requests/min for 15 min", "like": "real_steady"}}
 RUNS = ROOT / "results" / "raw" / "runs"
 # Eval jobs still to run before the load run. small_lean Q12-Q18 and Q14 on large ran on 2026-11-11 07:24 UTC
 # (key1, account cap 100%: docs/findings_and_decisions.md). Left: Q14 on medium (the gate refused it there).
@@ -47,10 +47,13 @@ SCHEDULED: list[dict] = [{"job": "Q14 on medium, fixed gate", "setting": "medium
 
 
 def load_run_cost(scenario: str) -> tuple[dict, int, str]:
-    """Tokens per request per model, every attempt, from the latest stand-in run of ``scenario`` (the current
-    pipeline: router, drafter fallback, verifier with headroom, degrade ladder). The stand-in counts prompt
-    tokens with the fit to real usage, so these approximate what the same requests would cost on Groq."""
-    files = sorted(RUNS.glob(f"{scenario}-*.jsonl"))
+    """Tokens per request per model, every attempt, from the latest real run of ``scenario`` if there is one,
+    else its latest stand-in run (the current pipeline: router, drafter fallback, verifier with headroom,
+    degrade ladder). Real first: on 2026-11-11 the stand-in-based estimate for real_steady (39.6K tokens on
+    gpt-oss-120b) was about half what the real run was charged (70.9K): real drafts fail the check and get
+    redrafted, which the stand-in never shows."""
+    files = sorted(RUNS.glob(f"{scenario}-*-real.jsonl")) or sorted(
+        f for f in RUNS.glob(f"{scenario}-*.jsonl") if not f.name.endswith("-real.jsonl"))
     if not files:
         return {}, 0, ""
     rows = [o for o in load_jsonl(files[-1]) if o.get("type") == "answer"]
