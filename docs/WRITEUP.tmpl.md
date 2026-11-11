@@ -7,7 +7,7 @@
 
 I built a Python pipeline on Groq's free tier. A router (qwen3.8-27b) picks the paper and rewrites the question, a search tool (BM25) fetches {{cfg.k_full}} pieces of {{cfg.piece_chars}} characters, a decide step refuses weak evidence, gpt-oss-120b drafts with a citation on every sentence, and a check verifies each citation, number and quote before release, rewriting a failed draft once.
 
-**The decision that shaped it most: an answer ladder with a floor that needs no model.** If the limiter predicts no room within {{cfg.max_wait_s}} s, the request steps down instead of queueing: another model, then a lean answer, then cited passages with no model call, flagged as unchecked. The floor costs no budget, so nobody is left without a reply: with the daily budget gone it answered in {{daily_exhausted.standin.ttft_p50}} ms at the median (stand-in).
+**The decision that shaped it most: an answer ladder with a floor that needs no model.** If the limiter predicts no room within {{cfg.max_wait_s}} s, the request steps down instead of queueing: another model, then a lean answer, then cited passages with no model call, flagged as unchecked. The floor costs no model budget, so the system can still return a fallback even when the daily allowance is exhausted: it answered in {{daily_exhausted.standin.ttft_p50}} ms at the median (stand-in).
 
 ## The real service and my stand-in
 
@@ -54,7 +54,7 @@ At 3pm, with the daily budget gone, "{{daily.question}}" gets this after {{daily
 
 {{quote:daily.reply}}
 
-It is immediate, gives no time estimate it cannot back, and flags the passages as unchecked; here they miss the figures asked for (graded {{daily.grade}}), which only a model could tell.
+It is immediate, gives no time estimate it cannot back, and flags the passages as unchecked; here they miss the figures asked for (graded {{daily.grade}}), something a simple word-overlap check cannot detect.
 
 ## What I'm unsure about, what I left out, what I learned
 

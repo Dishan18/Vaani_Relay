@@ -5,7 +5,7 @@
 
 I built a Python pipeline on Groq's free tier. A router (qwen3.8-27b) picks the paper and rewrites the question, a search tool (BM25) fetches 3 pieces of 2400 characters, a decide step refuses weak evidence, gpt-oss-120b drafts with a citation on every sentence, and a check verifies each citation, number and quote before release, rewriting a failed draft once.
 
-**The decision that shaped it most: an answer ladder with a floor that needs no model.** If the limiter predicts no room within 15 s, the request steps down instead of queueing: another model, then a lean answer, then cited passages with no model call, flagged as unchecked. The floor costs no budget, so nobody is left without a reply: with the daily budget gone it answered in 7 ms at the median (stand-in).
+**The decision that shaped it most: an answer ladder with a floor that needs no model.** If the limiter predicts no room within 15 s, the request steps down instead of queueing: another model, then a lean answer, then cited passages with no model call, flagged as unchecked. The floor costs no model budget, so the system can still return a fallback even when the daily allowance is exhausted: it answered in 7 ms at the median (stand-in).
 
 ## The real service and my stand-in
 
@@ -100,7 +100,7 @@ At 3pm, with the daily budget gone, "What theoretical and practical latency does
 > [S1] 2410.00037v1 pp.25-26 §5.3: "Table 5 reports results for ablations on the use of an RQ- Transformer. We first replicate the setting of Copet et al. (2023) with the delay pattern of [0, 1, 2, 3, 4, 5, 6, 7], which means that each level of R VQ token is generated one timestep after the preceding level. In this context, we see that using an RQ-Transformer is not necessary, as it only provides a marginal improvement in perplexity. However, this delay pattern induces a theoretical latency of 8 timesteps, which amounts to 640ms, a latency that is incompatible with the requirements of a real-time dialogue model."
 > [S2] 2410.00037v1 p.26 §5.3: "Results - Additional ablations. Table 6 reports additional ablations on additional delay patterns, the weight of the semantic token loss and our proposed Inner Monologue procedure, all using the RQ-Transformer. First, we compare three configurations of delays that are compatible with real-time dialogue. The [0 , 0, 0, 0, 0, 0, 0, 0] pattern represents the minimal latency of 80ms that can be obtained with Mimi tokens at 12.5Hz."
 
-It is immediate, gives no time estimate it cannot back, and flags the passages as unchecked; here they miss the figures asked for (graded wrong), which only a model could tell.
+It is immediate, gives no time estimate it cannot back, and flags the passages as unchecked; here they miss the figures asked for (graded wrong), something a simple word-overlap check cannot detect.
 
 ## What I'm unsure about, what I left out, what I learned
 
