@@ -20,13 +20,13 @@ Free tier, per model (each model hit its own wall). From data/calibration.json, 
 
 Drafter fixed (openai/gpt-oss-120b), verifier off; only retrieval changes.
 
-| setting | questions asked | correct and cited % | wrong % | correctly refused % | ungraded % | unsure | degraded | tokens per answer | TTFT p50 / p95 (ms) | total p50 / p95 (ms) | budget wait p50 (ms) |
+| setting (piece chars / pieces fetched / re-rank) | questions asked | correct and cited % | wrong % (incl. wrongly refused) | correctly refused % | ungraded % | unsure | degraded | tokens per answer | TTFT p50 / p95 (ms) | total p50 / p95 (ms) | budget wait p50 (ms) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| large | 18 | 72.2 | 5.6 | 22.2 | 0.0 | 0 | 1 | 1948 | 4622 / 16558 | 4622 / 16558 | 3552 |
-| medium | 18 | 50.0 | 27.8 | 22.2 | 0.0 | 0 | 2 | 2212 | 12234 / 29223 | 12234 / 29223 | 11130 |
-| medium+rerank | 18 | 50.0 | 27.8 | 22.2 | 0.0 | 0 | 1 | 1769 | 8882 / 23195 | 8882 / 23195 | 7659 |
-| small_lean | 18 | 33.3 | 44.4 | 22.2 | 0.0 | 7 | 1 | 1035 | 3579 / 19596 | 3579 / 19596 | 2697 |
-| small | 18 | 27.8 | 50.0 | 22.2 | 0.0 | 8 | 2 | 1957 | 11146 / 26696 | 11146 / 26696 | 10010 |
+| large (2400 / 3 / no) | 18 | 72.2 | 5.6 | 22.2 | 0.0 | 0 | 1 | 1948 | 4622 / 16558 | 4622 / 16558 | 3552 |
+| medium (1200 / 5 / no) | 18 | 50.0 | 27.8 | 22.2 | 0.0 | 0 | 2 | 2212 | 12234 / 29223 | 12234 / 29223 | 11130 |
+| medium+rerank (1200 / 4 / yes) | 18 | 50.0 | 27.8 | 22.2 | 0.0 | 0 | 1 | 1769 | 8882 / 23195 | 8882 / 23195 | 7659 |
+| small_lean (600 / 4 / no, no router) | 18 | 33.3 | 44.4 | 22.2 | 0.0 | 7 | 1 | 1035 | 3579 / 19596 | 3579 / 19596 | 2697 |
+| small (600 / 8 / no) | 18 | 27.8 | 50.0 | 22.2 | 0.0 | 8 | 2 | 1957 | 11146 / 26696 | 11146 / 26696 | 10010 |
 
 **Chosen setting so far: large.** best correct = 13 (complete settings only); within one of it (tie): large; cheapest tied: large (1948 tokens per answer).
 
@@ -36,7 +36,7 @@ Unsure or ungraded rows exist: the choice is provisional until they are checked 
 
 Same configuration for each (verifier off). Rows for the fixed drafter come from the retrieval sweep.
 
-| drafter | questions asked | correct and cited % | wrong % | correctly refused % | ungraded % | unsure | tokens per answer | total p50 / p95 (ms) | budget wait p50 (ms) | retries |
+| drafter | questions asked | correct and cited % | wrong % (incl. wrongly refused) | correctly refused % | ungraded % | unsure | tokens per answer | total p50 / p95 (ms) | budget wait p50 (ms) | retries |
 |---|---|---|---|---|---|---|---|---|---|---|
 | openai/gpt-oss-120b | 18 | 72.2 | 5.6 | 22.2 | 0.0 | 0 | 1948 | 4622 / 16558 | 3552 | 0 |
 | qwen/qwen3.8-27b | 18 | 66.7 | 11.1 | 22.2 | 0.0 | 0 | 1847 | 5268 / 19217 | 4221 | 2 |
@@ -73,7 +73,7 @@ Load runs only (the evals wait for budget on purpose). TTFT = first checked toke
 
 ## Table 2b: outcomes per scenario
 
-Succeeded = status ok (a checked answer or refusal, any degrade level, or cited passages after both drafts failed the citation check, shown in the next column: not budget); rate-limited = cited passages only because budget had no drafter in time; timed out or given up = the simulated person left first. Peak queue length = most requests waiting for budget at once, from the spans in data/results/detail.jsonl. Cost per 1,000 answers: $0 on the free tier we used; shadow = the same calls at Groq's published paid prices (data/prices.json, with URL and date).
+Succeeded = status ok (a checked answer or refusal, any degrade level, or cited passages after both drafts failed the citation check, shown in the next column: not budget); rate-limited = cited passages only because budget had no drafter in time; timed out or given up = the simulated person left first. Peak queue length = most requests waiting for budget at once, from results.csv's wait_spans_ms column. Cost per 1,000 answers: $0 on the free tier we used; shadow = the same calls at Groq's published paid prices (data/prices.json, with URL and date).
 
 | scenario | source | succeeded % | of which passages after a failed check % | rate-limited % | timed out or given up % | error % | retries per request | peak queue length | tokens per answer | cost per 1,000 answers (free / shadow) |
 |---|---|---|---|---|---|---|---|---|---|---|

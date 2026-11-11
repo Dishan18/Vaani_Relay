@@ -36,6 +36,10 @@
   {
    "regex": "\\bp(?:50|95|99)\\b",
    "why": "percentile name (nearest rank, stated with n in the tables)"
+  },
+  {
+   "regex": "\\b3pm\\b",
+   "why": "the brief's own scenario time (heading 7: 'At 3pm the daily budget is gone')"
   }
  ]
 }

@@ -226,6 +226,18 @@ cancelled:
 All five were killed before any of them reached a real call (the ledger's last real call is the Q14
 medium run). From here, a stopped waiter is checked in the process list, not only in the tool.
 
+## Tables recompute from results.csv (2026-11-11, pre-upload review)
+
+The brief says every figure in the tables must be computable from results.csv. Two were not:
+* **Peak queue length** came from the recorded spans in data/results/detail.jsonl. The CSV's start
+  time plus total wait undercounts it, because a request can wait more than once and not only at the
+  start. results.csv now has wait_spans_ms (each wait interval, in ms after start_time), and
+  make_tables.py computes peak queue from it. Every value is unchanged.
+* **Table 3's "wrong %"** counted wrongly refused answers as wrong without saying so. The header now
+  says so.
+
+An independent recompute straight from results.csv matches every cell of Tables 2a, 2b and 3.
+
 ## Decisions taken (2026-11-10)
 
 - **Ledger charges what Groq reports.** A completed call counts its reported usage (findings Q2:

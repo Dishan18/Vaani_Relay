@@ -30,6 +30,20 @@ typed into the template.
 | 19 | honesty | key2 and mistyped-key runs excluded "because the brief allows one budget" | the mistyped-key runs are excluded because every call got 401 | the two reasons given separately |
 | 20 | tooling | a fallback `else 0` for Q14's shared terms in writeup_facts.py | a typed number | removed; computed from traps.json |
 
+## Pre-upload review (2026-11-11): checked against every line of the brief
+
+| # | where | problem | evidence | fix |
+|---|---|---|---|---|
+| 30 | Table 3 | the setting column gave names only; the brief asks for piece size, pieces fetched and re-rank yes or no | the brief's Table 3 header | each setting now reads "name (piece chars / pieces / re-rank)" from scripts/eval_retrieval.py ANSWER_SETTINGS |
+| 31 | Table 3 | "wrong %" counted wrongly refused answers too, without saying so; an independent recompute from results.csv disagreed on four rows | make_tables.py summarise() | header now "wrong % (incl. wrongly refused)"; recompute matches |
+| 32 | Table 2b | peak queue length came from data/results/detail.jsonl, so it could not be recomputed from results.csv as the brief requires | the brief: "every figure in the tables must be computable from this file" | new results.csv column wait_spans_ms; make_tables.py computes peak queue from it; every value unchanged |
+| 33 | built | the brief's "at least one tool call, one branch or loop" was not pointed out | relay/pipeline.py | the search tool, the decide step and the ladder (branches), and the one rewrite of a failed draft (loop) are named |
+| 34 | honesty | "tables come from runs measured at e7aa65f" | Table 1 comes from the probe, not those runs | "the load and retrieval tables are as measured at e7aa65f" |
+| 35 | all prose | clipped, list-like sentences after the length cuts | | rewritten in plain sentences; no em or en dashes anywhere in the write-up or README |
+
+An independent recompute (nearest-rank percentiles and status shares straight from results.csv, without
+make_tables.py) now matches every cell of Tables 2a, 2b and 3.
+
 ## Final pass (2026-11-11, before submission): further corrections
 
 | # | section | draft said | evidence | now says |

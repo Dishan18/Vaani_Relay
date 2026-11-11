@@ -30,6 +30,7 @@ import math
 import re
 import sys
 from collections import defaultdict
+from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -166,23 +167,29 @@ def summarise(rows: list[dict]) -> dict:
 DETAIL = ROOT / "data" / "results" / "detail.jsonl"
 
 
-def peak_queue(request_ids: set[str], detail: Path = DETAIL) -> int | None:
-    """Most requests waiting for budget at the same moment, from the per-request spans: a request is
-    queued during each of its wait:* spans (arrival offset + span start..end)."""
-    if not detail.exists():
+def describe(setting: str) -> str:
+    """A retrieval setting as the brief asks for it: piece size, pieces fetched, re-rank yes or no."""
+    sys.path.insert(0, str(ROOT / "scripts"))
+    from eval_retrieval import ANSWER_SETTINGS
+    if setting not in ANSWER_SETTINGS:
+        return setting
+    size, k, rerank, router = ANSWER_SETTINGS[setting]
+    return f"{setting} ({size} / {k} / {'yes' if rerank else 'no'}{'' if router else ', no router'})"
+
+
+def peak_queue(rows: list[dict]) -> int | None:
+    """Most requests waiting for budget at the same moment, computed from results.csv alone: a request is
+    queued during each interval in its wait_spans_ms column ("start-end;..." ms after its start_time)."""
+    if not rows or not any("wait_spans_ms" in r for r in rows):
         return None
     events = []
-    with detail.open(encoding="utf-8") as f:
-        for line in f:
-            d = json.loads(line)
-            if d["request_id"] not in request_ids:
-                continue
-            t0 = float(d.get("arrival_offset_s") or 0.0)
-            for sp in d.get("spans") or []:
-                if sp["name"].startswith("wait:") and sp.get("end_ms") is not None and sp["end_ms"] > sp["start_ms"]:
-                    events += [(t0 + sp["start_ms"] / 1000, 1), (t0 + sp["end_ms"] / 1000, -1)]
+    for r in rows:
+        t0 = datetime.fromisoformat(r["start_time"]).timestamp()
+        for span in filter(None, (r.get("wait_spans_ms") or "").split(";")):
+            a, b = (float(x) for x in span.split("-"))
+            events += [(t0 + a / 1000, 1), (t0 + b / 1000, -1)]
     if not events:
-        return 0 if request_ids else None
+        return 0
     cur = peak = 0
     for _, step in sorted(events, key=lambda e: (e[0], e[1])):
         cur += step
@@ -215,7 +222,7 @@ def load_tables(latest: list[dict]) -> list[str]:
            "Succeeded = status ok (a checked answer or refusal, any degrade level, or cited passages after both "
            "drafts failed the citation check, shown in the next column: not budget); rate-limited = cited passages "
            "only because budget had no drafter in time; timed out or given up = the simulated person left first. Peak queue length "
-           "= most requests waiting for budget at once, from the spans in data/results/detail.jsonl. Cost per 1,000 "
+           "= most requests waiting for budget at once, from results.csv's wait_spans_ms column. Cost per 1,000 "
            "answers: $0 on the free tier we used; shadow = the same calls at Groq's published paid prices "
            "(data/prices.json, with URL and date).", "",
            "| scenario | source | succeeded % | of which passages after a failed check % | rate-limited % | "
@@ -237,7 +244,7 @@ def load_tables(latest: list[dict]) -> list[str]:
         retries = sum(int(r["retries"] or 0) for r in rs) / n
         tokens = sum(int(r["tokens_in"] or 0) + int(r["tokens_out"] or 0) for r in rs) / n
         shadow = sum(float(r.get("shadow_cost_usd") or 0) for r in rs) / n * 1000
-        pq = peak_queue({r["request_id"] for r in rs})
+        pq = peak_queue(rs)
         gate_fb = sum(1 for r in rs if r["status"] == "ok" and "failed the citation check" in (r.get("degraded_reason") or ""))
         T2b.append(f"| {sc} | {src} | {100 * st['ok'] / n:.1f} | {100 * gate_fb / n:.1f} | {100 * st['rate_limited'] / n:.1f} | "
                    f"{100 * st['timeout'] / n:.1f} | {100 * st['error'] / n:.1f} | {retries:.2f} | "
@@ -290,12 +297,12 @@ def main(argv=None) -> int:
         drafter = sorted({m for (_, m) in by})
         L += ["## Table 3: retrieval settings", "",
               f"Drafter fixed ({', '.join(drafter)}), verifier off; only retrieval changes.", "",
-              "| setting | questions asked | correct and cited % | wrong % | correctly refused % | ungraded % | "
+              "| setting (piece chars / pieces fetched / re-rank) | questions asked | correct and cited % | wrong % (incl. wrongly refused) | correctly refused % | ungraded % | "
               "unsure | degraded | tokens per answer | TTFT p50 / p95 (ms) | total p50 / p95 (ms) | budget wait p50 (ms) |",
               "|---|---|---|---|---|---|---|---|---|---|---|---|"]
         for s, x in sorted(stats.items(), key=lambda kv: (-kv[1]["n"], -kv[1]["correct"])):
             flag = "" if x["n"] >= n_questions else " (incomplete)"
-            L.append(f"| {s}{flag} | {x['n']} | {x['correct_pct']:.1f} | {x['wrong_pct']:.1f} | {x['refused_pct']:.1f} | "
+            L.append(f"| {describe(s)}{flag} | {x['n']} | {x['correct_pct']:.1f} | {x['wrong_pct']:.1f} | {x['refused_pct']:.1f} | "
                      f"{x['ungraded_pct']:.1f} | {x['unsure']} | {x['degraded']} | {x['tokens_per_answer']:.0f} | "
                      f"{ms(x['ttft_p50'])} / {ms(x['ttft_p95'])} | {ms(x['total_p50'])} / {ms(x['total_p95'])} | "
                      f"{ms(x['wait_p50'])} |")
@@ -325,7 +332,7 @@ def main(argv=None) -> int:
         stats = {m: summarise(v) for m, v in by.items()}
         L += [f"## Drafters at setting {', '.join(setting)}", "",
               "Same configuration for each (verifier off). Rows for the fixed drafter come from the retrieval sweep.", "",
-              "| drafter | questions asked | correct and cited % | wrong % | correctly refused % | ungraded % | unsure | "
+              "| drafter | questions asked | correct and cited % | wrong % (incl. wrongly refused) | correctly refused % | ungraded % | unsure | "
               "tokens per answer | total p50 / p95 (ms) | budget wait p50 (ms) | retries |",
               "|---|---|---|---|---|---|---|---|---|---|---|"]
         for m, x in sorted(stats.items(), key=lambda kv: -kv[1]["correct"]):

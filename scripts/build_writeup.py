@@ -27,15 +27,15 @@ BROWSERS = [Path(r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
             Path(r"C:\Program Files\Google\Chrome\Application\chrome.exe")]
 CSS = """
 @page { size: A4; margin: 9mm 10mm; }
-body { font-family: "Segoe UI", Arial, sans-serif; font-size: 8.6pt; line-height: 1.22; color: #111; }
+body { font-family: "Segoe UI", Arial, sans-serif; font-size: 8.6pt; line-height: 1.17; color: #111; }
 h1 { font-size: 12pt; margin: 0 0 3pt; }
 h2 { font-size: 9.6pt; margin: 5pt 0 2pt; border-bottom: 0.5pt solid #999; }
 p { margin: 0 0 3pt; }
 ul { margin: 0 0 3pt 14pt; padding: 0; } li { margin: 0; }
 blockquote { margin: 2pt 0 3pt 8pt; padding-left: 5pt; border-left: 1.5pt solid #999; font-size: 6.6pt; line-height: 1.15; }
 blockquote p { margin: 0; }
-table { border-collapse: collapse; margin: 2pt 0 4pt; font-size: 6.6pt; line-height: 1.15; width: 100%; }
-th, td { border: 0.4pt solid #aaa; padding: 0.6pt 2pt; vertical-align: top; text-align: left; }
+table { border-collapse: collapse; margin: 2pt 0 3pt; font-size: 6.6pt; line-height: 1.1; width: 100%; }
+th, td { border: 0.4pt solid #aaa; padding: 0.3pt 2pt; vertical-align: top; text-align: left; }
 table.compact td { white-space: nowrap; }
 blockquote { page-break-inside: avoid; } .cap { page-break-after: avoid; } tr { page-break-inside: avoid; }
 th { background: #eee; }

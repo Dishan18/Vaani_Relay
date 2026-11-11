@@ -26,6 +26,9 @@ results.csv: the brief's columns in order, then ours:
     or "not graded: stand-in" (plus "; replays real <request_id>, graded <label>" when its answer is
     byte-identical to a graded real answer). make_tables.py stops if a stand-in row carries a grade,
     and shows grading coverage for every scenario and source.
+  * wait_spans_ms: each interval the request spent waiting for budget, "start-end" in ms after start_time,
+    joined by ";" (from the load runs' recorded spans, data/results/detail.jsonl). Peak queue length in
+    Table 2b is computed from it, so it recomputes from this file.
   * degraded rows (level > 0) are graded like any other and keep their degraded_level;
     degraded_reason is the reply's notice (why it is not a full answer).
   * excluded: why a run listed in results/excluded_runs.json counts in no table (its rows stay, with
@@ -53,7 +56,7 @@ from relay.retrieve import Retriever  # noqa: E402
 
 COLUMNS = ["request_id", "scenario", "source", "start_time", "first_token_ms", "total_ms", "status", "retries",
            "tokens_in", "tokens_out", "retrieval_setting", "answer_grade",
-           "gave_up", "degraded_level", "degraded_reason", "queue_wait_ms", "model", "calls", "grade_sure", "answer_id", "grade_note",
+           "gave_up", "degraded_level", "degraded_reason", "queue_wait_ms", "wait_spans_ms", "model", "calls", "grade_sure", "answer_id", "grade_note",
            "superseded", "shadow_cost_usd", "excluded"]
 EXCLUDED = ROOT / "results" / "excluded_runs.json"
 PRICES = ROOT / "data" / "prices.json"
@@ -95,6 +98,15 @@ def main(argv: list[str] | None = None) -> int:
     overrides = load_overrides(a.overrides)
     raw_dirs = a.raw_dir or [ROOT / "results" / "raw" / "answers", ROOT / "results" / "raw" / "runs"]
     rows = [r for d in raw_dirs if d.exists() for r in read_answers(d)]
+    wait_spans: dict[str, str] = {}                 # request_id -> "a-b;c-d" (ms after arrival), load runs only
+    detail = ROOT / "data" / "results" / "detail.jsonl"
+    if detail.exists():
+        with detail.open(encoding="utf-8") as f:
+            for line in f:
+                d = json.loads(line)
+                spans = [(sp["start_ms"], sp["end_ms"]) for sp in d.get("spans") or []
+                         if sp["name"].startswith("wait:") and sp.get("end_ms") is not None and sp["end_ms"] > sp["start_ms"]]
+                wait_spans[d["request_id"]] = ";".join(f"{a:.1f}-{b:.1f}" for a, b in spans)
     excluded = json.loads(EXCLUDED.read_text(encoding="utf-8"))["runs"] if EXCLUDED.exists() else {}
     rows.sort(key=lambda r: (r["source"] != "real", r["start_time"], r["request_id"]))   # real first
     latest = {}
@@ -164,7 +176,8 @@ def main(argv: list[str] | None = None) -> int:
             "tokens_in": reply.get("tokens_in"), "tokens_out": reply.get("tokens_out"),
             "retrieval_setting": r["setting"], "answer_grade": final or "",
             "gave_up": int(gave_up), "degraded_level": reply.get("level"),
-            "degraded_reason": notice if (reply.get("level") or 0) > 0 else "", "queue_wait_ms": reply.get("budget_wait_ms"),
+            "degraded_reason": notice if (reply.get("level") or 0) > 0 else "",
+            "wait_spans_ms": wait_spans.get(r["request_id"], ""), "queue_wait_ms": reply.get("budget_wait_ms"),
             "model": r["drafter"], "calls": len(calls), "grade_sure": int(bool(g["sure"]) or bool(ov)),
             "answer_id": g["answer_id"], "grade_note": source, "superseded": superseded,
             "shadow_cost_usd": round(shadow_cost(calls, prices), 7), "excluded": excluded.get(r["run_id"], "")})
