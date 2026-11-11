@@ -4,7 +4,9 @@
         ->  results/raw/runs/<scenario>-<utc>.jsonl   one row per request (read by build_results.py)
             data/results/detail.jsonl               per-request step spans and every model call
 
-There is no --real: real load runs (real_steady, real_burst) wait until 120b's budget is back.
+--real runs only real_steady and real_burst (one after the other), every call through the ledger
+(relay.real.open_real, scope "load"); without --real those two run on the stand-in with identical
+arrivals, so real and stand-in can be compared row for row.
 
 Each scenario gets its own stand-in (standin/server.py, calibrated from the probe, replaying the
 recorded real router and draft texts where the request matches), its own client-side limiter
@@ -70,6 +72,7 @@ class Scenario:
     exhaust_daily: bool = False
     naive: bool = False
     arrivals_from: str | None = None                   # reuse another scenario's arrivals
+    duration_s: float | None = None                    # default length when --duration-s isn't given
 
 
 SCENARIOS = {
@@ -81,7 +84,11 @@ SCENARIOS = {
     "daily_exhausted": Scenario("daily_exhausted", 3.0, Switches(), exhaust_daily=True),
     "chaos": Scenario("chaos", 4.0, Switches(p503=0.10, stall_rate=0.05, stall_s=8.0, slow_under_load=True),
                       burst=None),
+    # the two real load runs (sizes: the budget plan's assumptions), also runnable on the stand-in
+    "real_steady": Scenario("real_steady", 2.0, Switches(), duration_s=900.0),
+    "real_burst": Scenario("real_burst", 0.0, Switches(), burst=(2.0, 20, 10.0), duration_s=60.0),
 }
+REAL_SCENARIOS = ("real_steady", "real_burst")
 
 
 def arrivals(sc: Scenario, duration_s: float, seed: int, questions: list[dict]) -> list[dict]:
@@ -181,18 +188,28 @@ def apply_overrides(cfg: dict, overrides: dict | None) -> dict:
 
 async def run_scenario(sc: Scenario, duration_s: float, seed: int, calibration: dict, questions: list[dict],
                        retriever: Retriever, run_stamp: str, replay: Replay, rows_path: Path,
-                       detail_path: Path, overrides: dict | None = None, label: str = "") -> dict:
+                       detail_path: Path, overrides: dict | None = None, label: str = "",
+                       real_client=None) -> dict:
+    """``real_client``: a relay.ledger.BudgetedClient for real Groq calls (scenario must be real_*);
+    None runs against a fresh stand-in."""
+    import contextlib
     sw = copy.deepcopy(sc.switches)
     stable = int(hashlib.sha256(f"{seed}:{sc.name}".encode()).hexdigest()[:8], 16)   # hash() is salted per process
-    async with StandIn(calibration, sw, replay, seed=stable) as s:
-        if sc.exhaust_daily:
+    source = "real" if real_client is not None else "stand-in"
+    ctx = contextlib.nullcontext() if real_client is not None else StandIn(calibration, sw, replay, seed=stable)
+    async with ctx as s:
+        if s is not None and sc.exhaust_daily:
             s.control({"exhaust_daily": "all"})
-        base_chat_client = LLMClient(Endpoint(s.base_url, source="stand-in"))
+        base_chat_client = LLMClient(Endpoint(s.base_url, source="stand-in")) if s is not None else None
 
         async def chat(payload, *, phase, timeouts=None):
             cur = CURRENT.get()
             t0 = time.perf_counter()
-            rec = await base_chat_client.stream_chat(payload, timeouts=timeouts)
+            if real_client is not None:
+                rec = await real_client.stream_chat(payload, phase=phase, timeouts=timeouts,
+                                                    extra={"request_id": (cur or {}).get("rid"), "scenario": sc.name})
+            else:
+                rec = await base_chat_client.stream_chat(payload, timeouts=timeouts)
             if cur is not None:
                 u = rec.usage or {}
                 cur["calls"].append({"step": phase, "model": payload["model"], "status": rec.status,
@@ -220,7 +237,7 @@ async def run_scenario(sc: Scenario, duration_s: float, seed: int, calibration: 
         t_start = time.perf_counter()
         wall0 = datetime.now(timezone.utc)
         rows_f = rows_path.open("w", encoding="utf-8", newline="\n")
-        rows_f.write(json.dumps({"type": "run", "run_id": run_id, "scenario": sc.name, "source": "stand-in",
+        rows_f.write(json.dumps({"type": "run", "run_id": run_id, "scenario": sc.name, "source": source,
                                  "duration_s": duration_s, "seed": seed, "arrivals": len(arr),
                                  "switches": sw.__dict__, "naive": sc.naive, "patience": PATIENCE,
                                  "naive_retry": NAIVE if sc.naive else None, "exhaust_daily": sc.exhaust_daily,
@@ -234,7 +251,7 @@ async def run_scenario(sc: Scenario, duration_s: float, seed: int, calibration: 
                 await asyncio.sleep(delay)
             arrived = datetime.now(timezone.utc).isoformat(timespec="milliseconds")
             rid = f"{run_id}-{i:04d}"
-            cur = {"t0": time.perf_counter(), "calls": []}
+            cur = {"t0": time.perf_counter(), "calls": [], "rid": rid}
             token = CURRENT.set(cur)
             trace = Trace()
             task = asyncio.ensure_future(pipe.answer(a["question"], request_id=rid, trace=trace))
@@ -271,7 +288,7 @@ async def run_scenario(sc: Scenario, duration_s: float, seed: int, calibration: 
                                 "end_ms": sp.end_ms if sp.end_ms is not None else waited_ms,
                                 "model": sp.model, "outcome": sp.outcome or "open when the person left"}
                                for sp in trace.spans]}
-            row = {"type": "answer", "run_id": run_id, "scenario": sc.name, "source": "stand-in", "setting": "large",
+            row = {"type": "answer", "run_id": run_id, "scenario": sc.name, "source": source, "setting": "large",
                    "setting_def": {"piece_chars": cfg["retrieval"]["piece_chars"], "k": cfg["retrieval"]["k_full"],
                                    "rerank": cfg["retrieval"]["rerank"], "router": True},
                    "drafter": cfg["models"]["draft"][0], "qid": a["qid"], "request_id": rid, "start_time": arrived,
@@ -296,7 +313,8 @@ async def run_scenario(sc: Scenario, duration_s: float, seed: int, calibration: 
             k = "gave_up" if d["gave_up"] else d["kind"]
             kinds[k] = kinds.get(k, 0) + 1
         return {"scenario": sc.name, "run_id": run_id, "requests": len(detail_rows), "outcomes": kinds,
-                "stand_in": dict(s.stats), "overrides": overrides or {}, "detail_rows": detail_rows,
+                "source": source, "stand_in": dict(s.stats) if s is not None else {},
+                "overrides": overrides or {}, "detail_rows": detail_rows,
                 "wall_s": round(time.perf_counter() - t_start, 1)}
 
 
@@ -315,10 +333,34 @@ async def main_async(a) -> int:
             raise SystemExit(f"unknown scenario {n}; choose from {', '.join(SCENARIOS)}")
     # rows are written under a .partial name and renamed when the scenario ends, so a reader never
     # sees a half-written file
-    paths = {n: a.out_dir / f"{n}-{stamp}.jsonl" for n in names}
-    results = await asyncio.gather(*(run_scenario(SCENARIOS[n], a.duration_s, a.seed, calibration, questions,
-                                                  retriever, stamp, replay, paths[n].with_suffix(".jsonl.partial"),
-                                                  a.detail) for n in names))
+    paths = {n: a.out_dir / f"{n}-{stamp}{'-real' if a.real else ''}.jsonl" for n in names}
+
+    def dur(n):
+        return a.duration_s if a.duration_s is not None else (SCENARIOS[n].duration_s or 300.0)
+    if a.real:
+        bad = [n for n in names if n not in REAL_SCENARIOS]
+        if bad:
+            raise SystemExit(f"--real runs only {', '.join(REAL_SCENARIOS)}; not {', '.join(bad)}")
+        from relay.real import open_real
+        calls_path = a.out_dir / f"load-{stamp}-real.calls.jsonl"
+        cf = calls_path.open("a", encoding="utf-8", newline="\n")
+
+        def sink(entry):
+            cf.write(json.dumps({"type": "call", **entry}, ensure_ascii=False) + "\n")
+            cf.flush()
+        results = []
+        try:
+            with open_real(scope="load", allow_real=True, raw_sink=sink) as bc:
+                for n in names:                     # one after the other: each measured on its own
+                    results.append(await run_scenario(SCENARIOS[n], dur(n), a.seed, calibration, questions, retriever,
+                                                      stamp, replay, paths[n].with_suffix(".jsonl.partial"), a.detail,
+                                                      real_client=bc))
+        finally:
+            cf.close()
+    else:
+        results = await asyncio.gather(*(run_scenario(SCENARIOS[n], dur(n), a.seed, calibration, questions,
+                                                      retriever, stamp, replay, paths[n].with_suffix(".jsonl.partial"),
+                                                      a.detail) for n in names))
     for n in names:
         paths[n].with_suffix(".jsonl.partial").replace(paths[n])
     summary = {"_generated_by": "scripts/run_load.py", "stamp": stamp, "duration_s": a.duration_s, "seed": a.seed,
@@ -327,16 +369,18 @@ async def main_async(a) -> int:
     (a.out_dir / f"summary-{stamp}.json").write_text(json.dumps(summary, indent=1) + "\n", encoding="utf-8",
                                                     newline="\n")
     for r in results:
-        print(f"{r['scenario']:<22} {r['requests']:>4} requests in {r['wall_s']} s  {r['outcomes']}  "
-              f"stand-in: ok {r['stand_in']['ok']} 429 {r['stand_in']['429']} 503 {r['stand_in']['503']} "
-              f"stalls {r['stand_in']['stalls']} replay hits {r['stand_in']['replay_hits']}")
+        si = r["stand_in"]
+        print(f"{r['scenario']:<22} {r['source']:<8} {r['requests']:>4} requests in {r['wall_s']} s  {r['outcomes']}"
+              + (f"  stand-in: ok {si['ok']} 429 {si['429']} 503 {si['503']} stalls {si['stalls']} replay hits "
+                 f"{si['replay_hits']}" if si else ""))
     return 0
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--scenarios", default=",".join(SCENARIOS))
-    ap.add_argument("--duration-s", type=float, default=300.0)
+    ap.add_argument("--scenarios", default=",".join(n for n in SCENARIOS if n not in REAL_SCENARIOS))
+    ap.add_argument("--duration-s", type=float, default=None, help="default: the scenario's own, else 300")
+    ap.add_argument("--real", action="store_true", help="real Groq calls (real_steady, real_burst only)")
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--out-dir", type=Path, default=RUNS)
     ap.add_argument("--detail", type=Path, default=DETAIL)

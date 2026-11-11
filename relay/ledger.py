@@ -178,9 +178,16 @@ def _int_header(rec: CallRecord, name: str) -> int | None:
         return None
 
 
+LEGACY_ACCOUNT = "key1"      # entries written before accounts were recorded: the first key
+
+
 class Ledger:
     def __init__(self, budget: Budget, path: Path = DEFAULT_LEDGER,
-                 clock: Callable[[], float] = time.time) -> None:
+                 clock: Callable[[], float] = time.time, account: str | None = None) -> None:
+        """``account``: a label for the API key in use (relay.real.account_label; never the key). Caps
+        count only that account's entries (entries without one belong to LEGACY_ACCOUNT), because Groq's
+        limits belong to the key's organization. None counts every entry (the conservative default)."""
+        self.account = account
         self.budget = budget
         self.path = path
         self.clock = clock
@@ -242,7 +249,8 @@ class Ledger:
 
     def _in_window(self) -> list[dict[str, Any]]:
         cutoff = self.clock() - self.budget.window_hours * 3600
-        return [e for e in self.entries if e["ts"] >= cutoff]
+        return [e for e in self.entries if e["ts"] >= cutoff
+                and (self.account is None or e.get("account", LEGACY_ACCOUNT) == self.account)]
 
     def usage(self, cap: Cap) -> dict[str, Any]:
         """Requests/tokens charged in the window under ``cap``, plus calls still in flight."""
@@ -316,6 +324,7 @@ class Ledger:
             "ts_iso": datetime.fromtimestamp(now, timezone.utc).isoformat(timespec="milliseconds"),
             "scope": r.scope,
             "phase": r.phase,
+            "account": self.account,
             "model": r.model,
             "call_id": rec.call_id,
             "source": rec.source,
