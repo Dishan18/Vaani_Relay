@@ -425,6 +425,10 @@ class StandIn:
         mx = int(p.get("max_tokens") or p.get("max_completion_tokens") or 1024)
         hold = min(mx, m.hold_cap)
         out_hold = min(mx, m.out_hold_cap)
+        # measured: on long drafts Groq held more than prompt + hold_cap at admission (real TPM 429s; n small)
+        extras = m.cal.get("admission_extra_samples") or []
+        if extras and mx > 500:
+            hold = hold + max(0, self.rng.choice(extras))
         per_unit = {"requests": 1.0, "tokens": float(pt + hold), "input_tokens": float(pt), "output_tokens": float(out_hold)}
         need = {n: per_unit.get(b.unit, float(pt + hold)) for n, b in m.buckets.items()}
         for n, b in m.buckets.items():
