@@ -117,13 +117,69 @@ Runs `real_steady-20261111T073012Z` and `real_burst-20261111T073012Z`; numbers i
   passages were the ladder: no call, an instant reply when 120b's minute budget couldn't serve them
   within 15 s.
 * **The stand-in missed this.** It replays the eval's answers, which passed the gate, so it never
-  produces a fresh draft that fails. Its twin shows real_steady at 100% success against 87.1% real.
+  produces a fresh draft that fails. In its real_steady twin every person got a written answer; in the
+  real run 4 of 31 got passages after failed checks (Table 2b, "of which passages after a failed check").
   Fresh-draft gate failures are a gap in the stand-in's realism.
 * **No daily-limit 429 under refill accounting.** The runs got one TPM 429, on gpt-oss-20b.
-* Candidate for the next iterate round (not changed mid-measurement): let the gate accept an
-  uncited framing or summary sentence when every factual sentence is cited, and keep a display formula
-  with the cited sentence it belongs to. The reply notice also says "no model call" when two drafts
-  were made; reword it.
+* What was done about it: see "Gate fix and how it is reported" below. (I first proposed letting the
+  gate accept an uncited framing sentence; the author ruled that out: an uncited sentence is never
+  released.)
+
+## Budget rules bent for the last runs, and why (2026-11-11)
+
+Both overrides were the author's decisions, for these runs only. Every ledger line they wrote records
+the override, and the defaults (90% cap, rolling 24 h sum) stay for everything else.
+* **Account cap raised to 100% for the two key1 eval jobs** (small_lean Q12-Q18, Q14 on large;
+  `RELAY_ACCOUNT_CAP_FRACTION=1.0`, lines carry `account_cap_fraction`).
+  * Why: the author asked to run them now rather than at 14:06 UTC. At 90% key1 had 6,630 tokens of
+    120b room against about 9.6K needed plus the stop rule's 7,400-token margin.
+  * The 100% cap is Groq's documented limit itself, so nothing beyond the published allowance was
+    used.
+* **Refill accounting for real_steady and real_burst** (`RELAY_LEDGER_ACCOUNTING=refill`, 90% cap
+  kept, lines carry `ledger_accounting`).
+  * Why: the author asked for the load runs now rather than at 17:55 UTC. Under the rolling sum key1
+    had about 18.8K of 120b room even at 100%, against about 52.7K needed.
+  * Refill (cap / 24 h) is the behaviour measured on Groq's own daily request counter (section
+    above). It gave 113K of room.
+  * Risk accepted: the daily-token side is unmeasured. No daily-limit 429 came back.
+
+## Gate fix and how it is reported (2026-11-11)
+
+**The baseline is e7aa65f.** Table 3 and the real load runs stay as measured there, on the old gate.
+The write-up reports them as that commit plus the replay delta below; nothing is re-run to replace
+them.
+
+**The fix** (`[gate]` in config/pipeline.toml, now on). Every released sentence stays cited.
+* `drop_plain_sentences`: an uncited sentence with no number (digits or words), quotation or
+  technical term is dropped from the reply. Anything else uncited fails the draft as before.
+  * Technical terms: a name or acronym, a hyphenated or underscored compound, LaTeX, or a word that is
+    rare in the corpus and occurs in the given sources.
+* `join_formulas`: a display-formula line, and a line leading into one ("... is computed as"), is
+  checked together with the cited sentence it belongs to. This applies only when the joined lines
+  contain math, so an uncited list item never borrows a later citation.
+* **Bug found by the replay, fixed:** gpt-oss sometimes writes a zero-width space inside the brackets
+  ("[<zero-width space>S1]"), and the gate did not read it as a citation. Invisible characters are now
+  stripped when citations are normalised.
+* The passages notice said "no model call" even after two drafts. It now says "no written answer"
+  and gives the reason.
+* **Status:** a passages reply after failed checks is now `ok`, with degraded_level 3 and the reason
+  in `degraded_reason`. `rate_limited` means budget caused the fallback. 48 status cells changed;
+  answers and grades did not. Table 2b adds the column "of which passages after a failed check".
+
+**Replay** (`scripts/replay_gate.py` -> `data/experiments/gate_replay/result.md`): every saved real
+draft, old gate vs new, with every changed verdict, dropped sentence and joined formula listed.
+* The drop rule removed nothing. Every uncited sentence in the real drafts names something or states
+  a number, so those drafts still fail, as the rule intends.
+* The changes come from formula joining and the zero-width fix.
+* At request level the changes are few: in real_steady one person (Q3) would have got a correct
+  written answer instead of passages.
+* Still failing, correctly: Q2's "d_model = 512", which is not in the retrieved pieces.
+* Still failing, wrongly: Q14's "{0,1}", read as the number "0,1". A gate false positive, not fixed
+  yet.
+
+**Waiting for 120b budget** (rolling 24 h on key1; `results/quality/budget_plan.md`):
+* Q14 on medium: the gate refused it there.
+* One real_steady rerun on the fixed gate, reported next to the e7aa65f run, not replacing it.
 
 ## Decisions taken (2026-11-10)
 

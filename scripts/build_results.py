@@ -14,7 +14,9 @@ results.csv: the brief's columns in order, then ours:
   tokens_out, retrieval_setting, answer_grade,
   gave_up, degraded_level, queue_wait_ms, model, calls, grade_sure, answer_id, superseded
   * first_token_ms = total_ms = arrival to release: the reply is buffered until checked (PLAN G2).
-  * status: ok for an answer or refusal; rate_limited for a passages-only reply (budget); error for
+  * status: ok for an answer or refusal, and for a passages-only reply after the drafts failed the
+    citation check (not budget: degraded_level and degraded_reason say what happened); rate_limited
+    only for a passages-only reply that budget caused; error for
     busy or a failed request; timeout (gave_up = 1) when the simulated person's patience ran out first:
     then total_ms = how long they waited and first_token_ms is empty. retries = model calls that
     failed (each was followed by another model, a retry, or giving up).
@@ -24,7 +26,8 @@ results.csv: the brief's columns in order, then ours:
     or "not graded: stand-in" (plus "; replays real <request_id>, graded <label>" when its answer is
     byte-identical to a graded real answer). make_tables.py stops if a stand-in row carries a grade,
     and shows grading coverage for every scenario and source.
-  * degraded rows (level > 0) are graded like any other and keep their degraded_level.
+  * degraded rows (level > 0) are graded like any other and keep their degraded_level;
+    degraded_reason is the reply's notice (why it is not a full answer).
   * excluded: why a run listed in results/excluded_runs.json counts in no table (its rows stay, with
     superseded = 1, and never replace an earlier answer).
   * shadow_cost_usd: the request's model calls priced at Groq's published paid prices
@@ -50,7 +53,7 @@ from relay.retrieve import Retriever  # noqa: E402
 
 COLUMNS = ["request_id", "scenario", "source", "start_time", "first_token_ms", "total_ms", "status", "retries",
            "tokens_in", "tokens_out", "retrieval_setting", "answer_grade",
-           "gave_up", "degraded_level", "queue_wait_ms", "model", "calls", "grade_sure", "answer_id", "grade_note",
+           "gave_up", "degraded_level", "degraded_reason", "queue_wait_ms", "model", "calls", "grade_sure", "answer_id", "grade_note",
            "superseded", "shadow_cost_usd", "excluded"]
 EXCLUDED = ROOT / "results" / "excluded_runs.json"
 PRICES = ROOT / "data" / "prices.json"
@@ -149,8 +152,10 @@ def main(argv: list[str] | None = None) -> int:
             unsure.append((rec, reply))
         calls = reply.get("model_calls") or []
         gave_up = bool(r.get("gave_up"))
-        status = "timeout" if gave_up else {"answer": "ok", "refusal": "ok", "passages": "rate_limited"}.get(
-            reply["kind"], "error")
+        notice = reply.get("notice") or ""
+        gate_fallback = reply["kind"] == "passages" and "failed the citation check" in notice
+        status = "timeout" if gave_up else "ok" if gate_fallback else {
+            "answer": "ok", "refusal": "ok", "passages": "rate_limited"}.get(reply["kind"], "error")
         out_rows.append({
             "request_id": r["request_id"], "scenario": r["scenario"], "source": r["source"],
             "start_time": r["start_time"], "first_token_ms": "" if gave_up else reply.get("released_ms"),
@@ -158,7 +163,8 @@ def main(argv: list[str] | None = None) -> int:
             "retries": sum(1 for c in calls if c.get("status") != 200 or c.get("outcome") != "ok"),
             "tokens_in": reply.get("tokens_in"), "tokens_out": reply.get("tokens_out"),
             "retrieval_setting": r["setting"], "answer_grade": final or "",
-            "gave_up": int(gave_up), "degraded_level": reply.get("level"), "queue_wait_ms": reply.get("budget_wait_ms"),
+            "gave_up": int(gave_up), "degraded_level": reply.get("level"),
+            "degraded_reason": notice if (reply.get("level") or 0) > 0 else "", "queue_wait_ms": reply.get("budget_wait_ms"),
             "model": r["drafter"], "calls": len(calls), "grade_sure": int(bool(g["sure"]) or bool(ov)),
             "answer_id": g["answer_id"], "grade_note": source, "superseded": superseded,
             "shadow_cost_usd": round(shadow_cost(calls, prices), 7), "excluded": excluded.get(r["run_id"], "")})

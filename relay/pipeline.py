@@ -188,13 +188,20 @@ def numbers_grounded(text: str, sources: list[Hit]) -> bool:
 _FULLWIDTH_CITE = re.compile(r"【\s*((?:S\s*)?\d+(?:\s*[,;]\s*(?:S\s*)?\d+)*)[^】]*】")
 
 
-def normalize_citations(text: str) -> str:
+_INVISIBLE = re.compile("[\u200b\u200c\u200d\u2060\ufeff]")   # zero-width spaces and joiners, BOM
+
+
+def normalize_citations(text: str, strip_invisible: bool = True) -> str:
     """Citation styles the drafter uses -> [S#]. Found in the first real run: gpt-oss writes
     【S3】 (sometimes 【S3†...】) instead of the [S3] the prompt asks for, and "[ S2 ]" with spaces.
-    Lists become [S1][S3]."""
+    Lists become [S1][S3]. Found by the gate replay (2026-11-11): gpt-oss also writes a zero-width
+    space inside the brackets ("[<zero-width space>S1]"), which the gate didn't read as a citation; invisible
+    characters are removed (strip_invisible=False reproduces the gate as measured at e7aa65f)."""
     def fw(m):
         ids = re.findall(r"\d+", m.group(1))
         return "".join(f"[S{i}]" for i in ids)
+    if strip_invisible:
+        text = _INVISIBLE.sub("", text)
     text = _FULLWIDTH_CITE.sub(fw, text)
     return re.sub(r"\[\s*S\s*(\d+)\s*\]", r"[S\1]", text)
 
@@ -218,22 +225,130 @@ def cited_ids(sentence: str) -> list[int]:
     return ids
 
 
-def check_citations(text: str, sources: list[Hit]) -> dict:
-    """The deterministic gate. Returns {ok, sentences, failures: [{sentence, reason}]}."""
+_TERMINAL = re.compile(r"[.!?][\"”'’)\]*_]*$")
+_LATEX_CMD = re.compile(r"\\[A-Za-z]+")
+_MATH = re.compile(r"\\[()\[\]]|\$|\\[A-Za-z]+")       # any LaTeX: inline or display math, or a command
+_NUMBER_WORDS = re.compile(
+    r"\b(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|"
+    r"seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|"
+    r"million|billion|dozen|half|twice|double|triple|single|first|second|third)\b", re.I)
+# Words that open or link sentences: capitalised, they are not names.
+_PLAIN_WORDS = frozenset(
+    "a an and as at both but by each either for from here how however in instead it its moreover neither "
+    "nor of on or overall so such that the their then there therefore these they this those thus to "
+    "together what when where which while why with yet also finally".split())
+RARE_DF = 0.05          # a word in fewer than 5% of the corpus pieces is a technical term
+_rare_cache: dict[int, frozenset] = {}
+
+
+def rare_terms(retriever) -> frozenset:
+    """Content words that occur in fewer than RARE_DF of the corpus pieces (stemmed as in BM25)."""
+    key = id(retriever)
+    if key not in _rare_cache:
+        df: dict[str, int] = {}
+        for p in retriever.pieces:
+            for t in set(tokenize(p.text)):
+                df[t] = df.get(t, 0) + 1
+        n = max(1, len(retriever.pieces))
+        _rare_cache[key] = frozenset(t for t, c in df.items() if c / n < RARE_DF)
+    return _rare_cache[key]
+
+
+def technical_terms(sentence: str, rare: frozenset = frozenset(), vocab: set | None = None) -> list[str]:
+    """What makes an uncited sentence a claim rather than filler: numbers (digits or words), a
+    quotation, LaTeX, a name or acronym, a hyphenated or underscored compound, or a word that is rare
+    in the corpus and occurs in the given sources (``vocab``; everyday words are rare in the papers
+    too, so rarity alone is not enough). A found term fails the draft; a sentence without one is
+    dropped, never released."""
+    bare = _CITE_ANY.sub("", sentence)
+    found = []
+    found += _NUM.findall(_digits_norm(bare))
+    found += [m.group(0) for m in _NUMBER_WORDS.finditer(bare)]
+    found += ["quotation"] if _QUOTE.search(bare) else []
+    found += ["LaTeX"] if _MATH.search(bare) else []
+    for w in re.findall(r"[A-Za-z][A-Za-z0-9’'_‑-]*", bare):
+        core = re.sub(r"[’']s$", "", w)
+        if re.search(r"[-‑_]", core.strip("-‑")):
+            found.append(core)
+        elif sum(c.isupper() for c in core) >= 2 or (core[0].isupper() and core.lower() not in _PLAIN_WORDS):
+            found.append(core)
+    found += [t for t in tokenize(bare) if t in rare and (vocab is None or t in vocab)]
+    return found
+
+
+def _is_formula(s: str) -> bool:
+    """A display-formula line: mostly markup once LaTeX command names are removed (a prose sentence
+    with a little inline math, like "\\(F\\) is the fraction of ...", is not one)."""
+    bare = _LATEX_CMD.sub("", _CITE_ANY.sub("", s))
+    chars = [c for c in bare if not c.isspace()]
+    return bool(chars) and sum(c.isalpha() for c in chars) / len(chars) < 0.5
+
+
+def join_formula_lines(sents: list[str]) -> list[str]:
+    """Join uncited lines that are a formula, or lead into one without ending a sentence ("... is
+    computed as"), to the next cited line, so a display formula is checked with the cited sentence it
+    belongs to. Only when there is math in the joined lines: an uncited list item never borrows a
+    later citation. Found in the real load runs: Q3's positional-encoding equations were split into
+    uncited lines."""
+    out, buf = [], []
+    for s in sents:
+        if not cited_ids(s) and (_is_formula(s) or not _TERMINAL.search(s.strip())):
+            buf.append(s)
+            continue
+        if buf and (any(_is_formula(b) for b in buf) or _MATH.search(s)):
+            out.append(" ".join(buf + [s]))
+        else:
+            out += buf + [s]
+        buf = []
+    if buf:
+        out.append(" ".join(buf))
+    return out
+
+
+def _drop_sentences(text: str, drop: list[str]) -> str:
+    """``text`` without the dropped sentences (and without lines or list items left empty)."""
+    for s in drop:
+        text = text.replace(s, "", 1)
+    lines = []
+    for line in text.splitlines():
+        if not line.strip():
+            lines.append("")
+        elif re.search(r"\w", _LIST_MARK.sub("", line)):
+            lines.append(re.sub(r"(?<=\S)[ \t]{2,}(?=\S)", " ", line).rstrip())
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(lines)).strip()
+
+
+def check_citations(text: str, sources: list[Hit], drop_plain: bool = False, join_formulas: bool = False,
+                    rare: frozenset = frozenset()) -> dict:
+    """The deterministic gate. Returns {ok, sentences, failures: [{sentence, reason}], dropped, text}.
+
+    ``text`` is what may be released: every sentence in it is cited and checked.
+    drop_plain: an uncited sentence with no number, quotation or technical term (technical_terms) is
+      dropped from the reply instead of failing the draft; an uncited sentence with one still fails
+      it. Found in the real load runs: correct drafts failed twice on filler like "Together, these
+      components give ...". An uncited sentence is never released.
+    join_formulas: see join_formula_lines."""
     sents = split_sentences(text)
-    failures = []
+    units = join_formula_lines(sents) if join_formulas else sents
+    failures, dropped = [], []
     n = len(sources)
     texts = [_grounding(h) for h in sources]
     content = 0
-    for s in sents:
+    vocab = {t for h in sources for t in tokenize(h.piece.text)} if drop_plain else set()
+    for s in units:
         bare = _CITE_ANY.sub("", s).strip()
         if len(re.findall(r"[A-Za-z]{2,}", bare)) < 3:
             continue                      # a fragment, not a claim
-        content += 1
         ids = cited_ids(s)
         if not ids:
-            failures.append({"sentence": s, "reason": "no citation"})
+            terms = technical_terms(s, rare, vocab) if drop_plain else []
+            if drop_plain and not terms:
+                dropped.append(s)
+                continue
+            content += 1
+            failures.append({"sentence": s, "reason": "no citation", "terms": terms})
             continue
+        content += 1
         bad = [i for i in ids if not 1 <= i <= n]
         if bad:
             failures.append({"sentence": s, "reason": f"cites a source that wasn't given: {bad}"})
@@ -250,7 +365,8 @@ def check_citations(text: str, sources: list[Hit]) -> dict:
                     break
     if content == 0:
         failures.append({"sentence": text[:120], "reason": "no answer sentences"})
-    return {"ok": not failures, "sentences": len(sents), "failures": failures}
+    out = _drop_sentences(text, dropped) if dropped and not failures else text
+    return {"ok": not failures, "sentences": len(sents), "failures": failures, "dropped": dropped, "text": out}
 
 
 # ----------------------------------------------------------------------------- prompts
@@ -522,8 +638,15 @@ class Pipeline:
                 return Reply(rid, question, "refusal", level, body, [], notice=self._notice(level, router_note),
                              checks={"draft_model": model})
             with tr.span("check") as s:
-                gate = check_citations(text, hits)
-                s.detail = {"gate_ok": gate["ok"], "failures": len(gate["failures"])}
+                g = self.cfg.get("gate", {})
+                gate = check_citations(text, hits, drop_plain=bool(g.get("drop_plain_sentences", False)),
+                                       join_formulas=bool(g.get("join_formulas", False)),
+                                       rare=rare_terms(self.retriever) if g.get("drop_plain_sentences") else frozenset())
+                s.detail = {"gate_ok": gate["ok"], "failures": len(gate["failures"]),
+                            "failed": [f["reason"] + ": " + f["sentence"][:200] for f in gate["failures"]],
+                            "dropped": gate["dropped"]}
+                if gate["ok"]:
+                    text = gate["text"]           # without dropped sentences: every released sentence is cited
                 verdict = None
                 if gate["ok"] and level in (FULL, FULL_OTHER):
                     verdict = await self._verify(text, hits, model, tr, calls, deadline)
@@ -539,7 +662,7 @@ class Pipeline:
                 reasons += [f"sentence {i} is not supported by its sources" for i in verdict.get("unsupported", [])]
             feedback = "Your previous answer failed the check:\n- " + "\n- ".join(reasons[:6])
             attempt_models = [model] + [m for m in attempt_models if m != model]
-        return self._passages(rid, question, hits, None, "the drafted answer failed the citation check twice",
+        return self._passages(rid, question, hits, None, "both drafted answers failed the citation check",
                               eta_note=False)
 
     # ------------------------------------------------------------ planning
@@ -815,4 +938,4 @@ class Pipeline:
         head = ("No written answer this time: here are the most relevant passages from the papers, "
                 f"quoted as they are.{when}")
         return Reply(rid, question, "passages", PASSAGES, head + "\n" + "\n".join(lines), source_list(hits),
-                     notice=f"passages only, no model call: {why}", eta_s=eta)
+                     notice=f"passages only, no written answer: {why}", eta_s=eta)

@@ -370,6 +370,48 @@ class GateTests(unittest.TestCase):
         r = check_citations('The paper says "attention is a magic trick for everything" here [S1].', self.hits)
         self.assertFalse(r["ok"])
 
+    def test_plain_uncited_sentence_is_dropped_never_released(self):
+        from relay.pipeline import rare_terms
+        text = ("The big model was trained on eight GPUs [S1].\n"
+                "Together, these choices explain how the result was reached.")
+        old = check_citations(text, self.hits)
+        self.assertFalse(old["ok"])
+        new = check_citations(text, self.hits, drop_plain=True, rare=rare_terms(RETRIEVER))
+        self.assertTrue(new["ok"], new["failures"])
+        self.assertEqual(new["dropped"], ["Together, these choices explain how the result was reached."])
+        self.assertEqual(new["text"], "The big model was trained on eight GPUs [S1].")
+        for s in split_sentences(new["text"]):        # every released sentence is cited
+            self.assertTrue(re.search(r"\[S\d+\]", s), s)
+
+    def test_uncited_sentence_with_a_term_or_number_still_fails(self):
+        from relay.pipeline import rare_terms
+        rare = rare_terms(RETRIEVER)
+        cited = "The big model was trained on eight GPUs [S1].\n"
+        for claim in ["The Transformer is the fastest model overall.",          # a name
+                      "Moshi's architecture is built around three core modules.",  # a number word
+                      "Training took 12 hours in total.",                        # digits
+                      "Thus, self-attention is cheaper than recurrence here.",   # a compound term
+                      "The encoding uses \\(\\sin\\) functions of the position."]:  # LaTeX
+            r = check_citations(cited + claim, self.hits, drop_plain=True, rare=rare)
+            self.assertFalse(r["ok"], claim)
+            self.assertEqual(r["dropped"], [], claim)
+            self.assertEqual(r["text"], cited + claim, claim)        # a failed draft is never edited
+
+    def test_formula_lines_join_the_cited_sentence_they_belong_to(self):
+        text = ("The encoding of each dimension is computed as\n"
+                "\\[\\text{PE}_{(pos,2i)}=\\sin(pos/10000^{2i/d})\\]\n"
+                "where pos is the position and i indexes the dimension [S1].")
+        self.assertFalse(check_citations(text, self.hits)["ok"])
+        r = check_citations(text, self.hits, join_formulas=True)
+        self.assertEqual([f["reason"] for f in r["failures"] if f["reason"] == "no citation"], [])
+
+    def test_uncited_list_item_does_not_borrow_a_later_citation(self):
+        text = ("The model has two parts:\n"
+                "- an encoder that reads the source sentence\n"
+                "- a decoder that writes the output sentence one token at a time [S1].")
+        r = check_citations(text, self.hits, join_formulas=True)
+        self.assertIn("no citation", [f["reason"] for f in r["failures"]])
+
     def test_sentence_split_keeps_citations_with_their_sentence(self):
         s = split_sentences("First claim here [S1]. Second claim follows [S2][S3].\n- Third claim in a list [S1].")
         self.assertEqual(s, ["First claim here [S1].", "Second claim follows [S2][S3].", "Third claim in a list [S1]."])

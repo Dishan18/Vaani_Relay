@@ -4,7 +4,7 @@
         ->  results/raw/runs/<scenario>-<utc>.jsonl   one row per request (read by build_results.py)
             data/results/detail.jsonl               per-request step spans and every model call
 
---real runs only real_steady and real_burst (one after the other), every call through the ledger
+--real runs only real_steady, real_burst and real_steady_fixed_gate (one after the other), every call through the ledger
 (relay.real.open_real, scope "load"); without --real those two run on the stand-in with identical
 arrivals, so real and stand-in can be compared row for row.
 
@@ -87,8 +87,12 @@ SCENARIOS = {
     # the two real load runs (sizes: the budget plan's assumptions), also runnable on the stand-in
     "real_steady": Scenario("real_steady", 2.0, Switches(), duration_s=900.0),
     "real_burst": Scenario("real_burst", 0.0, Switches(), burst=(2.0, 20, 10.0), duration_s=60.0),
+    # real_steady again on the fixed citation gate, with the same arrivals, questions and patience; its own
+    # name, so it is reported next to the real_steady run measured at e7aa65f rather than superseding it
+    "real_steady_fixed_gate": Scenario("real_steady_fixed_gate", 2.0, Switches(), duration_s=900.0,
+                                       arrivals_from="real_steady"),
 }
-REAL_SCENARIOS = ("real_steady", "real_burst")
+REAL_SCENARIOS = ("real_steady", "real_burst", "real_steady_fixed_gate")
 
 
 def arrivals(sc: Scenario, duration_s: float, seed: int, questions: list[dict]) -> list[dict]:

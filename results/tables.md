@@ -58,21 +58,21 @@ Load runs only (the evals wait for budget on purpose). TTFT = first checked toke
 
 ## Table 2b: outcomes per scenario
 
-Succeeded = status ok (a checked answer or refusal, any degrade level); rate-limited = cited passages only (no drafter in time); timed out or given up = the simulated person left first. Peak queue length = most requests waiting for budget at once, from the spans in data/results/detail.jsonl. Cost per 1,000 answers: $0 on the free tier we used; shadow = the same calls at Groq's published paid prices (data/prices.json, with URL and date).
+Succeeded = status ok (a checked answer or refusal, any degrade level, or cited passages after both drafts failed the citation check, shown in the next column: not budget); rate-limited = cited passages only because budget had no drafter in time; timed out or given up = the simulated person left first. Peak queue length = most requests waiting for budget at once, from the spans in data/results/detail.jsonl. Cost per 1,000 answers: $0 on the free tier we used; shadow = the same calls at Groq's published paid prices (data/prices.json, with URL and date).
 
-| scenario | source | succeeded % | rate-limited % | timed out or given up % | error % | retries per request | peak queue length | tokens per answer | cost per 1,000 answers (free / shadow) |
-|---|---|---|---|---|---|---|---|---|---|
-| burst | stand-in | 70.6 | 29.4 | 0.0 | 0.0 | 0.06 | 4 | 1629 | $0 / $0.83 |
-| chaos | stand-in | 96.3 | 0.0 | 3.7 | 0.0 | 0.26 | 2 | 2916 | $0 / $1.43 |
-| daily_exhausted | stand-in | 0.0 | 100.0 | 0.0 | 0.0 | 0.21 | 1 | 0 | $0 / $0.00 |
-| overload | stand-in | 87.2 | 7.7 | 5.1 | 0.0 | 0.01 | 5 | 1483 | $0 / $0.51 |
-| overload_naive_retry | stand-in | 46.2 | 52.6 | 1.3 | 0.0 | 5.81 | 1 | 1032 | $0 / $0.66 |
-| real_burst | real | 45.0 | 45.0 | 10.0 | 0.0 | 0.05 | 4 | 1385 | $0 / $0.64 |
-| real_burst | stand-in | 65.0 | 30.0 | 5.0 | 0.0 | 0.00 | 4 | 1355 | $0 / $0.58 |
-| real_steady | real | 87.1 | 12.9 | 0.0 | 0.0 | 0.00 | 1 | 3713 | $0 / $1.86 |
-| real_steady | stand-in | 100.0 | 0.0 | 0.0 | 0.0 | 0.00 | 1 | 3252 | $0 / $1.77 |
-| rpm_halved | stand-in | 86.1 | 8.3 | 5.6 | 0.0 | 0.03 | 3 | 1352 | $0 / $0.69 |
-| steady | stand-in | 100.0 | 0.0 | 0.0 | 0.0 | 0.04 | 1 | 3130 | $0 / $1.50 |
+| scenario | source | succeeded % | of which passages after a failed check % | rate-limited % | timed out or given up % | error % | retries per request | peak queue length | tokens per answer | cost per 1,000 answers (free / shadow) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| burst | stand-in | 70.6 | 0.0 | 29.4 | 0.0 | 0.0 | 0.06 | 4 | 1629 | $0 / $0.83 |
+| chaos | stand-in | 96.3 | 0.0 | 0.0 | 3.7 | 0.0 | 0.26 | 2 | 2916 | $0 / $1.43 |
+| daily_exhausted | stand-in | 0.0 | 0.0 | 100.0 | 0.0 | 0.0 | 0.21 | 1 | 0 | $0 / $0.00 |
+| overload | stand-in | 87.2 | 0.0 | 7.7 | 5.1 | 0.0 | 0.01 | 5 | 1483 | $0 / $0.51 |
+| overload_naive_retry | stand-in | 46.2 | 0.0 | 52.6 | 1.3 | 0.0 | 5.81 | 1 | 1032 | $0 / $0.66 |
+| real_burst | real | 55.0 | 10.0 | 35.0 | 10.0 | 0.0 | 0.05 | 4 | 1385 | $0 / $0.64 |
+| real_burst | stand-in | 65.0 | 0.0 | 30.0 | 5.0 | 0.0 | 0.00 | 4 | 1355 | $0 / $0.58 |
+| real_steady | real | 100.0 | 12.9 | 0.0 | 0.0 | 0.0 | 0.00 | 1 | 3713 | $0 / $1.86 |
+| real_steady | stand-in | 100.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.00 | 1 | 3252 | $0 / $1.77 |
+| rpm_halved | stand-in | 86.1 | 0.0 | 8.3 | 5.6 | 0.0 | 0.03 | 3 | 1352 | $0 / $0.69 |
+| steady | stand-in | 100.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.04 | 1 | 3130 | $0 / $1.50 |
 
 ## Grading coverage (every scenario and source)
 

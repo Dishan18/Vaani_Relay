@@ -108,14 +108,16 @@ def load_tables(latest: list[dict]) -> list[str]:
          "| scenario | source | requests sent | duration (s) | offered rate/min | TTFT p50 / p95 / p99 (ms) | "
          "total p50 / p95 / p99 (ms) | n (TTFT / total) |", "|---|---|---|---|---|---|---|---|"]
     T2b = ["## Table 2b: outcomes per scenario", "",
-           "Succeeded = status ok (a checked answer or refusal, any degrade level); rate-limited = cited passages "
-           "only (no drafter in time); timed out or given up = the simulated person left first. Peak queue length "
+           "Succeeded = status ok (a checked answer or refusal, any degrade level, or cited passages after both "
+           "drafts failed the citation check, shown in the next column: not budget); rate-limited = cited passages "
+           "only because budget had no drafter in time; timed out or given up = the simulated person left first. Peak queue length "
            "= most requests waiting for budget at once, from the spans in data/results/detail.jsonl. Cost per 1,000 "
            "answers: $0 on the free tier we used; shadow = the same calls at Groq's published paid prices "
            "(data/prices.json, with URL and date).", "",
-           "| scenario | source | succeeded % | rate-limited % | timed out or given up % | error % | retries per "
-           "request | peak queue length | tokens per answer | cost per 1,000 answers (free / shadow) |",
-           "|---|---|---|---|---|---|---|---|---|---|"]
+           "| scenario | source | succeeded % | of which passages after a failed check % | rate-limited % | "
+           "timed out or given up % | error % | retries per request | peak queue length | tokens per answer | "
+           "cost per 1,000 answers (free / shadow) |",
+           "|---|---|---|---|---|---|---|---|---|---|---|"]
     for (sc, src), rs in sorted(by.items()):
         n = len(rs)
         ts = [datetime.fromisoformat(r["start_time"]).timestamp() for r in rs]
@@ -132,7 +134,8 @@ def load_tables(latest: list[dict]) -> list[str]:
         tokens = sum(int(r["tokens_in"] or 0) + int(r["tokens_out"] or 0) for r in rs) / n
         shadow = sum(float(r.get("shadow_cost_usd") or 0) for r in rs) / n * 1000
         pq = peak_queue({r["request_id"] for r in rs})
-        T2b.append(f"| {sc} | {src} | {100 * st['ok'] / n:.1f} | {100 * st['rate_limited'] / n:.1f} | "
+        gate_fb = sum(1 for r in rs if r["status"] == "ok" and "failed the citation check" in (r.get("degraded_reason") or ""))
+        T2b.append(f"| {sc} | {src} | {100 * st['ok'] / n:.1f} | {100 * gate_fb / n:.1f} | {100 * st['rate_limited'] / n:.1f} | "
                    f"{100 * st['timeout'] / n:.1f} | {100 * st['error'] / n:.1f} | {retries:.2f} | "
                    f"{'not measured' if pq is None else pq} | {tokens:.0f} | $0 / ${shadow:.2f} |")
     return L + [""] + T2b + [""]

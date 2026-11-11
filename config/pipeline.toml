@@ -67,6 +67,16 @@ verify = { first_visible_s = 8.0, stall_s = 4.0, deadline_s = 12.0 }
 router = true
 verifier = true
 
+[gate]
+# The deterministic citation gate (relay/pipeline.py check_citations). Found in the real load runs
+# (findings 2026-11-11): correct drafts failed twice on uncited filler sentences and on display
+# formulas split into uncited lines. Every released sentence stays cited either way.
+# drop_plain_sentences: drop an uncited sentence with no number, quotation or technical term from the
+#   reply; an uncited sentence with one still fails the draft.
+# join_formulas: check a formula line together with the cited sentence it belongs to.
+drop_plain_sentences = true
+join_formulas = true
+
 [limiter]
 # Admit a call only if a total-token bucket keeps this many tokens to spare (not charged). (iterate
 # round 1 decides: real TPM 429s showed Groq holding 87-556 tokens more than prompt + 200 on long drafts)

@@ -1,11 +1,11 @@
 {
  "_generated_by": "scripts/budget_plan.py",
- "now": "2026-11-11 08:00 UTC",
+ "now": "2026-11-11 09:15 UTC",
  "accounting": "ledger: reported usage, rolling 24 h, no refill assumed",
  "measured_tokens_per_request": {
-  "qwen/qwen3.8-27b": 688.8235294117648,
-  "openai/gpt-oss-120b": 655.9117647058823,
-  "openai/gpt-oss-20b": 283.8529411764706
+  "qwen/qwen3.8-27b": 1285.2083333333333,
+  "openai/gpt-oss-120b": 1318.5,
+  "openai/gpt-oss-20b": 526.2083333333334
  },
  "answered": {
   "large": 18,
@@ -39,7 +39,16 @@
  },
  "jobs": [
   {
-   "job": "real_steady (2 requests/min for 15 min)",
+   "job": "Q14 on medium, fixed gate",
+   "tokens": {
+    "openai/gpt-oss-120b": 1752,
+    "qwen/qwen3.8-27b": 268
+   },
+   "start": "11-11 18:00 UTC",
+   "fits_now": false
+  },
+  {
+   "job": "real_steady rerun, fixed gate (2 requests/min for 15 min)",
    "tokens": {
     "qwen/qwen3.8-27b": 38556,
     "openai/gpt-oss-120b": 39555,
@@ -47,51 +56,26 @@
    },
    "start": "11-11 18:20 UTC",
    "fits_now": false
-  },
-  {
-   "job": "real_burst (20 requests within 10 s (inside RPM 30))",
-   "tokens": {
-    "qwen/qwen3.8-27b": 13776,
-    "openai/gpt-oss-120b": 13118,
-    "openai/gpt-oss-20b": 5677
-   },
-   "start": "11-11 18:25 UTC",
-   "fits_now": false
   }
  ],
  "load_assumptions": {
-  "real_steady": {
+  "real_steady rerun, fixed gate": {
    "requests": 30,
    "how": "2 requests/min for 15 min",
    "like": "steady"
-  },
-  "real_burst": {
-   "requests": 20,
-   "how": "20 requests within 10 s (inside RPM 30)",
-   "like": "burst"
   }
  },
  "load_run_120b_room_after_all_jobs": {
-  "real_steady": "11-11 18:20 UTC",
-  "real_burst": "11-11 18:20 UTC"
+  "real_steady rerun, fixed gate": "11-11 18:20 UTC"
  },
  "load_cost_basis": {
-  "real_steady": {
+  "real_steady rerun, fixed gate": {
    "stand_in_run": "steady-20261110T192348Z.jsonl",
    "stand_in_requests": 24,
    "tokens_per_request": {
     "qwen/qwen3.8-27b": 1285,
     "openai/gpt-oss-120b": 1318,
     "openai/gpt-oss-20b": 526
-   }
-  },
-  "real_burst": {
-   "stand_in_run": "burst-20261110T192348Z.jsonl",
-   "stand_in_requests": 34,
-   "tokens_per_request": {
-    "qwen/qwen3.8-27b": 689,
-    "openai/gpt-oss-120b": 656,
-    "openai/gpt-oss-20b": 284
    }
   }
  }

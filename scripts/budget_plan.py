@@ -38,12 +38,12 @@ M120, M20, MQ = "openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b"
 MODELS = [M120, M20, MQ]
 # Load runs (assumptions): production config (router qwen, drafter 120b first, verifier on when it
 # has headroom; the verifier reads the sources plus the answer, assumed 0.8 x a draft), setting large.
-LOAD = {"real_steady": {"requests": 30, "how": "2 requests/min for 15 min", "like": "steady"},
-        "real_burst": {"requests": 20, "how": "20 requests within 10 s (inside RPM 30)", "like": "burst"}}
+# Both ran on 2026-11-11 07:30 UTC (e7aa65f). Still to run: one real_steady rerun on the fixed gate.
+LOAD = {"real_steady rerun, fixed gate": {"requests": 30, "how": "2 requests/min for 15 min", "like": "steady"}}
 RUNS = ROOT / "results" / "raw" / "runs"
-# Eval jobs still to run before the load runs. small_lean Q12-Q18 and the Q14 rerun ran on 2026-11-11 07:24 UTC
-# (key1, account cap 100%: docs/findings_and_decisions.md), so none are left.
-SCHEDULED: list[dict] = []
+# Eval jobs still to run before the load run. small_lean Q12-Q18 and Q14 on large ran on 2026-11-11 07:24 UTC
+# (key1, account cap 100%: docs/findings_and_decisions.md). Left: Q14 on medium (the gate refused it there).
+SCHEDULED: list[dict] = [{"job": "Q14 on medium, fixed gate", "setting": "medium", "n": 1}]
 
 
 def load_run_cost(scenario: str) -> tuple[dict, int, str]:
