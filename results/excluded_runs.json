@@ -4,6 +4,8 @@
     "retrieval-part2-lean-rest-20261111": "ran on a second API key (ledger account key2); the brief allows one budget, so all reported real results use key1 (author's decision, 2026-11-11)",
     "q14-decide-gate-large-20261111": "ran on a second API key (ledger account key2); the brief allows one budget, so all reported real results use key1 (author's decision, 2026-11-11)",
     "real_steady-20261111T043922Z": "ran on a second API key (ledger account key2); the brief allows one budget, so all reported real results use key1 (author's decision, 2026-11-11)",
-    "real_burst-20261111T043922Z": "ran on a second API key (ledger account key2); the brief allows one budget, so all reported real results use key1 (author's decision, 2026-11-11)"
+    "real_burst-20261111T043922Z": "ran on a second API key (ledger account key2); the brief allows one budget, so all reported real results use key1 (author's decision, 2026-11-11)",
+    "retrieval-part2-lean-rest-key1-20261111": "every call got HTTP 401 Invalid API Key (the key in .env, labelled key1, was rejected by Groq at 2026-11-11 07:20 UTC); no model call ran, so every reply is the passages fallback and measures nothing",
+    "q14-decide-gate-large-key1-20261111": "every call got HTTP 401 Invalid API Key (the key in .env, labelled key1, was rejected by Groq at 2026-11-11 07:20 UTC); no model call ran, so every reply is the passages fallback and measures nothing"
   }
 }

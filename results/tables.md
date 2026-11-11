@@ -11,10 +11,10 @@ Drafter fixed (openai/gpt-oss-120b), verifier off; only retrieval changes.
 | large | 18 | 72.2 | 5.6 | 22.2 | 0.0 | 0 | 1 | 1948 | 4622 / 16558 | 4622 / 16558 | 3552 |
 | medium | 18 | 50.0 | 27.8 | 22.2 | 0.0 | 0 | 2 | 2212 | 12234 / 29223 | 12234 / 29223 | 11130 |
 | medium+rerank | 18 | 50.0 | 27.8 | 22.2 | 0.0 | 0 | 1 | 1769 | 8882 / 23195 | 8882 / 23195 | 7659 |
+| small_lean | 18 | 33.3 | 44.4 | 22.2 | 0.0 | 7 | 1 | 1035 | 3579 / 19596 | 3579 / 19596 | 2697 |
 | small | 18 | 27.8 | 50.0 | 22.2 | 0.0 | 8 | 2 | 1957 | 11146 / 26696 | 11146 / 26696 | 10010 |
-| small_lean (incomplete) | 11 | 36.4 | 54.5 | 9.1 | 0.0 | 5 | 1 | 1156 | 7105 / 19596 | 7105 / 19596 | 6390 |
 
-**Chosen setting so far: large.** best correct = 13 (complete settings only); within one of it (tie): large; cheapest tied: large (1948 tokens per answer); not eligible yet (incomplete): small_lean.
+**Chosen setting so far: large.** best correct = 13 (complete settings only); within one of it (tie): large; cheapest tied: large (1948 tokens per answer).
 
 Unsure or ungraded rows exist: the choice is provisional until they are checked (results/quality/unsure.md).
 
@@ -29,6 +29,14 @@ Same configuration for each (verifier off). Rows for the fixed drafter come from
 | openai/gpt-oss-20b | 18 | 38.9 | 38.9 | 22.2 | 0.0 | 7 | 2348 | 14422 / 36072 | 12354 | 1 |
 
 **First drafter: openai/gpt-oss-120b.** best correct = 13; within one of it (tie): openai/gpt-oss-120b, qwen/qwen3.8-27b; among those, fewest wrong then lowest total p50: openai/gpt-oss-120b.
+
+## Q14 decide gate: before / after (separate from Table 3)
+
+Before = the retrieval sweep's answer (old gate: evidence scored against the question only); after = the same question and setting with the gate scoring the router's rewrite too. The router prompt is unchanged, so Table 3 stays as measured.
+
+| qid | setting | drafter | before | after |
+|---|---|---|---|---|
+| Q14 | large | openai/gpt-oss-120b | wrong | wrong |
 
 ## Table 2a: latency per scenario
 
@@ -66,7 +74,8 @@ Succeeded = status ok (a checked answer or refusal, any degrade level); rate-lim
 | chaos | stand-in | 27 | 0 | not graded: stand-in 27 |
 | daily_exhausted | stand-in | 14 | 0 | not graded: stand-in 14 |
 | eval:drafter | real | 36 | 36 | - |
-| eval:retrieval | real | 83 | 83 | - |
+| eval:q14_decide_gate | real | 1 | 1 | - |
+| eval:retrieval | real | 90 | 90 | - |
 | overload | stand-in | 78 | 0 | not graded: stand-in 78 |
 | overload_naive_retry | stand-in | 78 | 0 | not graded: stand-in 78 |
 | rpm_halved | stand-in | 36 | 0 | not graded: stand-in 36 |

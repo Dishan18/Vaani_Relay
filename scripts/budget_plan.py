@@ -41,9 +41,9 @@ MODELS = [M120, M20, MQ]
 LOAD = {"real_steady": {"requests": 30, "how": "2 requests/min for 15 min", "like": "steady"},
         "real_burst": {"requests": 20, "how": "20 requests within 10 s (inside RPM 30)", "like": "burst"}}
 RUNS = ROOT / "results" / "raw" / "runs"
-# Already scheduled for 2026-11-11 14:04 UTC (the waiter): small_lean's last 7 (from c6e22ba), then Q14 on large.
-SCHEDULED = [{"job": "scheduled 14:04: small_lean Q12-Q18 (worktree at c6e22ba)", "setting": "small_lean", "n": 7},
-             {"job": "scheduled 14:04: Q14 on large after the decide-gate fix", "setting": "large", "n": 1}]
+# Eval jobs still to run before the load runs. small_lean Q12-Q18 and the Q14 rerun ran on 2026-11-11 07:24 UTC
+# (key1, account cap 100%: docs/findings_and_decisions.md), so none are left.
+SCHEDULED: list[dict] = []
 
 
 def load_run_cost(scenario: str) -> tuple[dict, int, str]:

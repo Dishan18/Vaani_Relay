@@ -6,7 +6,7 @@
    "large"
   ],
   "best_correct": 13,
-  "why": "best correct = 13 (complete settings only); within one of it (tie): large; cheapest tied: large (1948 tokens per answer); not eligible yet (incomplete): small_lean",
+  "why": "best correct = 13 (complete settings only); within one of it (tie): large; cheapest tied: large (1948 tokens per answer)",
   "provisional": true,
   "stats": {
    "large": {
@@ -94,23 +94,23 @@
     "retries": 0
    },
    "small_lean": {
-    "n": 11,
-    "correct": 4,
-    "wrong": 6,
-    "refused_wrongly": 0,
-    "refused_correctly": 1,
+    "n": 18,
+    "correct": 6,
+    "wrong": 7,
+    "refused_wrongly": 1,
+    "refused_correctly": 4,
     "ungraded": 0,
-    "unsure": 5,
-    "correct_pct": 36.36363636363637,
-    "wrong_pct": 54.54545454545455,
-    "refused_pct": 9.090909090909092,
+    "unsure": 7,
+    "correct_pct": 33.333333333333336,
+    "wrong_pct": 44.44444444444444,
+    "refused_pct": 22.22222222222222,
     "ungraded_pct": 0.0,
-    "tokens_per_answer": 1155.7272727272727,
-    "ttft_p50": 7105.4,
+    "tokens_per_answer": 1035.111111111111,
+    "ttft_p50": 3579.4,
     "ttft_p95": 19596.2,
-    "total_p50": 7105.4,
+    "total_p50": 3579.4,
     "total_p95": 19596.2,
-    "wait_p50": 6389.7,
+    "wait_p50": 2696.8,
     "degraded": 1,
     "retries": 1
    }

@@ -119,6 +119,19 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual(charge_of(old), 1700)
         self.assertEqual(charge_of({**old, "outcome": "timeout_stall"}), 3100)
         self.assertEqual(charge_of({**old, "status": 429, "usage_total_tokens": None, "charged_tokens": 900}), 900)
+        # entries written before the 401 rule (charged the prompt estimate) are re-read as free
+        from relay.ledger import requests_of
+        bad_key = {**old, "status": 401, "outcome": "http_error", "usage_total_tokens": None,
+                   "charged_requests": 1, "charged_tokens": 1196}
+        self.assertEqual((requests_of(bad_key), charge_of(bad_key)), (0, 0))
+
+    def test_invalid_key_charges_nothing_and_halts(self):
+        with self.ledger() as led:
+            e = led.settle(led.reserve(payload(), "probe", "p"), record("http_error", 401))
+            self.assertEqual((e["charged_requests"], e["charged_tokens"]), (0, 0))
+            self.assertIn("401", led.halted)
+            with self.assertRaisesRegex(BudgetExceeded, "halted"):
+                led.reserve(payload(), "probe", "p")
 
     def test_inflight_reservations_still_count(self):
         with self.ledger() as led:

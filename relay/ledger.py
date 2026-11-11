@@ -13,6 +13,10 @@ Caps come from ``config/budget.toml`` as fractions of the documented daily allow
 (``data/limits_documented.json``):
   * an account-wide safety net over all real calls (scope "*");
   * per-run caps, e.g. the probe's 10% (scope "probe").
+The account cap's fraction can be raised for one run with the environment variable
+``RELAY_ACCOUNT_CAP_FRACTION`` (at most 1.0, i.e. the documented limit itself). It is announced on
+stderr and every ledger line written under it carries ``account_cap_fraction``, so the override is
+on the record. The stand-in and per-run caps (e.g. the probe's) are never affected.
 They are counted over a **rolling 24 h window**. That is at least as strict as a fixed daily
 reset at any hour, and we don't yet know which one Groq uses.
 
@@ -64,9 +68,16 @@ def charge_of(e: dict[str, Any]) -> int:
     a completed 200 that reported its usage counts that usage; anything else keeps its conservative
     charge. Changed 2026-11-10 at the author's request (it was ~2x real usage on long drafts)."""
     u = e.get("usage_total_tokens")
+    if e.get("status") == 401:      # invalid key: Groq identified no account, so none was charged
+        return 0
     if e.get("status") == 200 and e.get("outcome") == "ok" and isinstance(u, int):
         return u
     return int(e.get("charged_tokens") or 0)
+
+
+def requests_of(e: dict[str, Any]) -> int:
+    """Requests a ledger entry counts against the caps (0 for a 401, like charge_of)."""
+    return 0 if e.get("status") == 401 else int(e.get("charged_requests") or 0)
 
 
 class BudgetExceeded(Exception):
@@ -99,20 +110,35 @@ class Budget:
     # so that a reservation is an upper bound on what a call can be charged. A measured per-model
     # value can replace it (Ledger.set_prompt_overhead).
     prompt_overhead_tokens: int = 16
+    # set only when RELAY_ACCOUNT_CAP_FRACTION overrides the "account" cap for this run
+    account_cap_fraction: float | None = None
+
+
+ACCOUNT_CAP_ENV = "RELAY_ACCOUNT_CAP_FRACTION"
 
 
 def load_budget(budget_path: Path = DEFAULT_BUDGET, documented_path: Path = DOCUMENTED) -> Budget:
     cfg = tomllib.loads(budget_path.read_text(encoding="utf-8"))
     doc = json.loads(documented_path.read_text(encoding="utf-8"))["models"]
     caps = []
+    override = None
+    raw = os.environ.get(ACCOUNT_CAP_ENV, "").strip()
+    if raw:
+        override = float(raw)
+        if not 0 < override <= 1.0:
+            raise ValueError(f"{ACCOUNT_CAP_ENV}={raw}: must be in (0, 1]; the documented limit is the ceiling")
+        print(f"ledger: account cap overridden to {override:.0%} of the documented daily limits "
+              f"({ACCOUNT_CAP_ENV}); recorded on every ledger line", file=sys.stderr)
     for c in cfg["cap"]:
         frac = float(c["fraction_of_documented"])
+        if override is not None and c["name"] == "account":
+            frac = override
         models = {m: ModelCap(math.floor(doc[m]["rpd"] * frac), math.floor(doc[m]["tpd"] * frac))
                   for m in c["models"]}
         caps.append(Cap(c["name"], c.get("scope", "*"), models, c.get("total_requests")))
     floor = cfg.get("server_floor", {}).get("min_remaining_requests_fraction")
     return Budget(caps, float(cfg.get("window_hours", 24)), floor,
-                  int(cfg.get("prompt_overhead_tokens", 16)))
+                  int(cfg.get("prompt_overhead_tokens", 16)), override)
 
 
 def prompt_chars(payload: dict[str, Any]) -> int:
@@ -260,9 +286,9 @@ class Ledger:
             if not cap.applies(e["scope"]):
                 continue
             p = per.setdefault(e["model"], {"requests": 0, "tokens": 0})
-            p["requests"] += e["charged_requests"]
+            p["requests"] += requests_of(e)
             p["tokens"] += charge_of(e)
-            total += e["charged_requests"]
+            total += requests_of(e)
         for r in self.inflight.values():
             if not cap.applies(r.scope):
                 continue
@@ -307,6 +333,9 @@ class Ledger:
         usage_total = (rec.usage or {}).get("total_tokens")
         if rec.outcome == CONNECT_ERROR:
             req, tok, basis = 0, 0, "never reached the server"
+        elif rec.status == 401:
+            # the key was rejected: no account was identified, so no account's budget was spent
+            req, tok, basis = 0, 0, "401: invalid API key, no account charged"
         elif rec.status is not None and 400 <= rec.status < 500:
             # rejected before any generation (429 limit, 413 too large, 400 bad params)
             req, tok, basis = 1, r.est_prompt_tokens, f"{rec.status}: rejected, prompt estimate only (assumption; probe P2/P3 check)"
@@ -325,6 +354,8 @@ class Ledger:
             "scope": r.scope,
             "phase": r.phase,
             "account": self.account,
+            **({"account_cap_fraction": self.budget.account_cap_fraction}
+               if self.budget.account_cap_fraction is not None else {}),
             "model": r.model,
             "call_id": rec.call_id,
             "source": rec.source,
@@ -345,6 +376,9 @@ class Ledger:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
             f.flush()
         self.entries.append(entry)
+        if rec.status == 401:
+            # every further call would be rejected too; one is enough to know
+            self.halted = "401 invalid API key: Groq rejected the key in .env; no further real calls"
         self._check_server_floor(rec)
         return entry
 

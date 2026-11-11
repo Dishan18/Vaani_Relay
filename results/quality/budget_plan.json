@@ -1,6 +1,6 @@
 {
  "_generated_by": "scripts/budget_plan.py",
- "now": "2026-11-11 04:56 UTC",
+ "now": "2026-11-11 07:25 UTC",
  "accounting": "ledger: reported usage, rolling 24 h, no refill assumed",
  "measured_tokens_per_request": {
   "qwen/qwen3.8-27b": 688.8235294117648,
@@ -16,45 +16,28 @@
  },
  "models": {
   "openai/gpt-oss-120b": {
-   "used_24h": 173370,
-   "room_now": 6630,
+   "used_24h": 181203,
+   "room_now": -1203,
    "cap": 180000.0,
    "first_spend_returns": "11-11 13:58 UTC",
-   "all_back": "11-11 18:26 UTC"
+   "all_back": "11-12 07:24 UTC"
   },
   "openai/gpt-oss-20b": {
-   "used_24h": 49510,
-   "room_now": 130490,
+   "used_24h": 49609,
+   "room_now": 130391,
    "cap": 180000.0,
    "first_spend_returns": "11-11 13:58 UTC",
-   "all_back": "11-11 18:32 UTC"
+   "all_back": "11-12 07:23 UTC"
   },
   "qwen/qwen3.8-27b": {
-   "used_24h": 69508,
-   "room_now": 110492,
+   "used_24h": 69776,
+   "room_now": 110224,
    "cap": 180000.0,
    "first_spend_returns": "11-11 13:58 UTC",
-   "all_back": "11-11 18:33 UTC"
+   "all_back": "11-12 07:24 UTC"
   }
  },
  "jobs": [
-  {
-   "job": "scheduled 14:04: small_lean Q12-Q18 (worktree at c6e22ba)",
-   "tokens": {
-    "openai/gpt-oss-120b": 7761
-   },
-   "start": "11-11 14:06 UTC",
-   "fits_now": false
-  },
-  {
-   "job": "scheduled 14:04: Q14 on large after the decide-gate fix",
-   "tokens": {
-    "openai/gpt-oss-120b": 1798,
-    "qwen/qwen3.8-27b": 268
-   },
-   "start": "11-11 14:11 UTC",
-   "fits_now": false
-  },
   {
    "job": "real_steady (2 requests/min for 15 min)",
    "tokens": {
@@ -62,7 +45,7 @@
     "openai/gpt-oss-120b": 39555,
     "openai/gpt-oss-20b": 15786
    },
-   "start": "11-11 17:56 UTC",
+   "start": "11-11 17:55 UTC",
    "fits_now": false
   },
   {
@@ -72,7 +55,7 @@
     "openai/gpt-oss-120b": 13118,
     "openai/gpt-oss-20b": 5677
    },
-   "start": "11-11 18:01 UTC",
+   "start": "11-11 18:00 UTC",
    "fits_now": false
   }
  ],
@@ -89,8 +72,8 @@
   }
  },
  "load_run_120b_room_after_all_jobs": {
-  "real_steady": "11-11 17:56 UTC",
-  "real_burst": "11-11 17:51 UTC"
+  "real_steady": "11-11 17:55 UTC",
+  "real_burst": "11-11 17:50 UTC"
  },
  "load_cost_basis": {
   "real_steady": {

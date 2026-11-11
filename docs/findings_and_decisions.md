@@ -57,8 +57,9 @@ Numbers here point at the generated files that hold them (rule 3); nothing is ty
 
 ## One budget: the key2 runs are excluded (2026-11-11)
 
-The author briefly switched .env to a second API key ("key2", a separate Groq organization: fresh,
-999/1000 daily requests on each model) and the remaining jobs ran on it: small_lean Q12-Q18, the Q14
+The author briefly switched .env to a second API key ("key2", which showed 999/1000 daily requests on
+each model; that does not by itself show a separate organization, see the next section) and the
+remaining jobs ran on it: small_lean Q12-Q18, the Q14
 decide-gate rerun, real_steady (31 requests) and real_burst (20). The brief allows one budget, so the
 author put the original key back and every reported real result uses key1 only. The key2 runs stay
 in the raw files and in results.csv (superseded, with the reason in the `excluded` column; list in
@@ -66,6 +67,28 @@ in the raw files and in results.csv (superseded, with the reason in the `exclude
 (entries before labels = key1; a fingerprint -> label map stays in a gitignored local file, no key
 material is committed), so key2's calls never counted against key1's caps. The key1 jobs wait for
 key1's 24 h window (`results/quality/budget_plan.md`, `--account key1`).
+
+## Mistyped key, 401s, and Groq's daily request counter (2026-11-11)
+
+* **The two key1 eval jobs ran early with the account cap at 100%** of the documented limits
+  (author's decision: run now instead of waiting for 14:06 UTC). The override is the environment
+  variable `RELAY_ACCOUNT_CAP_FRACTION`, set for those two runs only; every ledger line written under
+  it carries `account_cap_fraction`. The load runs stay on the 90% cap.
+* **First attempt: every call got HTTP 401 Invalid API Key.** The key in .env had been mistyped. The
+  two runs (`retrieval-part2-lean-rest-key1-20261111`, `q14-decide-gate-large-key1-20261111`) are
+  excluded (`results/excluded_runs.json`): no model call ran, so every reply is the passages fallback.
+  The ledger had charged those 16 calls 17,398 tokens of 120b (the 4xx rule: prompt estimate). A 401
+  identifies no account, so nothing was spent: `charge_of`/`requests_of` now count a 401 as 0 (old
+  entries re-read, file untouched), and the first 401 halts the ledger so a bad key costs one call,
+  not 16. Reruns: `...-key1b-20261111`, on the corrected key (the author confirms it is the key1
+  used for the last 24 h).
+* **Groq's daily request counter refills; it is not a rolling 24 h window** (measured, from the
+  `x-ratelimit-remaining-requests` headers saved in the ledger for gpt-oss-120b on key1): 942 at
+  11-10 14:03 UTC, back to 999 by 17:49 UTC (57 requests returned in under 4 h; RPD 1000/24 h refills
+  ~42 per hour); 915 at 18:26 UTC, 999 at 11-11 07:23 UTC. So "fresh" (999/1000) only means the
+  bucket is full, not that a key is unused or in another organization. Groq exposes no daily-token
+  header, so the daily-token side is still unmeasured. The ledger keeps the rolling 24 h sum, at the
+  author's request: it is at least as strict as any refill rule.
 
 ## Decisions taken (2026-11-10)
 

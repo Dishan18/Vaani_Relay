@@ -311,8 +311,8 @@
      "papers": [
       "dynamic_chunking"
      ],
-     "query": "dynamic chunking boundary detection variable length segments How does H-Net decide where to cut the byte stream into pieces?",
-     "alt_query": "adaptive segmentation policy cut points hierarchical sequence modeling How does H-Net decide where to cut the byte stream into pieces?"
+     "query": "dynamic chunking hierarchical sequence modeling segment boundary detection How does H-Net decide where to cut the byte stream into pieces?",
+     "alt_query": "byte stream segmentation policy variable length tokens end-to-end How does H-Net decide where to cut the byte stream into pieces?"
     },
     "gold_in_sources": "no",
     "borrowed": [],
