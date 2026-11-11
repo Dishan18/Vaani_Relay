@@ -102,11 +102,11 @@ Honest and immediate but, without the router, the passages miss the figures aske
 
 ## What I'm unsure about, what I left out, what I learned
 
-**Least certain:** Groq's daily token limit; no header or 429 shows it. Our key was charged 262144 gpt-oss-120b tokens in one 24 h window, over the documented 200000, unrefused, so it is not that rolling sum; if it resets at a fixed hour, the estimate above is wrong by hours. **Not built:** sentence-by-sentence release (we buffer, so first token equals total time); a model-based grader (it spends the shared budget). **Next:** a router prompt for Q14; fetching the neighbouring piece when a draft's number is missing (Q2).
+**Least certain:** Groq's daily token limit; no header or 429 shows it. Our key was charged 263495 gpt-oss-120b tokens in one 24 h window, over the documented 200000, unrefused, so it is not that rolling sum; if it resets at a fixed hour, the estimate above is wrong by hours. **Not built:** sentence-by-sentence release (we buffer, so first token equals total time); a model-based grader (it spends the shared budget). **Next:** a router prompt for Q14; fetching the neighbouring piece when a draft's number is missing (Q2).
 
 **One new thing, in my own words:** [AUTHOR: to write.]
 
-**Honesty notes.** Runs as measured at e7aa65f; 11 rows later moved from rate-limited to succeeded (passages after failed checks). The fixed gate passes 127 of 165 saved real drafts instead of 119, changing 2 requests in the tables. The grader changed after I saw answers (results/quality/grade_changes_*.md) and a Q13 gold fact became optional; 37 of 176 graded real rows were never checked by hand. To avoid waiting, two eval jobs capped at the documented limit and the real load runs used refill accounting. Runs on a second key (4, one budget) and a mistyped key (2, 401s) are excluded.
+**Honesty notes.** Runs as measured at e7aa65f; 11 rows later moved from rate-limited to succeeded (passages after failed checks). The fixed gate passes 127 of 165 saved real drafts instead of 119, changing 2 requests in the tables. The grader changed after I saw answers (results/quality/grade_changes_*.md) and a Q13 gold fact became optional; 37 of 177 graded real rows were never checked by hand. To avoid waiting, two eval jobs capped at the documented limit and the real load runs used refill accounting. Runs on a second key (4, one budget) and a mistyped key (2, 401s) are excluded.
 
 ## Your feedback on Vaani
 

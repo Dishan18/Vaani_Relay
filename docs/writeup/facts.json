@@ -1617,7 +1617,7 @@
   "how": "the commit the tables and real load runs were measured at"
  },
  "grades.n": {
-  "value": 176,
+  "value": 177,
   "source": [
    "results/results.csv"
   ],
@@ -1645,7 +1645,7 @@
   "how": "real calls answered (200) with the account cap at 100% (the two key1 eval jobs)"
  },
  "ledger.refill_calls": {
-  "value": 117,
+  "value": 119,
   "source": [
    "results/ledger/groq_calls.jsonl"
   ],
@@ -1659,7 +1659,7 @@
   "how": "of those, 429s"
  },
  "ledger.max24h_120b": {
-  "value": 262144,
+  "value": 263495,
   "source": [
    "results/ledger/groq_calls.jsonl"
   ],
