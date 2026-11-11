@@ -2295,16 +2295,14 @@
    "scenario": "real_burst",
    "refusal": false,
    "old_ok": false,
-   "fix_ok": false,
-   "new_ok": false,
+   "fix_ok": true,
+   "new_ok": true,
    "dropped": [],
    "let_through": [],
    "old_failures": [
     "number 0,1 is not in the cited sources: H‑Net learns to place chunk boundaries by a routing module that predicts a binary boundary indicator \\(b_t\\in\\{0,1\\}\\) for each input byte, conditioned on the full contextual embedding of that position [S1]."
    ],
-   "new_failures": [
-    "number 0,1 is not in the cited sources: H‑Net learns to place chunk boundaries by a routing module that predicts a binary boundary indicator \\(b_t\\in\\{0,1\\}\\) for each input byte, conditioned on the full contextual embedding of that position [S1]."
-   ],
+   "new_failures": [],
    "new_text": "H‑Net learns to place chunk boundaries by a routing module that predicts a binary boundary indicator \\(b_t\\in\\{0,1\\}\\) for each input byte, conditioned on the full contextual embedding of that position [S1]. The routing module is jointly trained with the rest of the network so that the chosen boundaries minimise the downstream loss, making the segmentation data‑dependent and context‑aware [S1]. In practice, a single‑stage H‑Net tends to place boundaries at whitespace characters, effectively learning that word boundaries are natural semantic units, while a two‑stage H‑Net first marks spacelike bytes and the initial characters of words before the second stage merges these into larger semantic chunks such as whole words or phrases [S3]. The model therefore does not rely on fixed delimiters or external heuristics; instead it adapts its cut points to the content and context of the sequence during end‑to‑end training [S3]. This dynamic chunking is achieved without any explicit supervision on boundary labels, relying instead on the differentiable routing and downsampling operations within the network [S1].",
    "text": "H‑Net learns to place chunk boundaries by a routing module that predicts a binary boundary indicator \\(b_t\\in\\{0,1\\}\\) for each input byte, conditioned on the full contextual embedding of that position [S1]. The routing module is jointly trained with the rest of the network so that the chosen boundaries minimise the downstream loss, making the segmentation data‑dependent and context‑aware [S1]. In practice, a single‑stage H‑Net tends to place boundaries at whitespace characters, effectively learning that word boundaries are natural semantic units, while a two‑stage H‑Net first marks spacelike bytes and the initial characters of words before the second stage merges these into larger semantic chunks such as whole words or phrases [S3]. The model therefore does not rely on fixed delimiters or external heuristics; instead it adapts its cut points to the content and context of the sequence during end‑to‑end training [S3]. This dynamic chunking is achieved without any explicit supervision on boundary labels, relying instead on the differentiable routing and downsampling operations within the network [S1]."
   },
@@ -4986,7 +4984,7 @@
  ],
  "draft_flips": {
   "pass -> pass": 119,
-  "fail -> fail": 39,
-  "fail -> pass": 7
+  "fail -> fail": 38,
+  "fail -> pass": 8
  }
 }

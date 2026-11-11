@@ -160,7 +160,11 @@ class Reply:
 
 # ----------------------------------------------------------------------------- deterministic gate
 _CITE_ANY = re.compile(r"\[\s*S?\s*\d+(?:\s*[,;]\s*S?\s*\d+)*\s*\]")
-_NUM = re.compile(r"(?<![A-Za-z_])\d+(?:[.,]\d+)*")
+# A number continues only through a decimal point. Thousands separators are removed first (_digits_norm),
+# so a comma left between digits separates two numbers: "{0,1}" is 0 and 1, not "0,1" (found by the gate
+# replay: Q14's b_t in {0,1} failed the check). LEGACY_NUM is the parse as measured at e7aa65f (replay only).
+_NUM = re.compile(r"(?<![A-Za-z_])\d+(?:\.\d+)*")
+LEGACY_NUM = re.compile(r"(?<![A-Za-z_])\d+(?:[.,]\d+)*")
 _QUOTE = re.compile(r"[\"“]([^\"”]{12,})[\"”]")
 _LIST_MARK = re.compile(r"^\s*(?:[-*•]|\d+[.)])\s+")
 _WS = re.compile(r"\s+")
@@ -319,7 +323,7 @@ def _drop_sentences(text: str, drop: list[str]) -> str:
 
 
 def check_citations(text: str, sources: list[Hit], drop_plain: bool = False, join_formulas: bool = False,
-                    rare: frozenset = frozenset()) -> dict:
+                    rare: frozenset = frozenset(), legacy_numbers: bool = False) -> dict:
     """The deterministic gate. Returns {ok, sentences, failures: [{sentence, reason}], dropped, text}.
 
     ``text`` is what may be released: every sentence in it is cited and checked.
@@ -354,7 +358,7 @@ def check_citations(text: str, sources: list[Hit], drop_plain: bool = False, joi
             failures.append({"sentence": s, "reason": f"cites a source that wasn't given: {bad}"})
             continue
         cited = " ".join(texts[i - 1] for i in ids)
-        for num in _NUM.findall(_digits_norm(bare)):
+        for num in (LEGACY_NUM if legacy_numbers else _NUM).findall(_digits_norm(bare)):
             if num not in cited:
                 failures.append({"sentence": s, "reason": f"number {num} is not in the cited sources"})
                 break

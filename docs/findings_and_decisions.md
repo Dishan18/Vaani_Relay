@@ -174,8 +174,10 @@ draft, old gate vs new, with every changed verdict, dropped sentence and joined 
 * At request level the changes are few: in real_steady one person (Q3) would have got a correct
   written answer instead of passages.
 * Still failing, correctly: Q2's "d_model = 512", which is not in the retrieved pieces.
-* Still failing, wrongly: Q14's "{0,1}", read as the number "0,1". A gate false positive, not fixed
-  yet.
+* Q14's "{0,1}" used to be read as the number "0,1", a gate false positive. Fixed before the Q14
+  medium run, so that run tests the decide gate, not this bug: a comma left between digits after
+  thousands separators are removed now separates two numbers. The replay's "old" column keeps the
+  e7aa65f parse.
 
 **Waiting for 120b budget** (rolling 24 h on key1; `results/quality/budget_plan.md`):
 * Q14 on medium: the gate refused it there.

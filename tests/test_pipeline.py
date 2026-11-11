@@ -405,6 +405,17 @@ class GateTests(unittest.TestCase):
         r = check_citations(text, self.hits, join_formulas=True)
         self.assertEqual([f["reason"] for f in r["failures"] if f["reason"] == "no citation"], [])
 
+    def test_a_set_is_not_one_number(self):
+        hits = RETRIEVER.search("routing module boundary indicator chunk", 3, ["dynamic_chunking"])
+        i = next(n for n, h in enumerate(hits, 1) if "0" in h.piece.text and "1" in h.piece.text)
+        text = f"The routing module predicts a boundary indicator \\(b_t\\in\\{{0,1\\}}\\) for each position [S{i}]."
+        self.assertTrue(check_citations(text, hits)["ok"], check_citations(text, hits)["failures"])
+        self.assertFalse(check_citations(text, hits, legacy_numbers=True)["ok"])      # as measured at e7aa65f
+        # still strict: a number that is not in the cited source fails, and 1,024 is still one number
+        self.assertFalse(check_citations(f"Each chunk holds 7919 bytes [S{i}].", hits)["ok"])
+        from relay.pipeline import _NUM, _digits_norm
+        self.assertEqual(_NUM.findall(_digits_norm("a 1,024-entry table and layers 2,4")), ["1024", "2", "4"])
+
     def test_uncited_list_item_does_not_borrow_a_later_citation(self):
         text = ("The model has two parts:\n"
                 "- an encoder that reads the source sentence\n"
