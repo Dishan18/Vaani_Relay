@@ -1,0 +1,33 @@
+{
+ "_generated_by": "scripts/run_load.py",
+ "stamp": "20261111T115624Z",
+ "duration_s": null,
+ "seed": 7,
+ "replay": {
+  "router": 18,
+  "drafts": 103
+ },
+ "scenarios": [
+  {
+   "scenario": "daily_exhausted",
+   "run_id": "daily_exhausted-20261111T115624Z",
+   "requests": 14,
+   "outcomes": {
+    "passages": 14
+   },
+   "source": "stand-in",
+   "stand_in": {
+    "requests": 3,
+    "ok": 0,
+    "429": 3,
+    "503": 0,
+    "413": 0,
+    "stalls": 0,
+    "replay_hits": 0,
+    "replay_misses": 0
+   },
+   "overrides": {},
+   "wall_s": 277.4
+  }
+ ]
+}

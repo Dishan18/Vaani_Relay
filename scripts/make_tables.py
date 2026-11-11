@@ -114,20 +114,18 @@ def table1(cal_path: Path = CAL, probe_path: Path = PROBE) -> list[str]:
                       if re.search(r"k=(\d+)", v))
     rows = [
         ("Requests per minute", per_model("RPM"), f"429 body \"Limit {p['limit']}\" after "
-         f"{walls['openai/gpt-oss-120b']['ok_before_first_429']} successes in a probe burst"
-         + ("; qwen never hit, documented" if qwen_rpm_doc else ""), "high" + (" (qwen low)" if qwen_rpm_doc else "")),
-        ("Tokens per minute", per_model("TPM") + f"; qwen also output {q['OTPM']['capacity']:.0f}, "
-         f"input {q['ITPM']['capacity']:.0f} (undocumented)", "x-ratelimit-limit-tokens; qwen's two only in real-run 429 "
-         "bodies", "high"),
-        ("Requests per day", per_model("RPD"), "x-ratelimit-limit-requests" + (
-            f"; refills: 120b remaining {rr['from']} to {rr['to']} in {rr['hours']} h, same day" if rr else ""),
-         "high (refill medium)"),
+         f"{walls['openai/gpt-oss-120b']['ok_before_first_429']} successes"
+         + ("; qwen: documented" if qwen_rpm_doc else ""), "high" + (" (qwen low)" if qwen_rpm_doc else "")),
+        ("Tokens per minute", per_model("TPM") + f"; qwen also out {q['OTPM']['capacity']:.0f}, "
+         f"in {q['ITPM']['capacity']:.0f}", "header; qwen's two only in real 429 bodies", "high"),
+        ("Requests per day", per_model("RPD"), "header" + (
+            f"; refilled {rr['from']} to {rr['to']} in {rr['hours']} h, same day" if rr else ""),
+         "high"),
         ("Tokens per day", per_model("TPD") + " (documented)", f"no header; {n_daily} of {n_429} real 429s named a "
          "daily limit", "low"),
-        ("Requests in flight at once", f"none found ({lim_k})", "stepwise concurrency in the probe",
-         "medium (lower bound)"),
-        ("What it returns when a limit is hit", f"429, retry-after {first['retry_after']} s, body naming the limit "
-         f"(\"{p['short']}: Limit {p['limit']}, Used {p['used']}\")", "probe burst; real-run 429 bodies", "high"),
+        ("Requests in flight at once", f"none found ({lim_k})", "stepwise concurrency", "medium"),
+        ("What it returns when a limit is hit", f"429, retry-after {first['retry_after']} s, names the limit "
+         f"(\"{p['short']}: Limit {p['limit']}\")", "probe burst; real 429s", "high"),
         ("Time until it recovers", f"{span(rec, '{:.1f}')} s to the next admission; tokens refill "
          f"{span(refill, '{:.0f}')}/s (TPM/60)", "recovery polls; token headers after a draft", "high"),
     ]
@@ -295,15 +293,19 @@ def main(argv=None) -> int:
             by[(r["retrieval_setting"], r["model"])].append(r)
         stats = {s: summarise(v) for (s, m), v in by.items()}
         drafter = sorted({m for (_, m) in by})
+        any_ungraded = any(x["ungraded"] for x in stats.values())
         L += ["## Table 3: retrieval settings", "",
               f"Drafter fixed ({', '.join(drafter)}), verifier off; only retrieval changes.", "",
-              "| setting (piece chars / pieces fetched / re-rank) | questions asked | correct and cited % | wrong % (incl. wrongly refused) | correctly refused % | ungraded % | "
+              # ungraded % only when some setting has ungraded answers (all 0.0 otherwise, and the table is wide)
+              "| setting (chars / pieces / re-rank) | questions asked | correct and cited % | wrong % (incl. wrongly refused) "
+              "| correctly refused % | " + ("ungraded % | " if any_ungraded else "") +
               "unsure | degraded | tokens per answer | TTFT p50 / p95 (ms) | total p50 / p95 (ms) | budget wait p50 (ms) |",
-              "|---|---|---|---|---|---|---|---|---|---|---|---|"]
+              "|---|---|---|---|---|" + ("---|" if any_ungraded else "") + "---|---|---|---|---|---|"]
         for s, x in sorted(stats.items(), key=lambda kv: (-kv[1]["n"], -kv[1]["correct"])):
             flag = "" if x["n"] >= n_questions else " (incomplete)"
             L.append(f"| {describe(s)}{flag} | {x['n']} | {x['correct_pct']:.1f} | {x['wrong_pct']:.1f} | {x['refused_pct']:.1f} | "
-                     f"{x['ungraded_pct']:.1f} | {x['unsure']} | {x['degraded']} | {x['tokens_per_answer']:.0f} | "
+                     + (f"{x['ungraded_pct']:.1f} | " if any_ungraded else "") +
+                     f"{x['unsure']} | {x['degraded']} | {x['tokens_per_answer']:.0f} | "
                      f"{ms(x['ttft_p50'])} / {ms(x['ttft_p95'])} | {ms(x['total_p50'])} / {ms(x['total_p95'])} | "
                      f"{ms(x['wait_p50'])} |")
         win, tied, best = pick(stats, lambda k: stats[k]["tokens_per_answer"], need=n_questions)

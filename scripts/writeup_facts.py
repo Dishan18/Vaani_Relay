@@ -42,7 +42,7 @@ DETAIL = ROOT / "data" / "results" / "detail.jsonl"
 RUNS = ROOT / "results" / "raw" / "runs"
 BASELINE = "e7aa65f"                       # Table 3 and the real load runs as measured
 REAL_RUNS = {"real_steady": "real_steady-20261111T073012Z", "real_burst": "real_burst-20261111T073012Z"}
-DAILY_RUN = "daily_exhausted-20261110T192348Z"   # the daily_exhausted run that counts in the tables
+DAILY_SCENARIO = "daily_exhausted"                # its run that counts in the tables gives the 3pm reply
 
 facts: dict[str, dict] = {}
 
@@ -272,6 +272,8 @@ def build() -> None:
       "input: overload's offered arrivals per minute")
 
     # ---------------------------------------------------------------- the reply when the daily budget is gone
+    daily_ids = [r["request_id"] for r in rows if r["scenario"] == DAILY_SCENARIO and r["source"] == "stand-in"]
+    DAILY_RUN = daily_ids[0].rsplit("-", 1)[0]
     daily = [x for x in load_jsonl(RUNS / f"{DAILY_RUN}.jsonl") if x.get("type") == "answer"]
     pick = min(daily, key=lambda x: len(x["reply"]["text"]))
     F("daily.request_id", pick["request_id"], RUNS / f"{DAILY_RUN}.jsonl", "the shortest reply of the daily_exhausted run")

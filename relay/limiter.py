@@ -585,6 +585,22 @@ class Limiter:
         items = [(t.prompt_tokens, t.max_tokens) for t in st.queue] + [(pt, max_tokens)]
         return max(0.0, self._predict(st, items, now)[-1][0] - now)
 
+    def daily_short(self, model: str, prompt_tokens: int | Prompt, max_tokens: int) -> str | None:
+        """The name of a daily bucket (period of an hour or more: RPD, TPD) that lacks room for this call
+        right now, or None. Lets the ladder say a reply waits on the daily allowance, whose refill is not
+        measured, rather than give a time estimate for it."""
+        st = self.models.get(model)
+        if st is None:
+            return None
+        now = self.now()
+        self._compact(st, now)
+        pt = prompt_tokens.tokens if isinstance(prompt_tokens, Prompt) else int(prompt_tokens)
+        need = self._needs(st, pt, max_tokens)
+        for n, bk in st.buckets.items():
+            if bk.period_s >= 3600 and bk.level(st.events, now) < need[n]:
+                return n
+        return None
+
     def capacity(self, model: str, bucket: str) -> float | None:
         st = self.models.get(model)
         b = st.buckets.get(bucket) if st else None

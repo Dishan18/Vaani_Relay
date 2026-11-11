@@ -5,7 +5,7 @@
 
 I built a Python pipeline on Groq's free tier. A router (qwen3.8-27b) picks the paper and rewrites the question, a search tool (BM25) fetches 3 pieces of 2400 characters, a decide step refuses weak evidence, gpt-oss-120b drafts with a citation on every sentence, and a check verifies each citation, number and quote before release, rewriting a failed draft once.
 
-**The decision that shaped it most: an answer ladder with a floor that needs no model.** If the limiter predicts no room within 15 s, the request steps down instead of queueing: another model, then a lean answer, then cited passages with no model call and an estimate of when to try again. The floor costs no budget, so nobody is left without a reply. With the daily budget gone it answered in 4 ms at the median (stand-in).
+**The decision that shaped it most: an answer ladder with a floor that needs no model.** If the limiter predicts no room within 15 s, the request steps down instead of queueing: another model, then a lean answer, then cited passages with no model call, flagged as unchecked. The floor costs no budget, so nobody is left without a reply: with the daily budget gone it answered in 7 ms at the median (stand-in).
 
 ## The real service and my stand-in
 
@@ -13,15 +13,15 @@ I built a Python pipeline on Groq's free tier. A router (qwen3.8-27b) picks the 
 
 | limit | value found | how found | confidence |
 |---|---|---|---|
-| Requests per minute | 30 per model | 429 body "Limit 30" after 30 successes in a probe burst; qwen never hit, documented | high (qwen low) |
-| Tokens per minute | 8000 per model; qwen also output 1000, input 7000 (undocumented) | x-ratelimit-limit-tokens; qwen's two only in real-run 429 bodies | high |
-| Requests per day | 1000 per model | x-ratelimit-limit-requests; refills: 120b remaining 942 to 999 in 3.76 h, same day | high (refill medium) |
+| Requests per minute | 30 per model | 429 body "Limit 30" after 30 successes; qwen: documented | high (qwen low) |
+| Tokens per minute | 8000 per model; qwen also out 1000, in 7000 | header; qwen's two only in real 429 bodies | high |
+| Requests per day | 1000 per model | header; refilled 942 to 999 in 3.76 h, same day | high |
 | Tokens per day | 200000 per model (documented) | no header; 0 of 22 real 429s named a daily limit | low |
-| Requests in flight at once | none found (20b k=8; 120b k=8; qwen k=4) | stepwise concurrency in the probe | medium (lower bound) |
-| What it returns when a limit is hit | 429, retry-after 2 s, body naming the limit ("RPM: Limit 30, Used 30") | probe burst; real-run 429 bodies | high |
+| Requests in flight at once | none found (20b k=8; 120b k=8; qwen k=4) | stepwise concurrency | medium |
+| What it returns when a limit is hit | 429, retry-after 2 s, names the limit ("RPM: Limit 30") | probe burst; real 429s | high |
 | Time until it recovers | 2.0 s to the next admission; tokens refill 133/s (TPM/60) | recovery polls; token headers after a draft | high |
 
-Found by a probe of 171 real calls and from real 429 messages. The stand-in speaks Groq's API, headers and 429 wording with the same limits, uses timings fitted to the probe (gpt-oss-120b: 13 calls, 473 tokens a second), and can slow down, stall, fail and refuse. **Where it is least like Groq:** it replays only drafts that passed the check, so it never shows a failed one. On the same arrivals, the real steady run gave 87.1% of people a written answer and its twin 100.0%.
+Found by a probe of 171 real calls and from real 429 messages. The stand-in speaks Groq's API, headers and 429 wording with the same limits, uses timings fitted to the probe (gpt-oss-120b: 13 calls, 473 tokens a second), streams replies in chunks, and can slow down under load, stall, fail and refuse. **Where it is least like Groq:** it replays only drafts that passed the check, so it never shows a failed one. On the same arrivals, the real steady run gave 87.1% of people a written answer and its twin 100.0%.
 
 ## Results
 
@@ -31,7 +31,7 @@ Found by a probe of 171 real calls and from real 429 messages. The stand-in spea
 |---|---|---|---|---|---|---|---|
 | burst | stand-in | 34 | 266 | 7.7 | 948 / 7828 / 11641 (= max, n<100) | 948 / 7828 / 11641 (= max, n<100) | 34 / 34 |
 | chaos | stand-in | 27 | 274 | 5.9 | 1966 / 9509 / 14496 (= max, n<100) | 2013 / 14496 / 17112 (= max, n<100) | 26 / 27 |
-| daily_exhausted | stand-in | 14 | 261 | 3.2 | 4 / 9 / 9 (= max, n<100) | 4 / 9 / 9 (= max, n<100) | 14 / 14 |
+| daily_exhausted | stand-in | 14 | 261 | 3.2 | 7 / 12 / 12 (= max, n<100) | 7 / 12 / 12 (= max, n<100) | 14 / 14 |
 | overload | stand-in | 78 | 299 | 15.6 | 1730 / 14043 / 28404 (= max, n<100) | 1961 / 16453 / 30882 (= max, n<100) | 74 / 78 |
 | overload_naive_retry | stand-in | 78 | 294 | 15.9 | 6271 / 11547 / 18414 (= max, n<100) | 6271 / 11547 / 18414 (= max, n<100) | 77 / 78 |
 | real_burst | real | 20 | 21 | 56.1 | 1006 / 11419 / 11419 (= max, n<100) | 1257 / 11419 / 15963 (= max, n<100) | 18 / 20 |
@@ -57,27 +57,27 @@ Found by a probe of 171 real calls and from real 429 messages. The stand-in spea
 | rpm_halved | stand-in | 86.1 | 0.0 | 8.3 | 5.6 | 0.0 | 0.03 | 3 | 1352 | $0 / $0.69 |
 | steady | stand-in | 100.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.04 | 1 | 3130 | $0 / $1.50 |
 
-Real rows ran against Groq, the rest on the stand-in. Percentiles are nearest-rank. **The number I could not have guessed:** qwen3.8-27b also caps output at 1000 tokens a minute (12.5% of its documented limit) and input at 7000. Neither is documented anywhere. On 18 questions I wrote (4 unanswerable), the chosen setting gave 72.2% correct, cited answers and 22.2% correct refusals, at 1948 tokens per answer.
+Percentiles are nearest-rank. Each reply's first token arrives with its last, since nothing is shown before the check; the two time columns differ only because people who gave up count in total time but have no first token (see n). **The number I could not have guessed:** qwen3.8-27b also caps output at 1000 tokens a minute (12.5% of its documented limit) and input at 7000. Neither is documented anywhere. On 18 questions I wrote (4 unanswerable), the chosen setting gave 72.2% correct, cited answers and 22.2% correct refusals, at 1948 tokens per answer.
 
 ## Where the time goes
 
-real_burst-20261111T073012Z-0009 (Q14) took 15963 ms and the person left at 15.9 s, before any token. explain_request.py splits its spans into waiting 15122 ms, working 838 ms and retrying 0 ms. It waited 5625 ms for gpt-oss-120b, drafted in 838 ms, failed the citation check, then waited 9496 ms for a second draft on gpt-oss-20b. It was a retry in all but name, and the person got nothing.
+real_burst-20261111T073012Z-0009 (Q14) took 15963 ms and the person left at 15.9 s, before any token. explain_request.py splits its spans into waiting 15122 ms, working 838 ms, retrying 0 ms and local work 3 ms. It waited 5625 ms for gpt-oss-120b, drafted in 838 ms, failed the citation check, then waited 9496 ms for a second draft on gpt-oss-20b. A retry in all but name, and the person got nothing.
 
 ## When a limit is hit
 
-**Per minute** (stand-in overload): 87.2% got a written answer (61.5% a weaker one, from a fallback model or the lean step), 7.7% got passages and 5.1% gave up. Anyone meeting an empty bucket waits, at most until the ladder's limit (p95 queue wait 10572 ms). Nobody is turned away. **Per day:** 0.0% written, 100.0% passages, because the ladder goes straight to the floor instead of holding people until a reset.
+**Per minute** (stand-in overload): 87.2% got a written answer (61.5% a weaker one, from a fallback model or the lean step), 7.7% got passages and 5.1% gave up waiting; the system rejected nobody outright. Anyone meeting an empty bucket waits at most until the ladder's limit (p95 queue wait 10572 ms). **Per day:** 0.0% written, 100.0% passages, because the ladder goes straight to the floor instead of holding people until a reset.
 
 ## Retrieval: quality versus cost
 
 **Table 3: retrieval settings**
 
-| setting (piece chars / pieces fetched / re-rank) | questions asked | correct and cited % | wrong % (incl. wrongly refused) | correctly refused % | ungraded % | unsure | degraded | tokens per answer | TTFT p50 / p95 (ms) | total p50 / p95 (ms) | budget wait p50 (ms) |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| large (2400 / 3 / no) | 18 | 72.2 | 5.6 | 22.2 | 0.0 | 0 | 1 | 1948 | 4622 / 16558 | 4622 / 16558 | 3552 |
-| medium (1200 / 5 / no) | 18 | 50.0 | 27.8 | 22.2 | 0.0 | 0 | 2 | 2212 | 12234 / 29223 | 12234 / 29223 | 11130 |
-| medium+rerank (1200 / 4 / yes) | 18 | 50.0 | 27.8 | 22.2 | 0.0 | 0 | 1 | 1769 | 8882 / 23195 | 8882 / 23195 | 7659 |
-| small_lean (600 / 4 / no, no router) | 18 | 33.3 | 44.4 | 22.2 | 0.0 | 7 | 1 | 1035 | 3579 / 19596 | 3579 / 19596 | 2697 |
-| small (600 / 8 / no) | 18 | 27.8 | 50.0 | 22.2 | 0.0 | 8 | 2 | 1957 | 11146 / 26696 | 11146 / 26696 | 10010 |
+| setting (chars / pieces / re-rank) | questions asked | correct and cited % | wrong % (incl. wrongly refused) | correctly refused % | unsure | degraded | tokens per answer | TTFT p50 / p95 (ms) | total p50 / p95 (ms) | budget wait p50 (ms) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| large (2400 / 3 / no) | 18 | 72.2 | 5.6 | 22.2 | 0 | 1 | 1948 | 4622 / 16558 | 4622 / 16558 | 3552 |
+| medium (1200 / 5 / no) | 18 | 50.0 | 27.8 | 22.2 | 0 | 2 | 2212 | 12234 / 29223 | 12234 / 29223 | 11130 |
+| medium+rerank (1200 / 4 / yes) | 18 | 50.0 | 27.8 | 22.2 | 0 | 1 | 1769 | 8882 / 23195 | 8882 / 23195 | 7659 |
+| small_lean (600 / 4 / no, no router) | 18 | 33.3 | 44.4 | 22.2 | 7 | 1 | 1035 | 3579 / 19596 | 3579 / 19596 | 2697 |
+| small (600 / 8 / no) | 18 | 27.8 | 50.0 | 22.2 | 8 | 2 | 1957 | 11146 / 26696 | 11146 / 26696 | 10010 |
 
 I chose **large**: the most correct answers, at 1948 tokens each. Re-ranking saved tokens but added no correct answers, and small_lean was cheapest but only 33.3% correct. Near the limit, the lean step fetches 2 pieces and skips the router.
 
@@ -94,21 +94,21 @@ Plain BM25 on the raw question (data/retrieval/traps.md):
 
 ## What the person sees
 
-At 3pm, with the daily budget gone, "What theoretical and practical latency does the paper report?" gets this after 4 ms (stand-in):
+At 3pm, with the daily budget gone, "What theoretical and practical latency does the paper report?" gets this after 8 ms (stand-in):
 
-> No written answer this time: here are the most relevant passages from the papers, quoted as they are. A written answer should be possible in about 496 s.
+> No written answer right now. Today's model allowance is used up, so please try again later. These are the closest passages from the papers, quoted as they are; they have not been checked against your question.
 > [S1] 2410.00037v1 pp.25-26 §5.3: "Table 5 reports results for ablations on the use of an RQ- Transformer. We first replicate the setting of Copet et al. (2023) with the delay pattern of [0, 1, 2, 3, 4, 5, 6, 7], which means that each level of R VQ token is generated one timestep after the preceding level. In this context, we see that using an RQ-Transformer is not necessary, as it only provides a marginal improvement in perplexity. However, this delay pattern induces a theoretical latency of 8 timesteps, which amounts to 640ms, a latency that is incompatible with the requirements of a real-time dialogue model."
 > [S2] 2410.00037v1 p.26 §5.3: "Results - Additional ablations. Table 6 reports additional ablations on additional delay patterns, the weight of the semantic token loss and our proposed Inner Monologue procedure, all using the RQ-Transformer. First, we compare three configurations of delays that are compatible with real-time dialogue. The [0 , 0, 0, 0, 0, 0, 0, 0] pattern represents the minimal latency of 80ms that can be obtained with Mimi tokens at 12.5Hz."
 
-Fast and honest, but without the router these passages miss the figures asked for (graded wrong).
+It is immediate, gives no time estimate it cannot back, and flags the passages as unchecked; here they miss the figures asked for (graded wrong), which only a model could tell.
 
 ## What I'm unsure about, what I left out, what I learned
 
-**Least certain:** how Groq's daily token limit works, since no header or 429 ever showed it. The evidence says it refills: my key was charged 263495 gpt-oss-120b tokens in one rolling 24-hour window, above the documented 200000, with no daily 429, and the request counter refills (Table 1). If it resets at a fixed hour, the estimate above is hours off. **Not built:** sentence-by-sentence release (I buffer, so first token equals total) and a model-based grader (it would spend shared budget). **Next:** a router prompt for Q14, and fetching the neighbouring piece when a draft's number is missing (Q2).
+**Least certain:** Groq's daily token limit. Documented: 200000 a day. Observed: my key was charged 263495 gpt-oss-120b tokens in one rolling 24-hour window with no daily-limit rejection, so it seems to refill or reset rather than sum strictly, but I never saw the limit itself (confidence low). If it is lower than the limiter assumes, a call gets a 429 and falls to the next rung. **Not built:** sentence-by-sentence release (I buffer, so first token equals total) and a model-based grader (it would spend shared budget). **Next:** a router prompt for Q14, and fetching the neighbouring piece when a draft's number is missing (Q2).
 
 **One new thing, in my own words:** One thing I learned is that a response starting quickly does not mean the system is fast. Time to first token is how long the person waits before seeing anything; total time is how long until the whole answer has arrived. At the model the two differ: the first piece arrives quickly and the rest streams after it. In my pipeline they are the same, because every reply is checked before it is released, so the person sees nothing until the checked answer is ready. That moved the question from "how fast does the model start" to "where does the waiting happen". Splitting one slow request into waiting, working and retrying showed it spent almost all its time waiting for budget, not generating. An average would have hidden that; percentiles and a per-request split did not.
 
-**Honesty notes.** The load and retrieval tables are as measured at e7aa65f; 11 rows later moved from rate-limited to succeeded (passages after a failed check, not budget). The fixed gate passes 127 of 165 saved real drafts instead of 119 and changes 2 requests in the tables; that replay, not one anecdotal rerun, is its measurement. I changed the grader after seeing answers (results/quality/grade_changes_*.md) and made a Q13 gold fact optional; 37 of 177 graded real rows were never checked by hand. To avoid waiting, two eval jobs capped at the documented limit and the last real runs used refill accounting. I excluded 4 runs made on a second key, as the brief allows one budget, and 2 made with a mistyped key.
+**Honesty notes.** All tables are generated from the submitted results.csv. The real runs date from commit e7aa65f; later I reclassified 11 rows as succeeded (passages after a failed check, not budget) and reran the daily-budget scenario on the stand-in after changing that reply. The gate fix is a separate replay of all 165 saved drafts (127 pass instead of 119; 2 requests would change), not applied to the tables. I changed the grader after seeing answers (results/quality/grade_changes_*.md) and made a Q13 gold fact optional; 37 of 177 graded real rows were never checked by hand. To avoid waiting, two eval jobs capped at the documented limit and the last real runs used refill accounting. Excluded runs and their reasons are in results/excluded_runs.json.
 
 ## Your feedback on Vaani
 

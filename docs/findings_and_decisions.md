@@ -238,6 +238,22 @@ The brief says every figure in the tables must be computable from results.csv. T
 
 An independent recompute straight from results.csv matches every cell of Tables 2a, 2b and 3.
 
+## The reply when the daily budget is gone (2026-11-11, after an external review)
+
+The floor's reply used to give a time estimate for every limit and did not say its passages were
+unchecked. For the 3pm question it quoted two passages with latency figures that do not answer it,
+and estimated "about 496 s", which rested on the daily refill we never measured.
+* **Now:** a daily limit (TPD or RPD) gets no time estimate ("Today's model allowance is used up, so
+  please try again later"). Per-minute limits keep theirs, since that refill is measured. Every
+  passages reply says the passages have not been checked against the question.
+* **Detecting the daily case:** the limiter's daily_short() names the daily bucket lacking room. It
+  covers both paths to the floor: the plan step, and a drafter that turns out to be unavailable.
+* **Passages are kept, not withheld.** The word-overlap evidence test scores these passages at the
+  maximum, so no lexical filter can tell they miss. For other questions (Q4) the passages hold the
+  answer, and they cost no budget.
+* daily_exhausted was rerun on the stand-in (no real calls), and its run replaces the old one in the
+  tables.
+
 ## Decisions taken (2026-11-10)
 
 - **Ledger charges what Groq reports.** A completed call counts its reported usage (findings Q2:

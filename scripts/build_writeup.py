@@ -26,8 +26,8 @@ BROWSERS = [Path(r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
             Path(r"C:\Program Files\Microsoft\Edge\Application\msedge.exe"),
             Path(r"C:\Program Files\Google\Chrome\Application\chrome.exe")]
 CSS = """
-@page { size: A4; margin: 9mm 10mm; }
-body { font-family: "Segoe UI", Arial, sans-serif; font-size: 8.6pt; line-height: 1.17; color: #111; }
+@page { size: A4; margin: 8mm 9mm; }
+body { font-family: "Segoe UI", Arial, sans-serif; font-size: 8.5pt; line-height: 1.17; color: #111; }
 h1 { font-size: 12pt; margin: 0 0 3pt; }
 h2 { font-size: 9.6pt; margin: 5pt 0 2pt; border-bottom: 0.5pt solid #999; }
 p { margin: 0 0 3pt; }
@@ -37,7 +37,7 @@ blockquote p { margin: 0; }
 table { border-collapse: collapse; margin: 2pt 0 3pt; font-size: 6.6pt; line-height: 1.1; width: 100%; }
 th, td { border: 0.4pt solid #aaa; padding: 0.3pt 2pt; vertical-align: top; text-align: left; }
 table.compact td { white-space: nowrap; }
-blockquote { page-break-inside: avoid; } .cap { page-break-after: avoid; } tr { page-break-inside: avoid; }
+blockquote { page-break-inside: avoid; } .cap { page-break-after: avoid; } tr { page-break-inside: avoid; } thead { display: table-header-group; }
 th { background: #eee; }
 .cap { font-weight: 600; margin: 3pt 0 1pt; }
 """
@@ -73,8 +73,10 @@ def to_html(md: str) -> str:
                 rows.append([c.strip() for c in lines[i].strip().strip("|").split("|")]); i += 1
             head, body = rows[0], [r for r in rows[1:] if not all(set(c) <= set("-: ") for c in r)]
             compact = all(len(c) <= 40 for r in body for c in r)      # short cells stay on one line
-            out.append(f"<table{' class=compact' if compact else ''}><tr>" + "".join(f"<th>{inline(c)}</th>" for c in head) + "</tr>"
-                       + "".join("<tr>" + "".join(f"<td>{inline(c)}</td>" for c in r) + "</tr>" for r in body) + "</table>")
+            out.append(f"<table{' class=compact' if compact else ''}><thead><tr>"   # thead repeats on a new page
+                       + "".join(f"<th>{inline(c)}</th>" for c in head) + "</tr></thead><tbody>"
+                       + "".join("<tr>" + "".join(f"<td>{inline(c)}</td>" for c in r) + "</tr>" for r in body)
+                       + "</tbody></table>")
             continue
         if l.startswith(">"):
             flush()

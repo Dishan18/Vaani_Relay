@@ -461,76 +461,6 @@
   ],
   "how": "queue_wait_ms p95, nearest rank"
  },
- "daily_exhausted.standin.n": {
-  "value": 14,
-  "source": [
-   "results/results.csv"
-  ],
-  "how": "rows of scenario daily_exhausted, source stand-in, counted in the tables"
- },
- "daily_exhausted.standin.written_pct": {
-  "value": "0.0",
-  "source": [
-   "results/results.csv"
-  ],
-  "how": "status ok and degraded_level < 3 (an answer or a refusal, written by a model), % of requests"
- },
- "daily_exhausted.standin.weaker_pct": {
-  "value": "0.0",
-  "source": [
-   "results/results.csv"
-  ],
-  "how": "written at degraded_level 1 (another model) or 2 (lean), % of requests"
- },
- "daily_exhausted.standin.passages_budget_pct": {
-  "value": "100.0",
-  "source": [
-   "results/results.csv"
-  ],
-  "how": "status rate_limited: cited passages because budget had no drafter in time, %"
- },
- "daily_exhausted.standin.passages_gate_pct": {
-  "value": "0.0",
-  "source": [
-   "results/results.csv"
-  ],
-  "how": "status ok at degraded_level 3: cited passages after both drafts failed the citation check, %"
- },
- "daily_exhausted.standin.gave_up_pct": {
-  "value": "0.0",
-  "source": [
-   "results/results.csv"
-  ],
-  "how": "status timeout (the simulated person left first), %"
- },
- "daily_exhausted.standin.ttft_n": {
-  "value": 14,
-  "source": [
-   "results/results.csv"
-  ],
-  "how": "requests with a first token"
- },
- "daily_exhausted.standin.ttft_p50": {
-  "value": "4",
-  "source": [
-   "results/results.csv"
-  ],
-  "how": "first_token_ms p50, nearest rank"
- },
- "daily_exhausted.standin.ttft_p95": {
-  "value": "9",
-  "source": [
-   "results/results.csv"
-  ],
-  "how": "first_token_ms p95, nearest rank"
- },
- "daily_exhausted.standin.queue_wait_p95": {
-  "value": "0",
-  "source": [
-   "results/results.csv"
-  ],
-  "how": "queue_wait_ms p95, nearest rank"
- },
  "rpm_halved.standin.n": {
   "value": 36,
   "source": [
@@ -806,6 +736,76 @@
  },
  "real_steady.standin.queue_wait_p95": {
   "value": "1",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "queue_wait_ms p95, nearest rank"
+ },
+ "daily_exhausted.standin.n": {
+  "value": 14,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "rows of scenario daily_exhausted, source stand-in, counted in the tables"
+ },
+ "daily_exhausted.standin.written_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok and degraded_level < 3 (an answer or a refusal, written by a model), % of requests"
+ },
+ "daily_exhausted.standin.weaker_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "written at degraded_level 1 (another model) or 2 (lean), % of requests"
+ },
+ "daily_exhausted.standin.passages_budget_pct": {
+  "value": "100.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status rate_limited: cited passages because budget had no drafter in time, %"
+ },
+ "daily_exhausted.standin.passages_gate_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok at degraded_level 3: cited passages after both drafts failed the citation check, %"
+ },
+ "daily_exhausted.standin.gave_up_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status timeout (the simulated person left first), %"
+ },
+ "daily_exhausted.standin.ttft_n": {
+  "value": 14,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "requests with a first token"
+ },
+ "daily_exhausted.standin.ttft_p50": {
+  "value": "7",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p50, nearest rank"
+ },
+ "daily_exhausted.standin.ttft_p95": {
+  "value": "12",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p95, nearest rank"
+ },
+ "daily_exhausted.standin.queue_wait_p95": {
+  "value": "0",
   "source": [
    "results/results.csv"
   ],
@@ -1518,51 +1518,51 @@
   "how": "input: overload's offered arrivals per minute"
  },
  "daily.request_id": {
-  "value": "daily_exhausted-20261110T192348Z-0006",
+  "value": "daily_exhausted-20261111T115624Z-0006",
   "source": [
-   "results/raw/runs/daily_exhausted-20261110T192348Z.jsonl"
+   "results/raw/runs/daily_exhausted-20261111T115624Z.jsonl"
   ],
   "how": "the shortest reply of the daily_exhausted run"
  },
  "daily.question": {
   "value": "What theoretical and practical latency does the paper report?",
   "source": [
-   "results/raw/runs/daily_exhausted-20261110T192348Z.jsonl"
+   "results/raw/runs/daily_exhausted-20261111T115624Z.jsonl"
   ],
   "how": "its question"
  },
  "daily.reply": {
-  "value": "No written answer this time: here are the most relevant passages from the papers, quoted as they are. A written answer should be possible in about 496 s.\n[S1] 2410.00037v1 pp.25-26 §5.3: \"Table 5 reports results for ablations on the use of an RQ- Transformer. We first replicate the setting of Copet et al. (2023) with the delay pattern of [0, 1, 2, 3, 4, 5, 6, 7], which means that each level of R VQ token is generated one timestep after the preceding level. In this context, we see that using an RQ-Transformer is not necessary, as it only provides a marginal improvement in perplexity. However, this delay pattern induces a theoretical latency of 8 timesteps, which amounts to 640ms, a latency that is incompatible with the requirements of a real-time dialogue model.\"\n[S2] 2410.00037v1 p.26 §5.3: \"Results - Additional ablations. Table 6 reports additional ablations on additional delay patterns, the weight of the semantic token loss and our proposed Inner Monologue procedure, all using the RQ-Transformer. First, we compare three configurations of delays that are compatible with real-time dialogue. The [0 , 0, 0, 0, 0, 0, 0, 0] pattern represents the minimal latency of 80ms that can be obtained with Mimi tokens at 12.5Hz.\"",
+  "value": "No written answer right now. Today's model allowance is used up, so please try again later. These are the closest passages from the papers, quoted as they are; they have not been checked against your question.\n[S1] 2410.00037v1 pp.25-26 §5.3: \"Table 5 reports results for ablations on the use of an RQ- Transformer. We first replicate the setting of Copet et al. (2023) with the delay pattern of [0, 1, 2, 3, 4, 5, 6, 7], which means that each level of R VQ token is generated one timestep after the preceding level. In this context, we see that using an RQ-Transformer is not necessary, as it only provides a marginal improvement in perplexity. However, this delay pattern induces a theoretical latency of 8 timesteps, which amounts to 640ms, a latency that is incompatible with the requirements of a real-time dialogue model.\"\n[S2] 2410.00037v1 p.26 §5.3: \"Results - Additional ablations. Table 6 reports additional ablations on additional delay patterns, the weight of the semantic token loss and our proposed Inner Monologue procedure, all using the RQ-Transformer. First, we compare three configurations of delays that are compatible with real-time dialogue. The [0 , 0, 0, 0, 0, 0, 0, 0] pattern represents the minimal latency of 80ms that can be obtained with Mimi tokens at 12.5Hz.\"",
   "source": [
-   "results/raw/runs/daily_exhausted-20261110T192348Z.jsonl"
+   "results/raw/runs/daily_exhausted-20261111T115624Z.jsonl"
   ],
   "how": "the reply text the person got, verbatim"
  },
  "daily.ms": {
-  "value": "4",
+  "value": "8",
   "source": [
-   "results/raw/runs/daily_exhausted-20261110T192348Z.jsonl"
+   "results/raw/runs/daily_exhausted-20261111T115624Z.jsonl"
   ],
   "how": "its time to release (ms)"
  },
  "daily.eta_s": {
-  "value": 495.8,
+  "value": null,
   "source": [
-   "results/raw/runs/daily_exhausted-20261110T192348Z.jsonl"
+   "results/raw/runs/daily_exhausted-20261111T115624Z.jsonl"
   ],
   "how": "the ETA it gave (s)"
  },
  "daily.qid": {
   "value": "Q11",
   "source": [
-   "results/raw/runs/daily_exhausted-20261110T192348Z.jsonl"
+   "results/raw/runs/daily_exhausted-20261111T115624Z.jsonl"
   ],
   "how": "its question id"
  },
  "daily.grade": {
   "value": "wrong",
   "source": [
-   "results/raw/runs/daily_exhausted-20261110T192348Z.jsonl",
+   "results/raw/runs/daily_exhausted-20261111T115624Z.jsonl",
    "data/questions.jsonl"
   ],
   "how": "relay.grade on this stand-in reply, for the write-up only (stand-in rows carry no grade in results.csv)"

@@ -30,6 +30,21 @@ typed into the template.
 | 19 | honesty | key2 and mistyped-key runs excluded "because the brief allows one budget" | the mistyped-key runs are excluded because every call got 401 | the two reasons given separately |
 | 20 | tooling | a fallback `else 0` for Q14's shared terms in writeup_facts.py | a typed number | removed; computed from traps.json |
 
+## External review (2026-11-11): points raised and what the data said
+
+| # | point raised | what the data showed | done |
+|---|---|---|---|
+| 36 | tables may not match the final results.csv | they do: an independent recompute matches every cell; the honesty note made them sound stale | note rewritten: all tables are generated from the submitted results.csv; the runs date from e7aa65f, 11 rows were later reclassified, and the gate replay is a separate experiment not applied to the tables |
+| 37 | first token differs from total in some rows, so maybe tokens leak before the check | for all 510 replies first_token_ms = total_ms; rows differ only because people who gave up count in total time but have no first token | stated under Results |
+| 38 | the 3pm reply quoted irrelevant numbers and a time estimate | the evidence test scores those passages at the maximum, so no lexical filter can catch them; the estimate assumed the daily refill we never measured | code change: a daily limit gives no time estimate and the passages are flagged as unchecked (relay/pipeline.py, limiter daily_short, tests); daily_exhausted rerun on the stand-in, no real calls; the write-up shows that run's reply |
+| 39 | daily token limit stated too strongly | Table 1 already said documented, confidence low | the write-up now gives documented vs observed and says confidence is low |
+| 40 | second API key | the author asked that it not be discussed | the write-up points to results/excluded_runs.json for every excluded run and its reason; the raw files are unchanged |
+| 41 | stand-in streaming not mentioned | it streams in chunks (standin/server.py) | mentioned |
+| 42 | "nobody is turned away" | error 0.0 everywhere, 5.1% gave up | "rejected nobody outright", with the give-ups |
+| 43 | slow-request split missing 3 ms | explain_request.py reports local work | added |
+| 44 | Table 3 continued on page 2 without headers | | headers repeat across pages; the always-zero "ungraded %" column is shown only when non-zero, and Table 3 now fits on page 1 |
+| 45 | "three unanswerable questions" | data/questions.jsonl has four with answerable = false (Q6, Q12, Q17, Q18), matching Table 3's 22.2% correctly refused (4 of 18) | no change |
+
 ## Pre-upload review (2026-11-11): checked against every line of the brief
 
 | # | where | problem | evidence | fix |

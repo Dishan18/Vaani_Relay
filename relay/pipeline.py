@@ -563,8 +563,14 @@ class Pipeline:
         if level == PASSAGES:
             hits = self._retrieve(tr, question, question, None, rc["k_lean"])
             eta = min((w for w in waits["lean"].values() if w is not None), default=None)
-            return self._passages(rid, question, hits, None if eta is None else round(eta, 1),
-                                  f"no drafter free within {lad['max_wait_s']:g} s")
+            # name the daily bucket when every drafter lacks daily room, so the reply gives no time estimate
+            mx = self.cfg["max_tokens"]["draft"]
+            daily = [self.lim.daily_short(m, self._prompt_for(m, rc["k_lean"], question, hits), mx)
+                     for m in self.models["draft"]]
+            why = f"no drafter free within {lad['max_wait_s']:g} s"
+            if daily and all(daily):
+                why += f" (daily allowance: {', '.join(sorted(set(daily)))})"
+            return self._passages(rid, question, hits, None if eta is None else round(eta, 1), why)
 
         # understand
         papers, query, alt = None, question, None
@@ -933,13 +939,21 @@ class Pipeline:
         lines = []
         for i, h in enumerate(hits, 1):
             lines.append(f"[S{i}] {h.piece.cite()}: \"{best_excerpt(h.piece.text, question)}\"")
-        if eta_note and eta is not None:
+        # A daily limit (TPD/RPD) gets no time estimate: how Groq's daily allowance refills is the least
+        # certain thing we measured, so a number of seconds would be a guess. Per-minute limits refill on a
+        # measured schedule, so they keep theirs. Changed 2026-11-11 after review: the old reply gave a
+        # daily-limit estimate and did not say the passages were unchecked.
+        daily = bool(re.search(r"\b(?:TPD|RPD)\b", why))
+        if daily:
+            eta = None
+            when = " Today's model allowance is used up, so please try again later."
+        elif eta_note and eta is not None:
             when = f" A written answer should be possible in about {max(1, round(eta))} s."
         elif eta_note:
             when = " A written answer isn't possible right now."
         else:
             when = ""
-        head = ("No written answer this time: here are the most relevant passages from the papers, "
-                f"quoted as they are.{when}")
+        head = (f"No written answer right now.{when} These are the closest passages from the papers, quoted as "
+                "they are; they have not been checked against your question.")
         return Reply(rid, question, "passages", PASSAGES, head + "\n" + "\n".join(lines), source_list(hits),
                      notice=f"passages only, no written answer: {why}", eta_s=eta)

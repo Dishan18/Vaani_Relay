@@ -350,6 +350,27 @@ class DecideAndCheckTests(unittest.TestCase):
         self.assertIn("citations only", r.notice)
 
 
+class FloorReplyTests(unittest.TestCase):
+    def setUp(self):
+        self.p = Pipeline(ScriptedChat(default_script), make_limiter(), RETRIEVER, cfg())
+        self.hits = RETRIEVER.search("Transformer big training cost FLOPs Table 2", 3, ["attention"])
+
+    def test_daily_limit_gives_no_time_estimate_and_flags_unchecked_passages(self):
+        why = "no drafter available (openai/gpt-oss-120b: TPD would not have room before the deadline)"
+        r = self.p._passages("r", "What did the big model cost?", self.hits, 495.8, why)
+        self.assertIsNone(r.eta_s)
+        self.assertNotRegex(r.text.splitlines()[0], r"\d")           # no number of seconds in the header
+        self.assertIn("allowance is used up", r.text)
+        self.assertIn("not been checked against your question", r.text)
+
+    def test_per_minute_limit_keeps_its_measured_estimate(self):
+        r = self.p._passages("r", "What did the big model cost?", self.hits, 12.4,
+                             "no drafter available (openai/gpt-oss-120b: TPM would not have room before the deadline)")
+        self.assertEqual(r.eta_s, 12.4)
+        self.assertIn("in about 12 s", r.text)
+        self.assertIn("not been checked against your question", r.text)
+
+
 class GateTests(unittest.TestCase):
     def setUp(self):
         self.hits = RETRIEVER.search("Transformer big training cost FLOPs Table 2", 3, ["attention"])

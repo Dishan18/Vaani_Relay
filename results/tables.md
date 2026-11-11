@@ -8,25 +8,25 @@ Free tier, per model (each model hit its own wall). From data/calibration.json, 
 
 | limit | value found | how found | confidence |
 |---|---|---|---|
-| Requests per minute | 30 per model | 429 body "Limit 30" after 30 successes in a probe burst; qwen never hit, documented | high (qwen low) |
-| Tokens per minute | 8000 per model; qwen also output 1000, input 7000 (undocumented) | x-ratelimit-limit-tokens; qwen's two only in real-run 429 bodies | high |
-| Requests per day | 1000 per model | x-ratelimit-limit-requests; refills: 120b remaining 942 to 999 in 3.76 h, same day | high (refill medium) |
+| Requests per minute | 30 per model | 429 body "Limit 30" after 30 successes; qwen: documented | high (qwen low) |
+| Tokens per minute | 8000 per model; qwen also out 1000, in 7000 | header; qwen's two only in real 429 bodies | high |
+| Requests per day | 1000 per model | header; refilled 942 to 999 in 3.76 h, same day | high |
 | Tokens per day | 200000 per model (documented) | no header; 0 of 22 real 429s named a daily limit | low |
-| Requests in flight at once | none found (20b k=8; 120b k=8; qwen k=4) | stepwise concurrency in the probe | medium (lower bound) |
-| What it returns when a limit is hit | 429, retry-after 2 s, body naming the limit ("RPM: Limit 30, Used 30") | probe burst; real-run 429 bodies | high |
+| Requests in flight at once | none found (20b k=8; 120b k=8; qwen k=4) | stepwise concurrency | medium |
+| What it returns when a limit is hit | 429, retry-after 2 s, names the limit ("RPM: Limit 30") | probe burst; real 429s | high |
 | Time until it recovers | 2.0 s to the next admission; tokens refill 133/s (TPM/60) | recovery polls; token headers after a draft | high |
 
 ## Table 3: retrieval settings
 
 Drafter fixed (openai/gpt-oss-120b), verifier off; only retrieval changes.
 
-| setting (piece chars / pieces fetched / re-rank) | questions asked | correct and cited % | wrong % (incl. wrongly refused) | correctly refused % | ungraded % | unsure | degraded | tokens per answer | TTFT p50 / p95 (ms) | total p50 / p95 (ms) | budget wait p50 (ms) |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| large (2400 / 3 / no) | 18 | 72.2 | 5.6 | 22.2 | 0.0 | 0 | 1 | 1948 | 4622 / 16558 | 4622 / 16558 | 3552 |
-| medium (1200 / 5 / no) | 18 | 50.0 | 27.8 | 22.2 | 0.0 | 0 | 2 | 2212 | 12234 / 29223 | 12234 / 29223 | 11130 |
-| medium+rerank (1200 / 4 / yes) | 18 | 50.0 | 27.8 | 22.2 | 0.0 | 0 | 1 | 1769 | 8882 / 23195 | 8882 / 23195 | 7659 |
-| small_lean (600 / 4 / no, no router) | 18 | 33.3 | 44.4 | 22.2 | 0.0 | 7 | 1 | 1035 | 3579 / 19596 | 3579 / 19596 | 2697 |
-| small (600 / 8 / no) | 18 | 27.8 | 50.0 | 22.2 | 0.0 | 8 | 2 | 1957 | 11146 / 26696 | 11146 / 26696 | 10010 |
+| setting (chars / pieces / re-rank) | questions asked | correct and cited % | wrong % (incl. wrongly refused) | correctly refused % | unsure | degraded | tokens per answer | TTFT p50 / p95 (ms) | total p50 / p95 (ms) | budget wait p50 (ms) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| large (2400 / 3 / no) | 18 | 72.2 | 5.6 | 22.2 | 0 | 1 | 1948 | 4622 / 16558 | 4622 / 16558 | 3552 |
+| medium (1200 / 5 / no) | 18 | 50.0 | 27.8 | 22.2 | 0 | 2 | 2212 | 12234 / 29223 | 12234 / 29223 | 11130 |
+| medium+rerank (1200 / 4 / yes) | 18 | 50.0 | 27.8 | 22.2 | 0 | 1 | 1769 | 8882 / 23195 | 8882 / 23195 | 7659 |
+| small_lean (600 / 4 / no, no router) | 18 | 33.3 | 44.4 | 22.2 | 7 | 1 | 1035 | 3579 / 19596 | 3579 / 19596 | 2697 |
+| small (600 / 8 / no) | 18 | 27.8 | 50.0 | 22.2 | 8 | 2 | 1957 | 11146 / 26696 | 11146 / 26696 | 10010 |
 
 **Chosen setting so far: large.** best correct = 13 (complete settings only); within one of it (tie): large; cheapest tied: large (1948 tokens per answer).
 
@@ -61,7 +61,7 @@ Load runs only (the evals wait for budget on purpose). TTFT = first checked toke
 |---|---|---|---|---|---|---|---|
 | burst | stand-in | 34 | 266 | 7.7 | 948 / 7828 / 11641 (= max, n<100) | 948 / 7828 / 11641 (= max, n<100) | 34 / 34 |
 | chaos | stand-in | 27 | 274 | 5.9 | 1966 / 9509 / 14496 (= max, n<100) | 2013 / 14496 / 17112 (= max, n<100) | 26 / 27 |
-| daily_exhausted | stand-in | 14 | 261 | 3.2 | 4 / 9 / 9 (= max, n<100) | 4 / 9 / 9 (= max, n<100) | 14 / 14 |
+| daily_exhausted | stand-in | 14 | 261 | 3.2 | 7 / 12 / 12 (= max, n<100) | 7 / 12 / 12 (= max, n<100) | 14 / 14 |
 | overload | stand-in | 78 | 299 | 15.6 | 1730 / 14043 / 28404 (= max, n<100) | 1961 / 16453 / 30882 (= max, n<100) | 74 / 78 |
 | overload_naive_retry | stand-in | 78 | 294 | 15.9 | 6271 / 11547 / 18414 (= max, n<100) | 6271 / 11547 / 18414 (= max, n<100) | 77 / 78 |
 | real_burst | real | 20 | 21 | 56.1 | 1006 / 11419 / 11419 (= max, n<100) | 1257 / 11419 / 15963 (= max, n<100) | 18 / 20 |
