@@ -923,3 +923,23 @@ You're at the point where further cosmetic edits are unlikely to improve the sub
 
 make these changes if needed
 ~~~~
+
+## 49. 2026-11-11T12:25:08.023Z (prompt)
+
+~~~~text
+<pasted_content id="fdc6">
+I found just one remaining sentence I recommend changing before submission.
+One final correction
+On page 2, under Honesty notes, you currently write:
+All tables are generated from the submitted results.csv.
+
+This is slightly too broad because Table 1, which reports Groq's limits, also relies on your probe records and provider documentation.
+
+Replace it with:
+Tables 2a, 2b and 3 are generated from the submitted results.csv. Table 1 is based on the real-service probes, response headers and provider documentation.
+
+This is more transparent about where your evidence comes from.
+</pasted_content id="fdc6">
+
+after this recheck if everything is alright
+~~~~
