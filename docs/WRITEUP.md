@@ -104,7 +104,7 @@ Honest and immediate but, without the router, the passages miss the figures aske
 
 **Least certain:** Groq's daily token limit, never shown in a header or 429. Evidence says it refills: our key was charged 263495 gpt-oss-120b tokens in one rolling 24 h window, over the documented 200000, with no daily 429, and the request counter refills (Table 1). If it resets at a fixed hour instead, the estimate above is wrong by hours. **Not built:** sentence-by-sentence release (we buffer, so first token equals total); a model-based grader (it spends shared budget). **Next:** a router prompt for Q14; fetching the neighbouring piece when a draft's number is missing (Q2).
 
-**One new thing, in my own words:** [AUTHOR: to write.]
+**One new thing, in my own words:** One thing I learned is that a response starting quickly does not mean the system is fast. Time to first token is how long the person waits before seeing anything; total time is how long until the whole answer has arrived. At the model the two differ: the first piece arrives quickly and the rest streams after it. In my pipeline they are the same, because every reply is checked before it is released, so the person sees nothing until the checked answer is ready. That moved the question from "how fast does the model start" to "where does the waiting happen". Splitting one slow request into waiting, working and retrying showed it spent almost all its time waiting for budget, not generating. An average would have hidden that; percentiles and a per-request split did not.
 
 **Honesty notes.** Tables from runs measured at e7aa65f; 11 rows later moved from rate-limited to succeeded (passages after failed checks). The fixed gate passes 127 of 165 saved real drafts instead of 119, changing 2 requests in the tables; the replay is its measurement (one real rerun would be anecdotal). The grader changed after I saw answers (results/quality/grade_changes_*.md) and a Q13 gold fact became optional; 37 of 177 graded real rows were never checked by hand. To avoid waiting, two eval jobs capped at the documented limit, and the real load runs and a last Q14 check used refill accounting. Runs on a second key (4, one budget) and a mistyped key (2, 401s) are excluded.
 
@@ -118,4 +118,12 @@ One change I would suggest is adding a simple end-to-end example showing how som
 
 ## How I worked with the assistant
 
-[AUTHOR: to write. Full conversation history attached. Three prompts that mattered and why; one thing it got wrong that you caught and how; one decision where you overruled it; what is distinctly yours.]
+My prompts from the main working session are attached verbatim (prompts.md).
+
+**Three prompts that mattered.** First, the ground rules I set before any code: measure before designing, never make a person wait for budget that isn't coming, and every reported number must come from a file a script produced. They became the ledger with its caps, the answer ladder with a no-model floor, and the number checker behind this page. Second, "before any load testing, measure answer quality on real groq": quality became the first measurement, so the retrieval setting and the drafter were chosen on graded answers, not on speed. Third, the gate fix: "dont accept uncited sentences", and replay every saved real draft through the old and new gate before any real call. That turned a change I could only have shown with one anecdotal rerun into a measurement over every draft we had.
+
+**What it got wrong, and how I caught it.** While grading, the assistant said a retrieved passage did not contain "discarding the prediction of the model for them" and treated an answer as unsupported. I rebuilt the pieces, found the phrase in the source, and asked it to recheck how it had decided; the answer stayed correct. I caught it by reading the source instead of the assistant's summary of it.
+
+**Where I overruled it.** It proposed letting the citation gate accept an uncited opening or closing sentence. I refused: no sentence reaches a person without a citation; filler can be dropped, anything else fails the draft. Earlier it suggested counting the daily budget as a refilling bucket; I kept the conservative rolling sum until there was evidence, and when I later used refill accounting to avoid waiting, the honesty notes say so.
+
+**What is distinctly mine.** The ground rules; the questions and their gold facts; the grading decisions and overrides; going back to one API key after re-reading the brief; and the call to stop spending budget once the replay had measured the fix.
