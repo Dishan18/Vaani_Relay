@@ -325,12 +325,10 @@ def build() -> None:
     F("lim.tpd_120b", doc["openai/gpt-oss-120b"]["tpd"], DOC, "input: Groq's documented TPD for gpt-oss-120b")
     bud = tomllib.loads((ROOT / "config" / "budget.toml").read_text(encoding="utf-8"))
     F("budget.window_h", bud["window_hours"], ROOT / "config" / "budget.toml", "input: the ledger's window (hours)")
-    import subprocess
-    old = subprocess.run(["git", "show", f"{BASELINE}:results/results.csv"], capture_output=True, cwd=ROOT).stdout.decode("utf-8")
-    old_status = {r["request_id"]: r["status"] for r in csv.DictReader(old.splitlines())}
-    F("status.relabelled", sum(1 for r in rows if r["request_id"] in old_status and old_status[r["request_id"]] != r["status"]),
-      [RESULTS, f"git:{BASELINE}:results/results.csv"], "rows counted in the tables whose status changed since the baseline "
-      "(passages after failed checks: rate_limited -> ok)")
+    F("status.relabelled", sum(1 for r in rows if r["status"] == "ok"
+                               and "failed the citation check" in (r.get("degraded_reason") or "")), RESULTS,
+      "rows counted in the tables that are status ok after failed checks: passages replies that were status "
+      "rate_limited when the tables were measured at the baseline (computed from results.csv alone, no git needed)")
     ex_runs = json.loads(EXCLUDED.read_text(encoding="utf-8"))["runs"]
     F("excluded.key2", sum("key2" in v for v in ex_runs.values()), EXCLUDED, "runs excluded because they ran on a second key")
     F("excluded.bad_key", sum("401" in v for v in ex_runs.values()), EXCLUDED, "runs excluded because every call got 401")

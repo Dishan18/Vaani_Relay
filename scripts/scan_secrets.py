@@ -69,12 +69,18 @@ def scan_file(where: str, data: bytes, known, findings) -> None:
 def main() -> int:
     known = secrets()
     findings: list[str] = []
-    tracked = subprocess.run(["git", "ls-files", "-z"], cwd=ROOT, capture_output=True, check=True).stdout.split(b"\0")
+    in_git = (ROOT / ".git").exists()
+    if in_git:
+        tracked = [x.decode("utf-8") for x in subprocess.run(["git", "ls-files", "-z"], cwd=ROOT, capture_output=True,
+                                                               check=True).stdout.split(b"\0") if x]
+    else:   # an unzipped copy of code.zip: every file except the virtualenv and caches
+        tracked = [q.relative_to(ROOT).as_posix() for q in ROOT.rglob("*") if q.is_file()
+                   and not any(part in (".venv", "__pycache__", "submission") for part in q.relative_to(ROOT).parts)]
     n = 0
-    for rel in filter(None, tracked):
-        p = ROOT / rel.decode("utf-8")
+    for rel in tracked:
+        p = ROOT / rel
         if p.is_file():
-            scan_file(rel.decode("utf-8"), p.read_bytes(), known, findings)
+            scan_file(rel, p.read_bytes(), known, findings)
             n += 1
     sub = ROOT / "submission"
     m = 0
@@ -83,15 +89,18 @@ def main() -> int:
             if p.is_file():
                 scan_file(p.relative_to(ROOT).as_posix(), p.read_bytes(), known, findings)
                 m += 1
-    hist = subprocess.run(["git", "log", "-p", "--all", "--binary", "--no-color"], cwd=ROOT, capture_output=True, check=True).stdout
-    check_blob("git history (all branches)", hist, known, findings)
-    names = subprocess.run(["git", "log", "--all", "--name-only", "--format="], cwd=ROOT, capture_output=True,
-                           check=True).stdout.decode("utf-8", "replace").splitlines()
-    for name in sorted(set(filter(None, names))):
-        if FORBIDDEN_NAMES.search(name):
-            findings.append(f"git history: forbidden file {name} was committed")
-    print(f"scanned {n} tracked files, {m} files under submission/, and the git history "
-          f"({len(known)} known secrets plus the gsk_ key pattern)")
+    if in_git:
+        hist = subprocess.run(["git", "log", "-p", "--all", "--binary", "--no-color"], cwd=ROOT, capture_output=True,
+                              check=True).stdout
+        check_blob("git history (all branches)", hist, known, findings)
+        names = subprocess.run(["git", "log", "--all", "--name-only", "--format="], cwd=ROOT, capture_output=True,
+                               check=True).stdout.decode("utf-8", "replace").splitlines()
+        for name in sorted(set(filter(None, names))):
+            if FORBIDDEN_NAMES.search(name):
+                findings.append(f"git history: forbidden file {name} was committed")
+    where = "tracked files, " if in_git else "files (no git history here), "
+    print(f"scanned {n} {where}{m} files under submission/"
+          f"{', and the git history' if in_git else ''} ({len(known)} known secrets plus the gsk_ key pattern)")
     if findings:
         print("FAILED:", *sorted(set(findings)), sep="\n  ")
         return 1

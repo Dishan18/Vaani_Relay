@@ -1682,10 +1682,9 @@
  "status.relabelled": {
   "value": 11,
   "source": [
-   "results/results.csv",
-   "git:e7aa65f:results/results.csv"
+   "results/results.csv"
   ],
-  "how": "rows counted in the tables whose status changed since the baseline (passages after failed checks: rate_limited -> ok)"
+  "how": "rows counted in the tables that are status ok after failed checks: passages replies that were status rate_limited when the tables were measured at the baseline (computed from results.csv alone, no git needed)"
  },
  "excluded.key2": {
   "value": 4,
