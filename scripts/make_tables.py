@@ -115,7 +115,7 @@ def table1(cal_path: Path = CAL, probe_path: Path = PROBE) -> list[str]:
         m = re.search(r"\(([^()]+\.jsonl)", src)
         return m.group(1) if m else src
     q = cal["qwen/qwen3.8-27b"]["buckets"]
-    conc = "; ".join(f"{SHORT[m]}: {v}" for m, v in ver["concurrency"].items())
+    conc = "; ".join(f"{SHORT[m]}: {v.split(';')[0]}" for m, v in ver["concurrency"].items())
     p = first["parsed"]
     rows = [
         ("Requests per minute", per_model("RPM"), how("RPM") + f"; {walls['openai/gpt-oss-120b']['ok_before_first_429']} "

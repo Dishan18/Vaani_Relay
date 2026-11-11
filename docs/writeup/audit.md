@@ -30,6 +30,16 @@ typed into the template.
 | 19 | honesty | key2 and mistyped-key runs excluded "because the brief allows one budget" | the mistyped-key runs are excluded because every call got 401 | the two reasons given separately |
 | 20 | tooling | a fallback `else 0` for Q14's shared terms in writeup_facts.py | a typed number | removed; computed from traps.json |
 
+## Trimmed for length (2026-11-11): claims no longer in the write-up
+
+Removed rather than shortened, so they need no evidence now; each is still backed where it lives:
+the stand-in's burst comparison and p95 first token (`real_burst.*`); the probe's phases
+(data/probe/findings.md); the verifier being on another model (config); Q5's top-ranked piece and Q17's
+distractor rank (data/retrieval/traps.json); the slow request's local time; the stricter retry
+policy's daily-429 rule, the pipeline's 429 counts and the Q8 example (data/experiments/r4*); the
+reply estimate's assumption; the replay's dropped-sentence count and the override count. Table 1's
+concurrency cell keeps only the limit found per model (make_tables.py).
+
 ## Every claim and its evidence
 
 | section | claim | evidence | status |
