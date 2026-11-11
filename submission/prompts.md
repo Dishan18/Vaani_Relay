@@ -668,3 +668,188 @@ okay works
 ~~~~text
 look through the pdf provided once again, check everything, i will upload the submission folder. i want to get this role so make sure everything is perfect, humanize all text, no em dashes. recheck, fix and audit the whole soln
 ~~~~
+
+## 44. 2026-11-11T10:49:25.916Z (prompt)
+
+~~~~text
+i have closed it. tell me what i need to do now
+~~~~
+
+## 45. 2026-11-11T11:03:33.329Z (prompt)
+
+~~~~text
+i am submitting, before that explain me the whole thing, start frpm basics, question, approach, what i did, how i did, why i did. explain problems, everything
+~~~~
+
+## 46. 2026-11-11T11:44:41.364Z (prompt)
+
+~~~~text
+<pasted_content id="fdc6">
+Yes. Overall, this is a strong submission, and it follows the assignment quite closely. I would put it in the final-polishing stage rather than rewrite it.
+
+I reviewed both pages against the original four-page brief and checked the tables and personal sections.
+
+Strong overall structure
+
+You have covered all the important requirements:
+
+- All eight main sections and both additional retrieval sections.
+- Real Groq measurements and a calibrated stand-in.
+- Five load scenarios, including the daily budget and halved RPM.
+- Latency percentiles, failure rates, retries and queue lengths.
+- Five retrieval configurations, exceeding the required three.
+- 18 evaluation questions, including unanswerable questions.
+- A concrete slow-request breakdown.
+- Vaani feedback and the assistant interaction account.
+
+Your strongest parts are the answer ladder, the naive retry comparison, the slow-request breakdown and the honesty notes. These show engineering decisions backed by measurements rather than just descriptions.
+
+I would not submit it quite yet, though. There are a few technical and presentation issues worth fixing.
+
+## Fix these before submission
+
+### 1.&#x20;
+
+Important
+
+&#x20;Results tables and raw CSV consistency
+
+Your honesty notes say:
+
+- The tables are from commit `e7aa65f`.
+- 11 rows subsequently changed from rate-limited to succeeded.
+- The fixed citation gate changed two requests in the tables.
+
+This could create a mismatch between your final `results.csv` and the tables. The brief explicitly says reviewers will recompute every figure from the raw CSV.&#x20;
+
+writeup.pdf
+
+The_Relay_Assignment_Brief.pdf
+
+
+
+What to do: Decide which dataset is your official submission, regenerate all tables from that exact dataset, and retain the replay results as a separate experiment.
+
+### 2.&#x20;
+
+Important
+
+&#x20;TTFT and total-time inconsistency
+
+In your learning section, you say:
+
+"In my pipeline they are the same, because every reply is checked before it is released."
+
+However, some table values differ.
+
+For example:
+
+| Scenario   | TTFT p50 | Total p50 |
+| ---------- | -------- | --------- |
+| Real burst | 1006 ms  | 1257 ms   |
+| Chaos      | 1966 ms  | 2013 ms   |
+| Overload   | 1730 ms  | 1961 ms   |
+
+writeup.pdf
+
+Either your pipeline exposes tokens before the check completes, or you are measuring provider-side TTFT rather than user-visible TTFT.
+
+Clarify which one it is. This is an important distinction for this assignment.
+
+### 3. Improve the daily-budget response
+
+Your current example displays passages containing 640 ms and 80 ms, although the question asks for the paper's theoretical and practical latency.
+
+You correctly acknowledge that the passages do not answer the question. However, displaying those numbers to the user could still be misleading.&#x20;
+
+writeup.pdf
+
+
+
+I would change the response to:
+
+> No verified written answer is available right now because today's model allowance has been exhausted. I don't want to provide potentially misleading information. The passages retrieved for this question do not contain enough evidence to answer it. Please try again later.
+
+I would also remove the 496-second estimate unless your reset measurement supports it. You yourself identify the daily-limit behaviour as your least certain assumption.
+
+### 4. Clarify the daily token limit
+
+You list 200,000 tokens per day as the documented limit, but your honesty notes report 263,495 tokens used within a rolling 24-hour window without a daily rate-limit response.
+
+Make the distinction explicit:
+
+- Documented limit: 200,000 tokens/day.
+- Empirically observed: no daily token-limit rejection in your tests.
+- Confidence: low.
+
+This is actually an interesting finding. Don't make it look like you experimentally confirmed something you couldn't reproduce.&#x20;
+
+writeup.pdf
+
+writeup.pdf
+
+
+
+### 5. Clarify the second API key
+
+Your honesty note mentions excluding four runs made with a second key.
+
+Clarify whether both keys belonged to the same Groq account. The assignment prohibits using extra accounts to bypass limits. If both were from the same account, say so explicitly.&#x20;
+
+writeup.pdf
+
+The_Relay_Assignment_Brief.pdf
+
+
+
+## Minor improvements
+
+| Location             | Suggested change                                                                                                                   |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Stand-in description | Explicitly mention streaming responses in chunks, if implemented. This is a stated requirement.                                    |
+| When a limit is hit  | Replace "Nobody is turned away" with "The system does not immediately reject requests, although 5.1% of users eventually give up." |
+| Where the time goes  | Account for the remaining 3 ms between the total and the reported waiting and working times.                                       |
+| Table 3              | Repeat the column headers on page 2 so the continued rows are easier to read.                                                      |
+
+Also, your write-up says 18 questions with four unanswerable questions. The earlier evaluation set I drafted for you had three intentionally unanswerable questions. Make sure your final question set, grading file and reported count all agree.
+
+## My final assessment
+
+Overall
+
+Good submission
+
+# 8/10
+
+My qualitative assessment, not an official assignment score.
+
+What is particularly good
+
+- Strong technical reasoning.
+- Real measurements rather than invented benchmarks.
+- Honest discussion of limitations.
+- Meaningful comparison of retry strategies.
+- Personal contribution is clearly explained.
+- Exactly two pages.
+
+My recommendation: Don't rewrite the document. Fix the data consistency, TTFT explanation and daily-budget response first. Those are the three things I would expect a technically strong reviewer to question during the interview.
+
+One more thing: I have reviewed the PDF, but not your actual `results.csv`, code or `prompts.md`. Those still need to be included separately as required by the brief.
+</pasted_content id="fdc6">
+
+check again and make these fixes if needed
+~~~~
+
+## 47. 2026-11-11T11:47:38.699Z (answer to the assistant's question)
+
+Question:
+
+~~~~text
+Was the second API key (key2, whose 4 runs are excluded) created in the same Groq account as key1, or in a different account? The brief forbids extra accounts, so the write-up must state this truthfully.
+~~~~
+
+My answer:
+
+~~~~text
+dont say anything about key2 since it can be ignored
+~~~~
