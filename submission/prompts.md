@@ -662,3 +662,9 @@ this is the first one, factcheck it, make it better and help me write the second
 ~~~~text
 okay works
 ~~~~
+
+## 43. 2026-11-11T10:30:34.280Z (prompt)
+
+~~~~text
+look through the pdf provided once again, check everything, i will upload the submission folder. i want to get this role so make sure everything is perfect, humanize all text, no em dashes. recheck, fix and audit the whole soln
+~~~~
