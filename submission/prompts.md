@@ -628,3 +628,37 @@ then prepare the submission, everything except my sections:
 ill send my 3 sections next, then rebuild the pdf with them and rerun the scan
 </pasted_content id="fdc6">
 ~~~~
+
+## 39. 2026-11-11T10:17:48.124Z (prompt)
+
+~~~~text
+This session only
+~~~~
+
+## 40. 2026-11-11T10:18:26.155Z (prompt)
+
+~~~~text
+what are the 2 sections?
+~~~~
+
+## 41. 2026-11-11T10:20:47.200Z (prompt)
+
+~~~~text
+<pasted_content id="fdc6">
+### One new thing, in my own words
+
+One thing I learned while working on this project is that a response starting quickly does not necessarily mean the system is fast. Time to first token only tells us how long the user waits before seeing the first part of an answer. Total response time tells us how long it takes to receive the complete answer.
+
+For example, a request might spend several seconds waiting in a queue before the model starts responding. Another request might start streaming almost immediately but take much longer to finish because it needs more tokens or additional model calls. Both situations feel slow to the user, but the reasons are different.
+
+I realised that looking at only the average response time would hide these differences. Measuring time to first token and total time separately gives a better idea of where the delay actually comes from and what needs to be improved.
+</pasted_content id="fdc6">
+
+this is the first one, factcheck it, make it better and help me write the second one
+~~~~
+
+## 42. 2026-11-11T10:27:19.138Z (prompt)
+
+~~~~text
+okay works
+~~~~

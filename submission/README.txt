@@ -1,7 +1,7 @@
 The Relay - submission
 ======================
 
-Everything here was produced by scripts in the code at commit 3be364c (the code.zip below), except the
+Everything here was produced by scripts in the code at commit cdf10a5 (the code.zip below), except the
 author's own sections of the write-up, which are added by hand to docs/WRITEUP.tmpl.md and rendered the
 same way.
 
@@ -16,7 +16,7 @@ results.csv     The raw file the brief asks for: one row per request, the brief'
                 scripts/make_tables.py. Rows of excluded runs stay in it, with superseded = 1 and the reason
                 in the "excluded" column.
 
-code.zip        The repository at commit 3be364c (git archive): code, tests, config, the questions and gold
+code.zip        The repository at commit cdf10a5 (git archive): code, tests, config, the questions and gold
                 facts, every raw result (results/raw: real and stand-in runs, per-call records), the call
                 ledger (results/ledger/groq_calls.jsonl), the probe log, experiment results, findings
                 (docs/findings_and_decisions.md) and the write-up's audit (docs/writeup/audit.md).
