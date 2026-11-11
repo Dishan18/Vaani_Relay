@@ -1,0 +1,1704 @@
+{
+ "cfg.max_wait_s": {
+  "value": 15.0,
+  "source": [
+   "config/pipeline.toml"
+  ],
+  "how": "input: [ladder] max_wait_s"
+ },
+ "cfg.k_full": {
+  "value": 3,
+  "source": [
+   "config/pipeline.toml"
+  ],
+  "how": "input: [retrieval] k_full"
+ },
+ "cfg.k_lean": {
+  "value": 2,
+  "source": [
+   "config/pipeline.toml"
+  ],
+  "how": "input: [retrieval] k_lean"
+ },
+ "cfg.piece_chars": {
+  "value": 2400,
+  "source": [
+   "config/pipeline.toml"
+  ],
+  "how": "input: [retrieval] piece_chars"
+ },
+ "q.n": {
+  "value": 18,
+  "source": [
+   "data/questions.jsonl"
+  ],
+  "how": "input: questions written for the evaluation"
+ },
+ "q.unanswerable": {
+  "value": 4,
+  "source": [
+   "data/questions.jsonl"
+  ],
+  "how": "input: questions marked answerable = false (the papers don't answer them)"
+ },
+ "real_steady.real.n": {
+  "value": 31,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "rows of scenario real_steady, source real, counted in the tables"
+ },
+ "real_steady.real.written_pct": {
+  "value": "87.1",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok and degraded_level < 3 (an answer or a refusal, written by a model), % of requests"
+ },
+ "real_steady.real.weaker_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "written at degraded_level 1 (another model) or 2 (lean), % of requests"
+ },
+ "real_steady.real.passages_budget_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status rate_limited: cited passages because budget had no drafter in time, %"
+ },
+ "real_steady.real.passages_gate_pct": {
+  "value": "12.9",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok at degraded_level 3: cited passages after both drafts failed the citation check, %"
+ },
+ "real_steady.real.gave_up_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status timeout (the simulated person left first), %"
+ },
+ "real_steady.real.ttft_n": {
+  "value": 31,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "requests with a first token"
+ },
+ "real_steady.real.ttft_p50": {
+  "value": "2320",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p50, nearest rank"
+ },
+ "real_steady.real.ttft_p95": {
+  "value": "4192",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p95, nearest rank"
+ },
+ "real_steady.real.queue_wait_p95": {
+  "value": "1",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "queue_wait_ms p95, nearest rank"
+ },
+ "real_burst.real.n": {
+  "value": 20,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "rows of scenario real_burst, source real, counted in the tables"
+ },
+ "real_burst.real.written_pct": {
+  "value": "45.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok and degraded_level < 3 (an answer or a refusal, written by a model), % of requests"
+ },
+ "real_burst.real.weaker_pct": {
+  "value": "30.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "written at degraded_level 1 (another model) or 2 (lean), % of requests"
+ },
+ "real_burst.real.passages_budget_pct": {
+  "value": "35.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status rate_limited: cited passages because budget had no drafter in time, %"
+ },
+ "real_burst.real.passages_gate_pct": {
+  "value": "10.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok at degraded_level 3: cited passages after both drafts failed the citation check, %"
+ },
+ "real_burst.real.gave_up_pct": {
+  "value": "10.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status timeout (the simulated person left first), %"
+ },
+ "real_burst.real.ttft_n": {
+  "value": 18,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "requests with a first token"
+ },
+ "real_burst.real.ttft_p50": {
+  "value": "1006",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p50, nearest rank"
+ },
+ "real_burst.real.ttft_p95": {
+  "value": "11419",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p95, nearest rank"
+ },
+ "real_burst.real.queue_wait_p95": {
+  "value": "10255",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "queue_wait_ms p95, nearest rank"
+ },
+ "overload.standin.n": {
+  "value": 78,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "rows of scenario overload, source stand-in, counted in the tables"
+ },
+ "overload.standin.written_pct": {
+  "value": "87.2",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok and degraded_level < 3 (an answer or a refusal, written by a model), % of requests"
+ },
+ "overload.standin.weaker_pct": {
+  "value": "61.5",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "written at degraded_level 1 (another model) or 2 (lean), % of requests"
+ },
+ "overload.standin.passages_budget_pct": {
+  "value": "7.7",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status rate_limited: cited passages because budget had no drafter in time, %"
+ },
+ "overload.standin.passages_gate_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok at degraded_level 3: cited passages after both drafts failed the citation check, %"
+ },
+ "overload.standin.gave_up_pct": {
+  "value": "5.1",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status timeout (the simulated person left first), %"
+ },
+ "overload.standin.ttft_n": {
+  "value": 74,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "requests with a first token"
+ },
+ "overload.standin.ttft_p50": {
+  "value": "1730",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p50, nearest rank"
+ },
+ "overload.standin.ttft_p95": {
+  "value": "14043",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p95, nearest rank"
+ },
+ "overload.standin.queue_wait_p95": {
+  "value": "10572",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "queue_wait_ms p95, nearest rank"
+ },
+ "overload_naive_retry.standin.n": {
+  "value": 78,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "rows of scenario overload_naive_retry, source stand-in, counted in the tables"
+ },
+ "overload_naive_retry.standin.written_pct": {
+  "value": "46.2",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok and degraded_level < 3 (an answer or a refusal, written by a model), % of requests"
+ },
+ "overload_naive_retry.standin.weaker_pct": {
+  "value": "29.5",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "written at degraded_level 1 (another model) or 2 (lean), % of requests"
+ },
+ "overload_naive_retry.standin.passages_budget_pct": {
+  "value": "52.6",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status rate_limited: cited passages because budget had no drafter in time, %"
+ },
+ "overload_naive_retry.standin.passages_gate_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok at degraded_level 3: cited passages after both drafts failed the citation check, %"
+ },
+ "overload_naive_retry.standin.gave_up_pct": {
+  "value": "1.3",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status timeout (the simulated person left first), %"
+ },
+ "overload_naive_retry.standin.ttft_n": {
+  "value": 77,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "requests with a first token"
+ },
+ "overload_naive_retry.standin.ttft_p50": {
+  "value": "6271",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p50, nearest rank"
+ },
+ "overload_naive_retry.standin.ttft_p95": {
+  "value": "11547",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p95, nearest rank"
+ },
+ "overload_naive_retry.standin.queue_wait_p95": {
+  "value": "0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "queue_wait_ms p95, nearest rank"
+ },
+ "burst.standin.n": {
+  "value": 34,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "rows of scenario burst, source stand-in, counted in the tables"
+ },
+ "burst.standin.written_pct": {
+  "value": "70.6",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok and degraded_level < 3 (an answer or a refusal, written by a model), % of requests"
+ },
+ "burst.standin.weaker_pct": {
+  "value": "32.4",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "written at degraded_level 1 (another model) or 2 (lean), % of requests"
+ },
+ "burst.standin.passages_budget_pct": {
+  "value": "29.4",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status rate_limited: cited passages because budget had no drafter in time, %"
+ },
+ "burst.standin.passages_gate_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok at degraded_level 3: cited passages after both drafts failed the citation check, %"
+ },
+ "burst.standin.gave_up_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status timeout (the simulated person left first), %"
+ },
+ "burst.standin.ttft_n": {
+  "value": 34,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "requests with a first token"
+ },
+ "burst.standin.ttft_p50": {
+  "value": "948",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p50, nearest rank"
+ },
+ "burst.standin.ttft_p95": {
+  "value": "7828",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p95, nearest rank"
+ },
+ "burst.standin.queue_wait_p95": {
+  "value": "7561",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "queue_wait_ms p95, nearest rank"
+ },
+ "chaos.standin.n": {
+  "value": 27,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "rows of scenario chaos, source stand-in, counted in the tables"
+ },
+ "chaos.standin.written_pct": {
+  "value": "96.3",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok and degraded_level < 3 (an answer or a refusal, written by a model), % of requests"
+ },
+ "chaos.standin.weaker_pct": {
+  "value": "33.3",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "written at degraded_level 1 (another model) or 2 (lean), % of requests"
+ },
+ "chaos.standin.passages_budget_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status rate_limited: cited passages because budget had no drafter in time, %"
+ },
+ "chaos.standin.passages_gate_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok at degraded_level 3: cited passages after both drafts failed the citation check, %"
+ },
+ "chaos.standin.gave_up_pct": {
+  "value": "3.7",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status timeout (the simulated person left first), %"
+ },
+ "chaos.standin.ttft_n": {
+  "value": 26,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "requests with a first token"
+ },
+ "chaos.standin.ttft_p50": {
+  "value": "1966",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p50, nearest rank"
+ },
+ "chaos.standin.ttft_p95": {
+  "value": "9509",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p95, nearest rank"
+ },
+ "chaos.standin.queue_wait_p95": {
+  "value": "1",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "queue_wait_ms p95, nearest rank"
+ },
+ "daily_exhausted.standin.n": {
+  "value": 14,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "rows of scenario daily_exhausted, source stand-in, counted in the tables"
+ },
+ "daily_exhausted.standin.written_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok and degraded_level < 3 (an answer or a refusal, written by a model), % of requests"
+ },
+ "daily_exhausted.standin.weaker_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "written at degraded_level 1 (another model) or 2 (lean), % of requests"
+ },
+ "daily_exhausted.standin.passages_budget_pct": {
+  "value": "100.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status rate_limited: cited passages because budget had no drafter in time, %"
+ },
+ "daily_exhausted.standin.passages_gate_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok at degraded_level 3: cited passages after both drafts failed the citation check, %"
+ },
+ "daily_exhausted.standin.gave_up_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status timeout (the simulated person left first), %"
+ },
+ "daily_exhausted.standin.ttft_n": {
+  "value": 14,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "requests with a first token"
+ },
+ "daily_exhausted.standin.ttft_p50": {
+  "value": "4",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p50, nearest rank"
+ },
+ "daily_exhausted.standin.ttft_p95": {
+  "value": "9",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p95, nearest rank"
+ },
+ "daily_exhausted.standin.queue_wait_p95": {
+  "value": "0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "queue_wait_ms p95, nearest rank"
+ },
+ "rpm_halved.standin.n": {
+  "value": 36,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "rows of scenario rpm_halved, source stand-in, counted in the tables"
+ },
+ "rpm_halved.standin.written_pct": {
+  "value": "86.1",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok and degraded_level < 3 (an answer or a refusal, written by a model), % of requests"
+ },
+ "rpm_halved.standin.weaker_pct": {
+  "value": "77.8",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "written at degraded_level 1 (another model) or 2 (lean), % of requests"
+ },
+ "rpm_halved.standin.passages_budget_pct": {
+  "value": "8.3",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status rate_limited: cited passages because budget had no drafter in time, %"
+ },
+ "rpm_halved.standin.passages_gate_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok at degraded_level 3: cited passages after both drafts failed the citation check, %"
+ },
+ "rpm_halved.standin.gave_up_pct": {
+  "value": "5.6",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status timeout (the simulated person left first), %"
+ },
+ "rpm_halved.standin.ttft_n": {
+  "value": 34,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "requests with a first token"
+ },
+ "rpm_halved.standin.ttft_p50": {
+  "value": "3135",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p50, nearest rank"
+ },
+ "rpm_halved.standin.ttft_p95": {
+  "value": "12601",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p95, nearest rank"
+ },
+ "rpm_halved.standin.queue_wait_p95": {
+  "value": "12306",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "queue_wait_ms p95, nearest rank"
+ },
+ "steady.standin.n": {
+  "value": 24,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "rows of scenario steady, source stand-in, counted in the tables"
+ },
+ "steady.standin.written_pct": {
+  "value": "100.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok and degraded_level < 3 (an answer or a refusal, written by a model), % of requests"
+ },
+ "steady.standin.weaker_pct": {
+  "value": "20.8",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "written at degraded_level 1 (another model) or 2 (lean), % of requests"
+ },
+ "steady.standin.passages_budget_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status rate_limited: cited passages because budget had no drafter in time, %"
+ },
+ "steady.standin.passages_gate_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok at degraded_level 3: cited passages after both drafts failed the citation check, %"
+ },
+ "steady.standin.gave_up_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status timeout (the simulated person left first), %"
+ },
+ "steady.standin.ttft_n": {
+  "value": 24,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "requests with a first token"
+ },
+ "steady.standin.ttft_p50": {
+  "value": "2029",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p50, nearest rank"
+ },
+ "steady.standin.ttft_p95": {
+  "value": "9630",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p95, nearest rank"
+ },
+ "steady.standin.queue_wait_p95": {
+  "value": "0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "queue_wait_ms p95, nearest rank"
+ },
+ "real_burst.standin.n": {
+  "value": 20,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "rows of scenario real_burst, source stand-in, counted in the tables"
+ },
+ "real_burst.standin.written_pct": {
+  "value": "65.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok and degraded_level < 3 (an answer or a refusal, written by a model), % of requests"
+ },
+ "real_burst.standin.weaker_pct": {
+  "value": "40.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "written at degraded_level 1 (another model) or 2 (lean), % of requests"
+ },
+ "real_burst.standin.passages_budget_pct": {
+  "value": "30.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status rate_limited: cited passages because budget had no drafter in time, %"
+ },
+ "real_burst.standin.passages_gate_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok at degraded_level 3: cited passages after both drafts failed the citation check, %"
+ },
+ "real_burst.standin.gave_up_pct": {
+  "value": "5.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status timeout (the simulated person left first), %"
+ },
+ "real_burst.standin.ttft_n": {
+  "value": 19,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "requests with a first token"
+ },
+ "real_burst.standin.ttft_p50": {
+  "value": "718",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p50, nearest rank"
+ },
+ "real_burst.standin.ttft_p95": {
+  "value": "7117",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p95, nearest rank"
+ },
+ "real_burst.standin.queue_wait_p95": {
+  "value": "6731",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "queue_wait_ms p95, nearest rank"
+ },
+ "real_steady.standin.n": {
+  "value": 31,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "rows of scenario real_steady, source stand-in, counted in the tables"
+ },
+ "real_steady.standin.written_pct": {
+  "value": "100.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok and degraded_level < 3 (an answer or a refusal, written by a model), % of requests"
+ },
+ "real_steady.standin.weaker_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "written at degraded_level 1 (another model) or 2 (lean), % of requests"
+ },
+ "real_steady.standin.passages_budget_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status rate_limited: cited passages because budget had no drafter in time, %"
+ },
+ "real_steady.standin.passages_gate_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status ok at degraded_level 3: cited passages after both drafts failed the citation check, %"
+ },
+ "real_steady.standin.gave_up_pct": {
+  "value": "0.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "status timeout (the simulated person left first), %"
+ },
+ "real_steady.standin.ttft_n": {
+  "value": 31,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "requests with a first token"
+ },
+ "real_steady.standin.ttft_p50": {
+  "value": "1495",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p50, nearest rank"
+ },
+ "real_steady.standin.ttft_p95": {
+  "value": "8248",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "first_token_ms p95, nearest rank"
+ },
+ "real_steady.standin.queue_wait_p95": {
+  "value": "1",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "queue_wait_ms p95, nearest rank"
+ },
+ "real_steady.gap_pts": {
+  "value": "12.9",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "stand-in written % minus real written %"
+ },
+ "real_burst.gap_pts": {
+  "value": "20.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "stand-in written % minus real written %"
+ },
+ "q3.large.n": {
+  "value": 18,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "eval:retrieval rows at setting large"
+ },
+ "q3.large.correct_pct": {
+  "value": "72.2",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "answer_grade correct, %"
+ },
+ "q3.large.refused_pct": {
+  "value": "22.2",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "answer_grade refused_correctly, %"
+ },
+ "q3.large.tokens": {
+  "value": "1948",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "tokens_in + tokens_out per request, mean"
+ },
+ "q3.medium.n": {
+  "value": 18,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "eval:retrieval rows at setting medium"
+ },
+ "q3.medium.correct_pct": {
+  "value": "50.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "answer_grade correct, %"
+ },
+ "q3.medium.refused_pct": {
+  "value": "22.2",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "answer_grade refused_correctly, %"
+ },
+ "q3.medium.tokens": {
+  "value": "2212",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "tokens_in + tokens_out per request, mean"
+ },
+ "q3.small.n": {
+  "value": 18,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "eval:retrieval rows at setting small"
+ },
+ "q3.small.correct_pct": {
+  "value": "27.8",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "answer_grade correct, %"
+ },
+ "q3.small.refused_pct": {
+  "value": "22.2",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "answer_grade refused_correctly, %"
+ },
+ "q3.small.tokens": {
+  "value": "1957",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "tokens_in + tokens_out per request, mean"
+ },
+ "q3.medium_rerank.n": {
+  "value": 18,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "eval:retrieval rows at setting medium+rerank"
+ },
+ "q3.medium_rerank.correct_pct": {
+  "value": "50.0",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "answer_grade correct, %"
+ },
+ "q3.medium_rerank.refused_pct": {
+  "value": "22.2",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "answer_grade refused_correctly, %"
+ },
+ "q3.medium_rerank.tokens": {
+  "value": "1769",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "tokens_in + tokens_out per request, mean"
+ },
+ "q3.small_lean.n": {
+  "value": 18,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "eval:retrieval rows at setting small_lean"
+ },
+ "q3.small_lean.correct_pct": {
+  "value": "33.3",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "answer_grade correct, %"
+ },
+ "q3.small_lean.refused_pct": {
+  "value": "22.2",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "answer_grade refused_correctly, %"
+ },
+ "q3.small_lean.tokens": {
+  "value": "1035",
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "tokens_in + tokens_out per request, mean"
+ },
+ "q3.chosen": {
+  "value": "large",
+  "source": [
+   "results/quality/winner.json"
+  ],
+  "how": "the setting make_tables.py picked: most correct, ties within one question broken by fewest tokens"
+ },
+ "lim.qwen_otpm": {
+  "value": "1000",
+  "source": [
+   "data/calibration.json"
+  ],
+  "how": "measured (real run 429 body (drafter-large-20261110.calls.jsonl))"
+ },
+ "lim.qwen_itpm": {
+  "value": "7000",
+  "source": [
+   "data/calibration.json"
+  ],
+  "how": "measured (real run 429 body (drafter-large-qwen-rerun-otpm-20261111.calls.jsonl))"
+ },
+ "lim.qwen_tpm_doc": {
+  "value": 8000,
+  "source": [
+   "data/limits_documented.json"
+  ],
+  "how": "input: Groq's documented TPM for the model"
+ },
+ "lim.otpm_share": {
+  "value": "12.5",
+  "source": [
+   "data/calibration.json",
+   "data/limits_documented.json"
+  ],
+  "how": "hidden output-token limit as % of the documented TPM"
+ },
+ "probe.calls": {
+  "value": 171,
+  "source": [
+   "data/probe/calibration.json"
+  ],
+  "how": "real calls the probe logged"
+ },
+ "cal.ttfb_n": {
+  "value": 13,
+  "source": [
+   "data/calibration.json"
+  ],
+  "how": "probe calls behind the 120b time-to-first-byte fit"
+ },
+ "cal.ttfb_p50": {
+  "value": "1130",
+  "source": [
+   "data/calibration.json"
+  ],
+  "how": "120b server time to first byte p50 (ms), probe"
+ },
+ "cal.decode_tps": {
+  "value": "473",
+  "source": [
+   "data/calibration.json"
+  ],
+  "how": "120b decode tokens/s p50, probe"
+ },
+ "cal.hold_max": {
+  "value": 556.0,
+  "source": [
+   "data/calibration.json"
+  ],
+  "how": "largest extra admission hold (tokens) seen in real 120b TPM 429s"
+ },
+ "slow.request_id": {
+  "value": "real_burst-20261111T073012Z-0009",
+  "source": [
+   "data/results/detail.jsonl"
+  ],
+  "how": "slowest request of the real burst run (scripts/explain_request.py --slowest)"
+ },
+ "slow.qid": {
+  "value": "Q14",
+  "source": [
+   "data/results/detail.jsonl"
+  ],
+  "how": "its question"
+ },
+ "slow.total_ms": {
+  "value": "15963",
+  "source": [
+   "data/results/detail.jsonl"
+  ],
+  "how": "arrival to release, or to when the person left (ms)"
+ },
+ "slow.waiting_ms": {
+  "value": "15122",
+  "source": [
+   "data/results/detail.jsonl"
+  ],
+  "how": "time classed as waiting by explain_request.split"
+ },
+ "slow.working_ms": {
+  "value": "838",
+  "source": [
+   "data/results/detail.jsonl"
+  ],
+  "how": "time classed as working by explain_request.split"
+ },
+ "slow.retrying_ms": {
+  "value": "0",
+  "source": [
+   "data/results/detail.jsonl"
+  ],
+  "how": "time classed as retrying by explain_request.split"
+ },
+ "slow.local_ms": {
+  "value": "3",
+  "source": [
+   "data/results/detail.jsonl"
+  ],
+  "how": "time classed as local by explain_request.split"
+ },
+ "slow.patience_s": {
+  "value": "15.9",
+  "source": [
+   "data/results/detail.jsonl"
+  ],
+  "how": "the simulated person's patience (s)"
+ },
+ "slow.plan": {
+  "value": "lean",
+  "source": [
+   "data/results/detail.jsonl"
+  ],
+  "how": "the ladder level its plan chose (span 'plan')"
+ },
+ "slow.check": {
+  "value": "fail",
+  "source": [
+   "data/results/detail.jsonl"
+  ],
+  "how": "the citation gate's verdict on its draft (span 'check'; no reason recorded)"
+ },
+ "slow.first_wait_ms": {
+  "value": "5625",
+  "source": [
+   "data/results/detail.jsonl"
+  ],
+  "how": "the first waiting interval (budget for the draft)"
+ },
+ "slow.last_wait_ms": {
+  "value": "9496",
+  "source": [
+   "data/results/detail.jsonl"
+  ],
+  "how": "the last waiting interval (for a second draft)"
+ },
+ "slow.draft_ms": {
+  "value": "838",
+  "source": [
+   "data/results/detail.jsonl"
+  ],
+  "how": "the first working interval (the draft call)"
+ },
+ "slow.last_wait_on": {
+  "value": "gpt-oss-20b",
+  "source": [
+   "data/results/detail.jsonl"
+  ],
+  "how": "the model the last wait was for (span label)"
+ },
+ "trap.Q14.question": {
+  "value": "How does H-Net decide where to cut the byte stream into pieces?",
+  "source": [
+   "data/retrieval/traps.json"
+  ],
+  "how": "the question text"
+ },
+ "trap.Q5.question": {
+  "value": "What training cost in FLOPs does Table 2 report for the big Transformer?",
+  "source": [
+   "data/retrieval/traps.json"
+  ],
+  "how": "the question text"
+ },
+ "trap.Q17.question": {
+  "value": "What is H-Net's p95 latency serving 1,000 simultaneous requests?",
+  "source": [
+   "data/retrieval/traps.json"
+  ],
+  "how": "the question text"
+ },
+ "trap.size": {
+  "value": 2400,
+  "source": [
+   "data/retrieval/traps.json"
+  ],
+  "how": "piece size the traps were measured at (chars)"
+ },
+ "trap.Q14.shared": {
+  "value": 0,
+  "source": [
+   "data/retrieval/traps.json"
+  ],
+  "how": "question terms (after stemming and stopwords) found in the passage that holds the answer"
+ },
+ "trap.Q14.terms": {
+  "value": 7,
+  "source": [
+   "data/retrieval/traps.json"
+  ],
+  "how": "question terms (after stemming and stopwords)"
+ },
+ "trap.Q5.rank": {
+  "value": 2,
+  "source": [
+   "data/retrieval/traps.json"
+  ],
+  "how": "rank of the right piece, plain BM25"
+ },
+ "trap.Q5.top_cite": {
+  "value": "1706.03762v7 p.8 §6.1",
+  "source": [
+   "data/retrieval/traps.json"
+  ],
+  "how": "the piece BM25 puts first"
+ },
+ "trap.Q17.wrong_rank": {
+  "value": 1,
+  "source": [
+   "data/retrieval/traps.json"
+  ],
+  "how": "rank of the first piece from another paper (the question is about H-Net)"
+ },
+ "trap.Q17.top_cite": {
+  "value": "2410.00037v1 p.2 §1",
+  "source": [
+   "data/retrieval/traps.json"
+  ],
+  "how": "the piece BM25 puts first"
+ },
+ "trap.Q17.top_paper": {
+  "value": "moshi",
+  "source": [
+   "data/retrieval/traps.json"
+  ],
+  "how": "its paper"
+ },
+ "trap.Q17.shared_terms": {
+  "value": "latency",
+  "source": [
+   "data/retrieval/traps.json"
+  ],
+  "how": "question terms that piece shares"
+ },
+ "trap.Q17.distractor_rank": {
+  "value": 44,
+  "source": [
+   "data/retrieval/traps.json"
+  ],
+  "how": "rank of the first piece holding a distractor (a number a reply could borrow)"
+ },
+ "trap.Q14.correct": {
+  "value": 0,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "Q14 answers graded correct, over all retrieval settings"
+ },
+ "trap.Q14.asked": {
+  "value": 5,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "Q14 answers, all settings"
+ },
+ "trap.Q12.refused": {
+  "value": 5,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "Q12 correctly refused, all settings"
+ },
+ "trap.Q12.asked": {
+  "value": 5,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "Q12 asked, all settings"
+ },
+ "trap.Q17.refused": {
+  "value": 5,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "Q17 correctly refused, all settings"
+ },
+ "trap.Q17.asked": {
+  "value": 5,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "Q17 asked, all settings"
+ },
+ "r4.retry_off.s7.no_written": {
+  "value": 12,
+  "source": [
+   "data/experiments/r4_retry_policy/result.json"
+  ],
+  "how": "arm retry_off, seed 7: people without a written answer"
+ },
+ "r4.retry_off.s7.n": {
+  "value": 107,
+  "source": [
+   "data/experiments/r4_retry_policy/result.json"
+  ],
+  "how": "arm retry_off, seed 7: requests"
+ },
+ "r4.retry_off.s7.ttft_p95": {
+  "value": "9936",
+  "source": [
+   "data/experiments/r4_retry_policy/result.json"
+  ],
+  "how": "arm retry_off, seed 7: TTFT p95 (ms)"
+ },
+ "r4.retry_off.s8.no_written": {
+  "value": 10,
+  "source": [
+   "data/experiments/r4_retry_policy/result.json"
+  ],
+  "how": "arm retry_off, seed 8: people without a written answer"
+ },
+ "r4.retry_off.s8.n": {
+  "value": 100,
+  "source": [
+   "data/experiments/r4_retry_policy/result.json"
+  ],
+  "how": "arm retry_off, seed 8: requests"
+ },
+ "r4.retry_off.s8.ttft_p95": {
+  "value": "10792",
+  "source": [
+   "data/experiments/r4_retry_policy/result.json"
+  ],
+  "how": "arm retry_off, seed 8: TTFT p95 (ms)"
+ },
+ "r4.retry_on.s7.no_written": {
+  "value": 13,
+  "source": [
+   "data/experiments/r4_retry_policy/result.json"
+  ],
+  "how": "arm retry_on, seed 7: people without a written answer"
+ },
+ "r4.retry_on.s7.n": {
+  "value": 107,
+  "source": [
+   "data/experiments/r4_retry_policy/result.json"
+  ],
+  "how": "arm retry_on, seed 7: requests"
+ },
+ "r4.retry_on.s7.ttft_p95": {
+  "value": "9322",
+  "source": [
+   "data/experiments/r4_retry_policy/result.json"
+  ],
+  "how": "arm retry_on, seed 7: TTFT p95 (ms)"
+ },
+ "r4.retry_on.s8.no_written": {
+  "value": 14,
+  "source": [
+   "data/experiments/r4_retry_policy/result.json"
+  ],
+  "how": "arm retry_on, seed 8: people without a written answer"
+ },
+ "r4.retry_on.s8.n": {
+  "value": 100,
+  "source": [
+   "data/experiments/r4_retry_policy/result.json"
+  ],
+  "how": "arm retry_on, seed 8: requests"
+ },
+ "r4.retry_on.s8.ttft_p95": {
+  "value": "8451",
+  "source": [
+   "data/experiments/r4_retry_policy/result.json"
+  ],
+  "how": "arm retry_on, seed 8: TTFT p95 (ms)"
+ },
+ "r4b.pipe.s7.no_written": {
+  "value": 0,
+  "source": [
+   "data/experiments/r4b_policy_vs_naive/result.json"
+  ],
+  "how": "seed 7, overload: people without a written answer"
+ },
+ "r4b.pipe.s7.n": {
+  "value": 47,
+  "source": [
+   "data/experiments/r4b_policy_vs_naive/result.json"
+  ],
+  "how": "seed 7, overload: requests"
+ },
+ "r4b.pipe.s7.http_429": {
+  "value": 1,
+  "source": [
+   "data/experiments/r4b_policy_vs_naive/result.json"
+  ],
+  "how": "seed 7, overload: 429s from the stand-in"
+ },
+ "r4b.naive.s7.no_written": {
+  "value": 25,
+  "source": [
+   "data/experiments/r4b_policy_vs_naive/result.json"
+  ],
+  "how": "seed 7, overload_naive_retry: people without a written answer"
+ },
+ "r4b.naive.s7.n": {
+  "value": 47,
+  "source": [
+   "data/experiments/r4b_policy_vs_naive/result.json"
+  ],
+  "how": "seed 7, overload_naive_retry: requests"
+ },
+ "r4b.naive.s7.http_429": {
+  "value": 274,
+  "source": [
+   "data/experiments/r4b_policy_vs_naive/result.json"
+  ],
+  "how": "seed 7, overload_naive_retry: 429s from the stand-in"
+ },
+ "r4b.pipe.s8.no_written": {
+  "value": 0,
+  "source": [
+   "data/experiments/r4b_policy_vs_naive/result.json"
+  ],
+  "how": "seed 8, overload: people without a written answer"
+ },
+ "r4b.pipe.s8.n": {
+  "value": 47,
+  "source": [
+   "data/experiments/r4b_policy_vs_naive/result.json"
+  ],
+  "how": "seed 8, overload: requests"
+ },
+ "r4b.pipe.s8.http_429": {
+  "value": 8,
+  "source": [
+   "data/experiments/r4b_policy_vs_naive/result.json"
+  ],
+  "how": "seed 8, overload: 429s from the stand-in"
+ },
+ "r4b.naive.s8.no_written": {
+  "value": 23,
+  "source": [
+   "data/experiments/r4b_policy_vs_naive/result.json"
+  ],
+  "how": "seed 8, overload_naive_retry: people without a written answer"
+ },
+ "r4b.naive.s8.n": {
+  "value": 47,
+  "source": [
+   "data/experiments/r4b_policy_vs_naive/result.json"
+  ],
+  "how": "seed 8, overload_naive_retry: requests"
+ },
+ "r4b.naive.s8.http_429": {
+  "value": 264,
+  "source": [
+   "data/experiments/r4b_policy_vs_naive/result.json"
+  ],
+  "how": "seed 8, overload_naive_retry: 429s from the stand-in"
+ },
+ "naive.qid": {
+  "value": "Q8",
+  "source": [
+   "data/experiments/r4b_policy_vs_naive/rows/current-seed7-overload_naive_retry.jsonl",
+   "data/experiments/r4b_policy_vs_naive/rows/current-seed7-overload.jsonl"
+  ],
+  "how": "the naive-retry request (seed 7) with the most failed calls that ended in passages"
+ },
+ "naive.failed_calls": {
+  "value": 12,
+  "source": [
+   "data/experiments/r4b_policy_vs_naive/rows/current-seed7-overload_naive_retry.jsonl",
+   "data/experiments/r4b_policy_vs_naive/rows/current-seed7-overload.jsonl"
+  ],
+  "how": "its calls that got no 200 (429s)"
+ },
+ "naive.ms": {
+  "value": "9140",
+  "source": [
+   "data/experiments/r4b_policy_vs_naive/rows/current-seed7-overload_naive_retry.jsonl",
+   "data/experiments/r4b_policy_vs_naive/rows/current-seed7-overload.jsonl"
+  ],
+  "how": "its time to release (ms)"
+ },
+ "naive.pipe_kind": {
+  "value": "answer",
+  "source": [
+   "data/experiments/r4b_policy_vs_naive/rows/current-seed7-overload_naive_retry.jsonl",
+   "data/experiments/r4b_policy_vs_naive/rows/current-seed7-overload.jsonl"
+  ],
+  "how": "what the pipeline's policy gave the same arrival"
+ },
+ "naive.pipe_ms": {
+  "value": "9016",
+  "source": [
+   "data/experiments/r4b_policy_vs_naive/rows/current-seed7-overload_naive_retry.jsonl",
+   "data/experiments/r4b_policy_vs_naive/rows/current-seed7-overload.jsonl"
+  ],
+  "how": "and how fast (ms)"
+ },
+ "cfg.retry_enabled": {
+  "value": "off",
+  "source": [
+   "config/pipeline.toml"
+  ],
+  "how": "input: [retry] enabled"
+ },
+ "cfg.retry_max": {
+  "value": 1,
+  "source": [
+   "config/pipeline.toml"
+  ],
+  "how": "input: [retry] max_per_step (the policy tested)"
+ },
+ "cfg.retry_budget_pct": {
+  "value": "10",
+  "source": [
+   "config/pipeline.toml"
+  ],
+  "how": "input: [retry] global_budget_fraction, as %"
+ },
+ "naive.retries": {
+  "value": 3,
+  "source": [
+   "scripts/run_load.py"
+  ],
+  "how": "input: NAIVE retries per call"
+ },
+ "naive.backoff_s": {
+  "value": 1.0,
+  "source": [
+   "scripts/run_load.py"
+  ],
+  "how": "input: NAIVE first back-off (s)"
+ },
+ "load.overload_rate": {
+  "value": 15.0,
+  "source": [
+   "scripts/run_load.py"
+  ],
+  "how": "input: overload's offered arrivals per minute"
+ },
+ "daily.request_id": {
+  "value": "daily_exhausted-20261110T192348Z-0006",
+  "source": [
+   "results/raw/runs/daily_exhausted-20261110T192348Z.jsonl"
+  ],
+  "how": "the shortest reply of the daily_exhausted run"
+ },
+ "daily.question": {
+  "value": "What theoretical and practical latency does the paper report?",
+  "source": [
+   "results/raw/runs/daily_exhausted-20261110T192348Z.jsonl"
+  ],
+  "how": "its question"
+ },
+ "daily.reply": {
+  "value": "No written answer this time: here are the most relevant passages from the papers, quoted as they are. A written answer should be possible in about 496 s.\n[S1] 2410.00037v1 pp.25-26 §5.3: \"Table 5 reports results for ablations on the use of an RQ- Transformer. We first replicate the setting of Copet et al. (2023) with the delay pattern of [0, 1, 2, 3, 4, 5, 6, 7], which means that each level of R VQ token is generated one timestep after the preceding level. In this context, we see that using an RQ-Transformer is not necessary, as it only provides a marginal improvement in perplexity. However, this delay pattern induces a theoretical latency of 8 timesteps, which amounts to 640ms, a latency that is incompatible with the requirements of a real-time dialogue model.\"\n[S2] 2410.00037v1 p.26 §5.3: \"Results - Additional ablations. Table 6 reports additional ablations on additional delay patterns, the weight of the semantic token loss and our proposed Inner Monologue procedure, all using the RQ-Transformer. First, we compare three configurations of delays that are compatible with real-time dialogue. The [0 , 0, 0, 0, 0, 0, 0, 0] pattern represents the minimal latency of 80ms that can be obtained with Mimi tokens at 12.5Hz.\"",
+  "source": [
+   "results/raw/runs/daily_exhausted-20261110T192348Z.jsonl"
+  ],
+  "how": "the reply text the person got, verbatim"
+ },
+ "daily.ms": {
+  "value": "4",
+  "source": [
+   "results/raw/runs/daily_exhausted-20261110T192348Z.jsonl"
+  ],
+  "how": "its time to release (ms)"
+ },
+ "daily.eta_s": {
+  "value": 495.8,
+  "source": [
+   "results/raw/runs/daily_exhausted-20261110T192348Z.jsonl"
+  ],
+  "how": "the ETA it gave (s)"
+ },
+ "daily.qid": {
+  "value": "Q11",
+  "source": [
+   "results/raw/runs/daily_exhausted-20261110T192348Z.jsonl"
+  ],
+  "how": "its question id"
+ },
+ "daily.grade": {
+  "value": "wrong",
+  "source": [
+   "results/raw/runs/daily_exhausted-20261110T192348Z.jsonl",
+   "data/questions.jsonl"
+  ],
+  "how": "relay.grade on this stand-in reply, for the write-up only (stand-in rows carry no grade in results.csv)"
+ },
+ "replay.drafts": {
+  "value": 165,
+  "source": [
+   "data/experiments/gate_replay/result.json"
+  ],
+  "how": "real drafts replayed through the old and new gate"
+ },
+ "replay.old_pass": {
+  "value": 119,
+  "source": [
+   "data/experiments/gate_replay/result.json"
+  ],
+  "how": "drafts the gate as measured at e7aa65f passes"
+ },
+ "replay.new_pass": {
+  "value": 127,
+  "source": [
+   "data/experiments/gate_replay/result.json"
+  ],
+  "how": "drafts the fixed gate passes"
+ },
+ "replay.dropped": {
+  "value": 0,
+  "source": [
+   "data/experiments/gate_replay/result.json"
+  ],
+  "how": "sentences the fixed gate dropped"
+ },
+ "replay.req_changed": {
+  "value": 2,
+  "source": [
+   "data/experiments/gate_replay/result.json"
+  ],
+  "how": "requests counted in the tables whose outcome the fixed gate changes"
+ },
+ "replay.req_in_tables": {
+  "value": 159,
+  "source": [
+   "data/experiments/gate_replay/result.json"
+  ],
+  "how": "requests counted in the tables with a draft"
+ },
+ "baseline": {
+  "value": "e7aa65f",
+  "source": [
+   "git"
+  ],
+  "how": "the commit the tables and real load runs were measured at"
+ },
+ "grades.n": {
+  "value": 176,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "real rows counted in the tables that carry a grade"
+ },
+ "grades.unsure": {
+  "value": 37,
+  "source": [
+   "results/results.csv"
+  ],
+  "how": "of those, graded automatically with the grader unsure and not checked by hand (grade_sure 0)"
+ },
+ "grades.overrides": {
+  "value": 22,
+  "source": [
+   "results/grade_overrides.jsonl"
+  ],
+  "how": "grades set by hand (author's overrides)"
+ },
+ "ledger.cap100_calls": {
+  "value": 8,
+  "source": [
+   "results/ledger/groq_calls.jsonl"
+  ],
+  "how": "real calls answered (200) with the account cap at 100% (the two key1 eval jobs)"
+ },
+ "ledger.refill_calls": {
+  "value": 117,
+  "source": [
+   "results/ledger/groq_calls.jsonl"
+  ],
+  "how": "real calls made under refill accounting (the two real load runs)"
+ },
+ "ledger.refill_429": {
+  "value": 1,
+  "source": [
+   "results/ledger/groq_calls.jsonl"
+  ],
+  "how": "of those, 429s"
+ },
+ "ledger.max24h_120b": {
+  "value": 262144,
+  "source": [
+   "results/ledger/groq_calls.jsonl"
+  ],
+  "how": "most gpt-oss-120b tokens key1 was charged (reported usage) in any 24 h window"
+ },
+ "lim.tpd_120b": {
+  "value": 200000,
+  "source": [
+   "data/limits_documented.json"
+  ],
+  "how": "input: Groq's documented TPD for gpt-oss-120b"
+ },
+ "budget.window_h": {
+  "value": 24,
+  "source": [
+   "config/budget.toml"
+  ],
+  "how": "input: the ledger's window (hours)"
+ },
+ "status.relabelled": {
+  "value": 11,
+  "source": [
+   "results/results.csv",
+   "git:e7aa65f:results/results.csv"
+  ],
+  "how": "rows counted in the tables whose status changed since the baseline (passages after failed checks: rate_limited -> ok)"
+ },
+ "excluded.key2": {
+  "value": 4,
+  "source": [
+   "results/excluded_runs.json"
+  ],
+  "how": "runs excluded because they ran on a second key"
+ },
+ "excluded.bad_key": {
+  "value": 2,
+  "source": [
+   "results/excluded_runs.json"
+  ],
+  "how": "runs excluded because every call got 401"
+ }
+}

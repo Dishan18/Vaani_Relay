@@ -27,11 +27,124 @@ import argparse
 import csv
 import json
 import math
+import re
 import sys
 from collections import defaultdict
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+CAL = ROOT / "data" / "calibration.json"
+PROBE = ROOT / "data" / "probe" / "calibration.json"
+LEDGER = ROOT / "results" / "ledger" / "groq_calls.jsonl"
+SHORT = {"openai/gpt-oss-20b": "20b", "openai/gpt-oss-120b": "120b", "qwen/qwen3.8-27b": "qwen"}
+
+
+def rpd_refill(ledger: Path = LEDGER, model: str = "openai/gpt-oss-120b") -> dict | None:
+    """The largest rise in x-ratelimit-remaining-requests between two consecutive calls of one key
+    (key1: entries without an account label, or labelled key1) on the same UTC day, so a reset at
+    00:00 UTC can't explain it, and less than 24 h after the spends, so a rolling window can't either."""
+    if not ledger.exists():
+        return None
+    pts = []
+    with ledger.open(encoding="utf-8") as f:
+        for line in f:
+            e = json.loads(line)
+            if (e.get("source") == "real" and e.get("model") == model and e.get("hdr_remaining_requests") is not None
+                    and e.get("account", "key1") == "key1"):
+                pts.append((e["ts"], int(e["hdr_remaining_requests"]), e["ts_iso"]))
+    pts.sort()
+    best = None
+    for (t0, r0, i0), (t1, r1, i1) in zip(pts, pts[1:]):
+        if i0[:10] != i1[:10]:
+            continue
+        if r1 - r0 > 0 and (best is None or r1 - r0 > best["rise"]):
+            best = {"from": r0, "to": r1, "rise": r1 - r0, "hours": round((t1 - t0) / 3600, 2), "at": i0, "until": i1}
+    return best
+
+
+def daily_429s(raw: Path = ROOT / "results" / "raw") -> tuple[int, int]:
+    """(429 responses whose body names a per-day limit, all 429 responses) in every saved real call:
+    results/raw and the probe's log."""
+    daily = total = 0
+    for p in [*raw.rglob("*.jsonl"), ROOT / "data" / "probe" / "probe_raw.jsonl"]:
+        with p.open(encoding="utf-8") as f:
+            for line in f:
+                if '"status": 429' not in line:
+                    continue
+                o = json.loads(line)
+                rec = o.get("record") or o
+                if rec.get("status") != 429 or rec.get("source", "real") != "real" or o.get("mode", "real") != "real":
+                    continue
+                total += 1
+                body = (rec.get("error_body") or "").lower()
+                daily += ("per day" in body)
+    return daily, total
+
+
+def table1(cal_path: Path = CAL, probe_path: Path = PROBE) -> list[str]:
+    """Table 1 in the brief's rows: value found, how, confidence."""
+    cal = json.loads(cal_path.read_text(encoding="utf-8"))["models"]
+    probe = json.loads(probe_path.read_text(encoding="utf-8"))
+    ver = probe["verdicts"]
+    walls = probe["requests_window_and_pooling"][0]["per_model"]
+    first = next(w["first_429"] for w in walls.values() if w.get("first_429"))
+    rec = [w["first_recovery_success_s_after_first_429"] for w in walls.values()
+           if w.get("first_recovery_success_s_after_first_429") is not None]
+    refill = [e["median_refill_per_s"] for m in probe["tokens_window"] for e in (probe["tokens_window"][m] or [])
+              if e.get("median_refill_per_s")]
+    rr = rpd_refill()
+    n_daily, n_429 = daily_429s()
+
+    def per_model(bucket):
+        return "; ".join(f"{SHORT[m]} {c['buckets'][bucket]['capacity']:.0f}" for m, c in cal.items() if bucket in c["buckets"])
+
+    def how(bucket):
+        by: dict[str, list[str]] = {}
+        for m, c in cal.items():
+            if bucket in c["buckets"]:
+                by.setdefault(c["buckets"][bucket]["source"], []).append(SHORT[m])
+        return "; ".join(f"{', '.join(ms)}: {src}" for src, ms in by.items())
+
+    def span(xs, fmt):
+        lo, hi = fmt.format(min(xs)), fmt.format(max(xs))
+        return lo if lo == hi else f"{lo}-{hi}"
+
+    def file_of(src):
+        m = re.search(r"\(([^()]+\.jsonl)", src)
+        return m.group(1) if m else src
+    q = cal["qwen/qwen3.8-27b"]["buckets"]
+    conc = "; ".join(f"{SHORT[m]}: {v}" for m, v in ver["concurrency"].items())
+    p = first["parsed"]
+    rows = [
+        ("Requests per minute", per_model("RPM"), how("RPM") + f"; {walls['openai/gpt-oss-120b']['ok_before_first_429']} "
+         "successes before the first 429 in a burst", "high (gpt-oss), low (qwen: documented only)"),
+        ("Tokens per minute", per_model("TPM") + f"; qwen also: output {q['OTPM']['capacity']:.0f}/min, "
+         f"input {q['ITPM']['capacity']:.0f}/min (undocumented)", how("TPM") + "; qwen's two hidden limits: "
+         f"named in real-run 429 bodies ({file_of(q['OTPM']['source'])}, {file_of(q['ITPM']['source'])})",
+         "high"),
+        ("Requests per day", per_model("RPD"), how("RPD") + (
+            f"; refills continuously: 120b's remaining went from {rr['from']} to {rr['to']} in {rr['hours']} h "
+            "with no reset (ledger headers)" if rr else ""), "high (limit), medium (refill)"),
+        ("Tokens per day", per_model("TPD"), f"documented only: no header shows it; {n_daily} of the {n_429} "
+         "real 429s saved named a per-day limit", "low"),
+        ("Requests in flight at once", "no limit found", f"stepwise concurrency in the probe: {conc}",
+         "medium (a lower bound only)"),
+        ("What it returns when a limit is hit", f"HTTP 429, retry-after: {first['retry_after']} s, and a body "
+         f"naming the limit: \"{p['what']} ({p['short']}): Limit {p['limit']}, Used {p['used']}, Requested "
+         f"{p['requested']}. Please try again in {p['try_again_in']}\"", "probe burst past the RPM wall; real-run 429 bodies",
+         "high"),
+        ("Time until it recovers", f"next request admitted {span(rec, '{:.1f}')} s after the first 429; "
+         f"tokens refill at {span(refill, '{:.0f}')} per s (TPM/60): buckets, not minute windows",
+         "recovery polls after the RPM wall; remaining-tokens headers after a draft", "high (minute), medium (day)"),
+    ]
+    L = ["## Table 1: limits found in the real service", "",
+         "Free tier, per model (each model hit its own wall). From data/calibration.json, data/probe/calibration.json "
+         "and the ledger's response headers.", "",
+         "| limit | value found | how found | confidence |", "|---|---|---|---|"]
+    L += [f"| {a} | {b} | {c} | {d} |" for a, b, c, d in rows]
+    return L + [""]
 
 
 def pct(xs, q):
@@ -175,6 +288,7 @@ def main(argv=None) -> int:
     L = ["# Tables", "", f"Generated by `scripts/make_tables.py` from `{a.results.name}` "
          "(latest answer per question). Percentiles nearest-rank. TTFT = total: replies are released "
          "after their checks. Both include budget waits (the eval waits rather than degrade).", ""]
+    L += table1()
     winner = {}
     ret = [r for r in rows if r["scenario"] == "eval:retrieval"]
     if ret:

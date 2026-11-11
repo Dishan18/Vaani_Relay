@@ -1,0 +1,41 @@
+{
+ "_what": "Digits the write-up template may contain in its own text, because they are names, not measurements. Read by scripts/check_numbers.py; any other digit in the template fails the check.",
+ "patterns": [
+  {
+   "regex": "\\bQ\\d{1,2}\\b",
+   "why": "question id from data/questions.jsonl"
+  },
+  {
+   "regex": "\\bgpt-oss-(?:20|120)b\\b",
+   "why": "model id"
+  },
+  {
+   "regex": "\\bqwen3\\.8-27b\\b",
+   "why": "model id"
+  },
+  {
+   "regex": "\\bTable (?:1|2a|2b|3)\\b",
+   "why": "the brief's table names"
+  },
+  {
+   "regex": "\\b(?:401|429)s?\\b",
+   "why": "HTTP status codes (401 invalid key, 429 rate limited)"
+  },
+  {
+   "regex": "\\b5xx\\b",
+   "why": "HTTP status class (server error)"
+  },
+  {
+   "regex": "\\bBM25\\b",
+   "why": "name of the ranking function"
+  },
+  {
+   "regex": "\\bgrade_changes_v\\d_v\\d\\.md\\b",
+   "why": "file name"
+  },
+  {
+   "regex": "\\bp(?:50|95|99)\\b",
+   "why": "percentile name (nearest rank, stated with n in the tables)"
+  }
+ ]
+}
