@@ -149,16 +149,13 @@ All three are fixed and covered by tests. **gpt-oss-120b wasn't re-run after the
 so its two numbers measure the bugs, not the final design. `[draft] format = "text"` switches to prose
 in one line.
 
-## 8. What I'm unsure about, and what's next
+## 8. What's next, in order
 
-- **Least certain:** whether claims mode matches prose with gpt-oss-120b. I couldn't re-measure it
-  today. If it doesn't, the switch is one line in `config/production.toml`.
-- **Next, in order:**
-    1. A layout-aware PDF parser. Equations and tables come out as fragments; that's the root of Q14 and
-       of the quote-matching problems.
-    2. Graded answers for the plain-wording questions, written by someone who hasn't seen the passages.
-    3. The reranker on GPU.
-    4. A router in JSON mode, and paper selection without a model call.
+1. A layout-aware PDF parser. Equations and tables come out as fragments; that's the root of Q14 and
+   of the quote-matching problems.
+2. Graded answers for the plain-wording questions, written by someone who hasn't seen the passages.
+3. The reranker on GPU.
+4. A router in JSON mode, and paper selection without a model call.
 
 ## 9. How to run and reproduce
 

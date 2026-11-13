@@ -332,19 +332,14 @@ answers yet. Claims mode streams and uses 23% fewer tokens than prose, for one q
 <p>All three are fixed and covered by tests. <strong>gpt-oss-120b wasn't re-run after the fixes</strong> (daily budget),
 so its two numbers measure the bugs, not the final design. <code>[draft] format = "text"</code> switches to prose
 in one line.</p>
-<h2>8. What I'm unsure about, and what's next</h2>
-<ul>
-<li><strong>Least certain:</strong> whether claims mode matches prose with gpt-oss-120b. I couldn't re-measure it
-  today. If it doesn't, the switch is one line in <code>config/production.toml</code>.</li>
-<li><strong>Next, in order:</strong><ol>
+<h2>8. What's next, in order</h2>
+<ol>
 <li>A layout-aware PDF parser. Equations and tables come out as fragments; that's the root of Q14 and
    of the quote-matching problems.</li>
 <li>Graded answers for the plain-wording questions, written by someone who hasn't seen the passages.</li>
 <li>The reranker on GPU.</li>
 <li>A router in JSON mode, and paper selection without a model call.</li>
 </ol>
-</li>
-</ul>
 <h2>9. How to run and reproduce</h2>
 <pre><code>docker compose up --build                      API on http://localhost:8080 (no key: stand-in model)
 python -m unittest discover -s tests           197 tests, no key, no network, no Redis
