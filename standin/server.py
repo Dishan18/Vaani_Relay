@@ -247,7 +247,10 @@ def placeholder(messages: list[dict]) -> str:
         # a real sentence (not a paragraph label like "Metrics."), so the shape is a plausible answer
         sents = re.split(r"(?<=[.!?])\s+", m.group(1).replace("\n", " "))
         good = [s for s in sents if len(re.findall(r"[A-Za-z]{2,}", s)) >= 6]
-        return f"{(good or sents)[0]} [S1]"
+        first = (good or sents)[0]
+        if "JSON Lines" in sysmsg:      # the production claims drafter: one claim, quoting its own source
+            return json.dumps({"text": first, "sources": [1], "quote": " ".join(first.split()[:12])}) + "\n"
+        return f"{first} [S1]"
     return "OK"
 
 

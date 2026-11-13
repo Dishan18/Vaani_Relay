@@ -1,0 +1,44 @@
+# Production settings, merged over config/pipeline.toml (relay.pipeline.load_production_config).
+# config/pipeline.toml stays exactly as submitted and measured, so every number in the write-up still
+# reproduces; the service (service/) and ask.py run with this file. Each change says what it fixes.
+
+[retrieval]
+# Hybrid retrieval (relay/dense.py): BM25 + bge-small-en-v1.5 embeddings, fused by reciprocal rank.
+# Small-to-big: search 600-char children (precise), hand the drafter their 2400-char parents (context).
+# Measured on 46 answerable questions, 32 of them in plain engineer wording (data/retrieval/v2.md):
+#   hit@3 all: BM25 2400 (submitted) 63%, hybrid 2400 70%, small-to-big hybrid 76%, + rerank 76-80%.
+#   On the plain-wording questions: BM25 50% -> small-to-big hybrid 78%.
+mode = "hybrid"
+piece_chars = 2400
+child_chars = 600
+candidates = 30
+# BM25's top 3 parents always make the cut, the fused ranking fills up to k = 5. With k = 3, fusion pushed out
+# passages BM25 ranked 2nd-3rd that held exact-term facts (Q11, Q16). Measured, k = 5 (data/retrieval/v2.md):
+#   original 14: hit 93%, fact recall 88% (submitted BM25 k=3: 93% / 84%); plain-wording 32: hit 78% (50%);
+#   all 46: 83% (63%). Cost: ~9.3k context chars per draft instead of ~5.6k (about +900 prompt tokens).
+keep_bm25 = 3
+k_full = 5
+k_lean = 3
+# Cross-encoder rerank (Xenova/ms-marco-MiniLM-L-6-v2): +4 points hit@3 for hybrid 2400, but about
+# 1.7 s per query on this CPU. Off by default on CPU; set it on a GPU host, where it costs ~20 ms.
+rerank_model = ""
+
+[router]
+# The router also writes one hypothetical answer sentence (HyDE), used only as the embedding query.
+hyde = true
+
+[decide]
+# Lexical evidence alone refused answerable questions phrased in other words (Q14). The gate now refuses
+# only when the lexical evidence AND the best child's cosine are weak. Answerable min 0.56; off-topic
+# 0.44-0.63, which the router refuses before this point anyway (data/retrieval/v2.md).
+refuse_if_dense_below = 0.55
+
+[draft]
+# "claims": the drafter returns JSON Lines {text, sources, quote}; citations are metadata rendered by the
+# system, each claim is checked (quote found in a cited source, numbers present) as it streams in and
+# released immediately. "text": the submitted [S#]-prose drafter and regex gate.
+format = "claims"
+
+[max_tokens]
+# A claim carries its quote: about 1.5x the visible output of a prose sentence, plus gpt-oss reasoning.
+draft = 1600

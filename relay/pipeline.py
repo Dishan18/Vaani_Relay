@@ -43,6 +43,7 @@ over every model call in the request (``Reply.tokens_in`` / ``tokens_out``).
 from __future__ import annotations
 
 import asyncio
+import inspect
 import json
 import re
 import time
@@ -54,6 +55,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Awaitable, Callable
 
+from relay.claims import Claim, ClaimStream, claims_messages, render
 from relay.limiter import TOKENS, Grant, Limiter, Ticket, Unavailable
 from relay.llm import CallRecord, Timeouts
 from relay.retrieve import PAPER_TITLES, PAPERS, Hit, Retriever, tokenize
@@ -70,9 +72,26 @@ ChatFn = Callable[..., Awaitable[CallRecord]]
 
 
 def plain_chat(client) -> ChatFn:
-    async def chat(payload, *, phase, timeouts=None):
-        return await client.stream_chat(payload, timeouts=timeouts)
+    async def chat(payload, *, phase, timeouts=None, on_delta=None):
+        return await client.stream_chat(payload, timeouts=timeouts, on_delta=on_delta)
     return chat
+
+
+PRODUCTION_CONFIG = ROOT / "config" / "production.toml"
+
+
+def load_production_config(path: Path = PRODUCTION_CONFIG) -> dict:
+    """config/pipeline.toml (as submitted and measured) with config/production.toml's tables merged
+    over it, key by key."""
+    base = load_config()
+    with path.open("rb") as f:
+        over = tomllib.load(f)
+    for k, v in over.items():
+        if isinstance(v, dict) and isinstance(base.get(k), dict):
+            base[k] = {**base[k], **v}
+        else:
+            base[k] = v
+    return base
 
 
 def load_config(path: Path = CONFIG) -> dict:
@@ -142,6 +161,8 @@ class Reply:
     checks: dict = field(default_factory=dict)
     released_ms: float | None = None   # arrival -> release (= first token: the reply is buffered)
     budget_wait_ms: float = 0.0
+    claims: list[dict] = field(default_factory=list)   # claims mode: each sentence with its sources and quote
+    first_token_ms: float | None = None  # claims mode, streaming: arrival -> first verified claim released
 
     @property
     def tokens_in(self) -> int:
@@ -385,6 +406,16 @@ ROUTER_SYSTEM = (
     "use (technical terms, not the question's everyday words).\n"
     "alt_query: a second, differently worded keyword query with synonyms.")
 
+# Production router (config/production.toml [router] hyde = true): the same JSON plus one hypothetical
+# answer sentence, written the way the paper would phrase it. It is used only as the embedding query
+# (HyDE, Gao et al. 2022): a guessed answer sits closer to the real passage in embedding space than
+# the question does. It is never shown to anyone, so a wrong guess costs only a worse search.
+ROUTER_SYSTEM_HYDE = ROUTER_SYSTEM.replace(
+    'Reply with JSON only, no prose: {"papers": [...], "query": "...", "alt_query": "..."}.',
+    'Reply with JSON only, no prose: {"papers": [...], "query": "...", "alt_query": "...", "hyde": "..."}.'
+) + ("\nhyde: one or two sentences that answer the question the way the paper itself would, using its "
+     "technical terms (a plausible guess is fine; it is used only to search).")
+
 DRAFT_SYSTEM = (
     "Answer the question using only the numbered sources below.\n"
     "Rules:\n"
@@ -509,6 +540,11 @@ class RetryBudget:
 class Pipeline:
     def __init__(self, chat: ChatFn, limiter: Limiter, retriever: Retriever, config: dict | None = None) -> None:
         self.chat, self.lim, self.retriever = chat, limiter, retriever
+        try:      # does the chat function take on_delta (streaming)? Without it, claims are parsed after the call
+            params = inspect.signature(chat).parameters.values()
+            self._chat_streams = any(x.name == "on_delta" or x.kind == x.VAR_KEYWORD for x in params)
+        except (TypeError, ValueError):
+            self._chat_streams = False
         self.cfg = config or load_config()
         self.models = self.cfg["models"]
         self.max_tokens = self.cfg["max_tokens"]
@@ -523,13 +559,17 @@ class Pipeline:
 
     # ------------------------------------------------------------ public
     async def answer(self, question: str, request_id: str | None = None, patience_s: float | None = None,
-                     trace: Trace | None = None) -> Reply:
-        """``trace``: pass your own to keep the spans of a request that is cancelled (a person who left)."""
+                     trace: Trace | None = None, on_claim: Callable[[dict], None] | None = None) -> Reply:
+        """``trace``: pass your own to keep the spans of a request that is cancelled (a person who left).
+        ``on_claim``: claims mode only. Called with each verified claim as soon as it is checked, so a
+        caller can stream the answer sentence by sentence (the LLM verifier is skipped when streaming:
+        it needs the whole answer)."""
         rid = request_id or uuid.uuid4().hex[:12]
         tr = trace if trace is not None else Trace()
         arrival = self.lim.now()
         deadline = arrival + min(self.cfg["ladder"]["deadline_s"], patience_s or 1e9)
         calls: list[ModelCall] = []
+        tr.meta["_on_claim"] = on_claim
         try:
             reply = await self._answer(rid, question, tr, calls, deadline)
         except Exception as e:                       # internal failure only -> busy
@@ -542,11 +582,14 @@ class Pipeline:
                           notice=f"internal failure: {type(e).__name__}", eta_s=float(n))
         with tr.span("send") as s:
             s.outcome = reply.kind
+        tr.meta.pop("_on_claim", None)
         for k, v in tr.meta.items():
             reply.checks.setdefault(k, v)
         reply.model_calls = calls
         reply.spans = tr.spans
         reply.released_ms = round(tr.ms(), 1)
+        if reply.first_token_ms is None:
+            reply.first_token_ms = reply.released_ms
         reply.budget_wait_ms = round(sum((x.end_ms - x.start_ms) for x in tr.spans
                                          if x.name.startswith("wait:") and x.end_ms is not None), 1)
         return reply
@@ -556,12 +599,12 @@ class Pipeline:
         rc, lad = self.cfg["retrieval"], self.cfg["ladder"]
         with tr.span("plan") as s:
             # plan from the real prompt: one BM25 search on the question (no budget) sizes the draft
-            plan_hits = self.search_papers(question, rc["k_full"])
+            plan_hits = await self._offload(self.search_papers, question, rc["k_full"])
             level, drafter, waits = self._plan(deadline, question, plan_hits)
             s.outcome = LEVEL_NAMES[level]
             s.detail = {"predicted_wait_s": waits, "drafter": drafter}
         if level == PASSAGES:
-            hits = self._retrieve(tr, question, question, None, rc["k_lean"])
+            hits = await self._offload(self._retrieve, tr, question, question, None, rc["k_lean"])
             eta = min((w for w in waits["lean"].values() if w is not None), default=None)
             # name the daily bucket when every drafter lacks daily room, so the reply gives no time estimate
             mx = self.cfg["max_tokens"]["draft"]
@@ -576,12 +619,13 @@ class Pipeline:
         papers, query, alt = None, question, None
         router_note = ""
         steps = self.cfg.get("steps", {})
+        hyde = None
         if level in (FULL, FULL_OTHER) and steps.get("router", True):
             with tr.span("understand") as s:
                 try:
-                    papers, query, alt = await self._understand(question, tr, calls, deadline)
+                    papers, query, alt, hyde = await self._understand(question, tr, calls, deadline)
                     s.outcome = "router"
-                    tr.meta["router"] = {"papers": papers, "query": query, "alt_query": alt}
+                    tr.meta["router"] = {"papers": papers, "query": query, "alt_query": alt, "hyde": hyde}
                 except _Step as e:
                     s.outcome = f"heuristic ({e})"
                     router_note = "no router"
@@ -599,7 +643,9 @@ class Pipeline:
                          notice="refused without a draft: the question is about none of the papers")
 
         k = rc["k_full"] if level in (FULL, FULL_OTHER) else rc["k_lean"]
-        hits = self._retrieve(tr, query, question, papers or None, k, alt)
+        # dense query: the router's hypothetical answer (HyDE) plus the question, when there is one
+        hits = await self._offload(self._retrieve, tr, query, question, papers or None, k, alt,
+                              dense_query=f"{hyde} {question}" if hyde else question)
         tr.meta["retrieval"] = {"query": query, "papers": papers or None, "k": k,
                                 "pids": [h.piece.pid for h in hits]}
 
@@ -616,13 +662,26 @@ class Pipeline:
                 return ev["best"] < dc["refuse_if_best_below"] or ev["top_bm25"] < dc["refuse_if_top_bm25_below"]
             ev = ev_q if not weak(ev_q) or weak(ev_r) else ev_r
             s.detail = {**ev, "question": ev_q, "rewrite": ev_r if query != question else None}
-            if not hits or (weak(ev_q) and weak(ev_r)):
+            # semantic evidence (production, hybrid retrieval): a question that shares few words with
+            # the passages but means the same thing is not refused. Measured: answerable questions'
+            # best child cosine >= 0.56, off-topic 0.44-0.63 (data/retrieval/v2.md); the router
+            # refuses off-topic questions first, so this only rescues lexically weak answerable ones.
+            dense_ok = False
+            if dc.get("refuse_if_dense_below") is not None and hits and hasattr(self.retriever, "dense_best") \
+                    and getattr(self.retriever, "dense", None) is not None:
+                db = await self._offload(self.retriever.dense_best, question, hits)
+                s.detail["dense_best"] = round(db, 3)
+                dense_ok = db >= dc["refuse_if_dense_below"]
+            if not hits or (weak(ev_q) and weak(ev_r) and not dense_ok):
                 s.outcome = "refuse: evidence too weak"
                 return Reply(rid, question, "refusal", level,
                              "The papers don't appear to cover this: no passage matches the question.",
                              [], notice="refused without a model call: retrieval found almost nothing",
                              checks={"evidence": ev})
             s.outcome = "draft"
+
+        if (self.cfg.get("draft") or {}).get("format") == "claims":
+            return await self._answer_claims(rid, question, hits, level, drafter, tr, calls, deadline, router_note)
 
         # draft + check, stepping down the ladder if the drafter isn't available
         attempt_models = self._draft_order(drafter)
@@ -674,6 +733,138 @@ class Pipeline:
             attempt_models = [model] + [m for m in attempt_models if m != model]
         return self._passages(rid, question, hits, None, "both drafted answers failed the citation check",
                               eta_note=False)
+
+    async def _offload(self, fn, *args, **kw):
+        """Run retrieval off the event loop when it does model inference (embeddings, rerank): a 1.7 s CPU
+        rerank inline would stall every other request in the process. Plain BM25 stays inline (< 1 ms)."""
+        if hasattr(self.retriever, "dense"):
+            return await asyncio.to_thread(fn, *args, **kw)
+        return fn(*args, **kw)
+
+    # ------------------------------------------------------------ claims mode (production)
+    async def _answer_claims(self, rid, question, hits, level, drafter, tr: Trace, calls, deadline,
+                             router_note) -> Reply:
+        """Draft as JSON-Lines claims carrying their own citation metadata (relay.claims). Each claim is
+        checked as its line arrives; with ``on_claim`` it is released immediately (streaming). A claim
+        that fails its check is dropped, never released. No verified claim -> one redraft with the
+        reasons -> passages. The LLM verifier runs only when not streaming (it needs the whole answer)
+        and, since claims are separate, drops just the claims it finds unsupported."""
+        rc = self.cfg["retrieval"]
+        on_claim = tr.meta.get("_on_claim")
+        released: list[Claim] = []
+        holder: dict = {}
+        first_ms: list[float] = []
+
+        def factory(use: list[Hit]):
+            stream = ClaimStream(use)
+            holder["stream"], holder["hits"] = stream, use
+
+            def on_delta(kind, text):
+                if kind != "content":
+                    return
+                for c in stream.feed(text):
+                    if c.ok and on_claim is not None:
+                        released.append(c)
+                        if not first_ms:
+                            first_ms.append(round(tr.ms(), 1))
+                        on_claim({**c.to_dict(use), "sid_cites": source_list(use)})
+            return on_delta
+
+        attempt_models = self._draft_order(drafter)
+        feedback, model, last_dropped, verdict_any = None, None, [], False
+        for attempt in (1, 2):
+            try:
+                rec, model, level = await self._draft_claims(question, hits, level, attempt_models, tr, calls,
+                                                             deadline, feedback, factory, released)
+            except _Step as e:
+                if released:                       # partial stream: keep what was verified and sent
+                    break
+                lean_hits = hits[: rc["k_lean"]]
+                return self._passages(rid, question, lean_hits, self._eta(rc["k_lean"], question, lean_hits),
+                                      f"no drafter available ({e})")
+            stream: ClaimStream = holder["stream"]
+            use: list[Hit] = holder["hits"]
+            # a chat client that doesn't stream: parse the finished text now (same checks, no early release)
+            tail = (rec.text or "") if not self._chat_streams else ""
+            for c in stream.feed(tail, final=True):  # (and a last line without a newline)
+                if c.ok and on_claim is not None:
+                    released.append(c)
+                    if not first_ms:
+                        first_ms.append(round(tr.ms(), 1))
+                    on_claim({**c.to_dict(use), "sid_cites": source_list(use)})
+            good, dropped = stream.good, stream.dropped
+            last_dropped = dropped
+            with tr.span("check") as s:
+                s.detail = {"claims": len(stream.claims), "verified": len(good),
+                            "dropped": [f"{c.reason}: {c.text[:120]}" for c in dropped], "junk_lines": len(stream.junk)}
+                if stream.refusal is not None and not good:
+                    s.outcome = "refusal"
+                    reason = stream.refusal if numbers_grounded(stream.refusal, use) else ""
+                    return Reply(rid, question, "refusal", level,
+                                 "The papers don't say." + (f" {reason}" if reason else ""), [],
+                                 notice=self._notice(level, router_note), checks={"draft_model": model})
+                if good and on_claim is None and level in (FULL, FULL_OTHER):
+                    verdict = await self._verify("\n".join(render([c]) for c in good), use, model, tr, calls, deadline)
+                    s.detail["verifier"] = verdict
+                    verdict_any = verdict is not None
+                    if verdict and verdict.get("unsupported"):
+                        bad = set(verdict["unsupported"])
+                        for i, c in enumerate(list(good), 1):
+                            if i in bad:
+                                c.ok, c.reason = False, "the verifier found it unsupported by its sources"
+                        good, dropped = stream.good, stream.dropped
+                        last_dropped = dropped
+                # a redraft only when nothing usable came back, or (not streaming) most claims failed
+                need_redraft = not good or (on_claim is None and len(dropped) > len(good))
+                s.outcome = "pass" if not need_redraft else "fail"
+            if not need_redraft or released:
+                break
+            reasons = [f"{c.reason}: {c.text[:160]}" for c in dropped] or stream.junk[:3] or ["no claims"]
+            feedback = ("Your previous answer failed the check (each line must be one JSON object whose quote is "
+                        "copied exactly from a cited source):\n- " + "\n- ".join(reasons[:6]))
+            attempt_models = [model] + [m for m in attempt_models if m != model]
+        stream = holder.get("stream")
+        use = holder.get("hits") or hits
+        final = released if on_claim is not None else (stream.good if stream else [])
+        if not final:
+            return self._passages(rid, question, hits, None, "both drafted answers failed the citation check",
+                                  eta_note=False)
+        verified = on_claim is not None or verdict_any
+        notice = self._notice(level, router_note, verified=verified)
+        if last_dropped:
+            notice = "; ".join(x for x in (notice, f"{len(last_dropped)} statement(s) removed because their "
+                                                   "supporting quote or number wasn't in the sources") if x)
+        if on_claim is not None:
+            notice = "; ".join(x for x in (notice, "streamed sentence by sentence: each checked against its quoted "
+                                                   "source, no second-model check") if x)
+        reply = Reply(rid, question, "answer", level, render(final), source_list(use), notice=notice,
+                      checks={"draft_model": model, "dropped": [c.to_dict(use) for c in last_dropped]},
+                      claims=[c.to_dict(use) for c in final])
+        if first_ms:
+            reply.first_token_ms = first_ms[0]
+        return reply
+
+    async def _draft_claims(self, question, hits, level, models, tr, calls, deadline, feedback, factory, released):
+        rc, lad = self.cfg["retrieval"], self.cfg["ladder"]
+        with tr.span("draft", level=LEVEL_NAMES[level], format="claims") as s:
+            if level in (FULL, FULL_OTHER):
+                msgs = claims_messages(question, hits, render_sources, feedback)
+                try:
+                    rec, m = await self._try_models("draft", models, msgs, tr, calls, lad["preferred_free_within_s"],
+                                                    deadline, on_delta_factory=lambda: factory(hits),
+                                                    stop_if=lambda: bool(released))
+                    s.outcome = m
+                    return rec, m, (FULL if m == self.models["draft"][0] else FULL_OTHER)
+                except _Step:
+                    if released:
+                        raise
+                    level = LEAN
+            lean = hits[: rc["k_lean"]]
+            msgs = claims_messages(question, lean, render_sources, feedback)
+            rec, m = await self._try_models("draft", models, msgs, tr, calls, lad["max_wait_s"], deadline,
+                                            on_delta_factory=lambda: factory(lean), stop_if=lambda: bool(released))
+            s.outcome = f"{m} (lean)"
+            return rec, m, LEAN
 
     # ------------------------------------------------------------ planning
     def _plan(self, deadline: float, question: str, hits: list[Hit]) -> tuple[int, str | None, dict]:
@@ -735,13 +926,16 @@ class Pipeline:
         return "; ".join(parts)
 
     # ------------------------------------------------------------ retrieval (the tool)
-    def search_papers(self, query: str, k: int, papers: list[str] | None = None) -> list[Hit]:
-        return self.retriever.search(query, k, papers, use_rerank=self.cfg["retrieval"].get("rerank", False))
+    def search_papers(self, query: str, k: int, papers: list[str] | None = None,
+                      dense_query: str | None = None) -> list[Hit]:
+        kw = {"dense_query": dense_query} if dense_query and hasattr(self.retriever, "dense") else {}
+        return self.retriever.search(query, k, papers, use_rerank=self.cfg["retrieval"].get("rerank", False), **kw)
 
-    def _retrieve(self, tr: Trace, query: str, question: str, papers, k: int, alt: str | None = None) -> list[Hit]:
+    def _retrieve(self, tr: Trace, query: str, question: str, papers, k: int, alt: str | None = None,
+                  dense_query: str | None = None) -> list[Hit]:
         rc = self.cfg["retrieval"]
         with tr.span("retrieve", query=query, papers=papers, k=k) as s:
-            hits = self.search_papers(query, k, papers)
+            hits = self.search_papers(query, k, papers, dense_query)
             ev = self.retriever.evidence(question, hits)
             s.detail["evidence"] = ev
             s.outcome = "1 search"
@@ -774,7 +968,7 @@ class Pipeline:
 
     # ------------------------------------------------------------ model steps
     async def _call(self, step: str, model: str, messages: list[dict], tr: Trace, calls: list[ModelCall],
-                    wait_limit_s: float, deadline: float) -> CallRecord:
+                    wait_limit_s: float, deadline: float, on_delta=None) -> CallRecord:
         """Reserve (waiting at most wait_limit_s, never past the deadline), call, settle. Raises
         _Step if this model can't serve the step."""
         mx = self.max_tokens[step]
@@ -793,7 +987,8 @@ class Pipeline:
                    **self.lim.settings.get(model, {})}
         with tr.span(f"call:{step}", model=model) as s:
             try:
-                rec = await self.chat(payload, phase=step, timeouts=self.timeouts.get(step))
+                kw = {"on_delta": on_delta} if on_delta is not None and self._chat_streams else {}
+                rec = await self.chat(payload, phase=step, timeouts=self.timeouts.get(step), **kw)
             except asyncio.CancelledError:
                 g.limiter.abandon(g)        # sent, then the person left: keep what admission charged
                 raise
@@ -815,7 +1010,7 @@ class Pipeline:
         return rec
 
     async def _try_models(self, step: str, models: list[str], messages, tr, calls, wait_limit_s, deadline,
-                          exclude: tuple[str, ...] = ()) -> tuple[CallRecord, str]:
+                          exclude: tuple[str, ...] = (), on_delta_factory=None, stop_if=None) -> tuple[CallRecord, str]:
         """Each model in fallback order. With [retry] enabled (config/pipeline.toml): after a request
         that was sent and failed, at most max_per_step retries for the step (counted across the
         request, lean step-down included), each on a model not yet failed (a different bucket), never
@@ -829,6 +1024,8 @@ class Pipeline:
                 continue
             if self.lim.now() >= deadline:
                 break
+            if stop_if is not None and stop_if():
+                break                      # claims already streamed to the person: never restart elsewhere
             if pol and state["sent_failures"] > 0:
                 why = None
                 if step in pol.get("best_effort_steps", []):
@@ -847,7 +1044,8 @@ class Pipeline:
                 self.retry_budget.note_retry(self.lim.now())
             n_before = len(calls)
             try:
-                rec = await self._call(step, m, messages, tr, calls, wait_limit_s, deadline)
+                rec = await self._call(step, m, messages, tr, calls, wait_limit_s, deadline,
+                                       on_delta_factory() if on_delta_factory is not None else None)
                 if pol and len(calls) > n_before:
                     self.retry_budget.note_attempt(self.lim.now())
                 return rec, m
@@ -862,7 +1060,9 @@ class Pipeline:
         raise _Step("; ".join(errs) or "deadline")
 
     async def _understand(self, question, tr, calls, deadline):
-        msgs = [{"role": "system", "content": ROUTER_SYSTEM}, {"role": "user", "content": question}]
+        hyde_on = bool((self.cfg.get("router") or {}).get("hyde"))
+        msgs = [{"role": "system", "content": ROUTER_SYSTEM_HYDE if hyde_on else ROUTER_SYSTEM},
+                {"role": "user", "content": question}]
         rec, _ = await self._try_models("understand", self.models["understand"], msgs, tr, calls,
                                         self.cfg["ladder"]["router_free_within_s"], deadline)
         obj = _json_obj(rec.text)
@@ -873,8 +1073,9 @@ class Pipeline:
             papers = None                    # named only unknown ids: don't trust it
         query = str(obj.get("query") or "").strip() or question
         alt = str(obj.get("alt_query") or "").strip() or None
+        hyde = (str(obj.get("hyde") or "").strip() or None) if hyde_on else None
         # keep the question's own words too: the rewrite adds vocabulary, it shouldn't lose any
-        return papers, f"{query} {question}", (f"{alt} {question}" if alt else None)
+        return papers, f"{query} {question}", (f"{alt} {question}" if alt else None), hyde
 
     async def _draft(self, question, hits, level, models, tr, calls, deadline, feedback=None):
         rc, lad = self.cfg["retrieval"], self.cfg["ladder"]
