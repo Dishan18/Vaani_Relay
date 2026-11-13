@@ -1,0 +1,13 @@
+.git
+.env
+.env.*
+!.env.example
+**/__pycache__
+.venv
+submission
+results/raw/runs
+results/ledger
+data/papers/*.pdf
+data/probe/dryrun
+ask.py
+data/retrieval/emb_cache

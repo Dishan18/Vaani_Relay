@@ -1,0 +1,70 @@
+# The Relay, production-shaped, on one machine:
+#   docker compose up --build                     API on http://localhost:8080 (2 replicas behind nginx)
+#   docker compose --profile observability up     + Prometheus on http://localhost:9090
+# With no GROQ_API_KEY in .env the API answers from the stand-in model service (no budget spent).
+x-relay: &relay
+  build: .
+  image: vaani-relay:2.0
+  env_file:
+    - path: .env
+      required: false
+  environment: &relay-env
+    REDIS_URL: redis://redis:6379/0
+    RELAY_LLM_BASE_URL: ${RELAY_LLM_BASE_URL:-http://standin:8790/openai/v1}
+  depends_on:
+    redis:
+      condition: service_healthy
+  restart: unless-stopped
+
+services:
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "volatile-lru"]
+    volumes: [redis-data:/data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  standin:
+    <<: *relay
+    command: ["python", "-m", "standin.server", "serve", "--host", "0.0.0.0", "--port", "8790",
+              "--replay", "results/raw/answers", "--seed", "1"]
+    depends_on: []
+    healthcheck:
+      disable: true
+
+  api:
+    <<: *relay
+    deploy:
+      replicas: 2
+    depends_on:
+      redis:
+        condition: service_healthy
+      standin:
+        condition: service_started
+
+  worker:
+    <<: *relay
+    command: ["python", "-m", "service.worker", "--concurrency", "4"]
+    healthcheck:
+      disable: true
+
+  nginx:
+    image: nginx:1.27-alpine
+    volumes: [./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro]
+    ports: ["8080:80"]
+    depends_on: [api]
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    profiles: [observability]
+    volumes: [./deploy/prometheus.yml:/etc/prometheus/prometheus.yml:ro]
+    ports: ["9090:9090"]
+    depends_on: [api]
+
+volumes:
+  redis-data:

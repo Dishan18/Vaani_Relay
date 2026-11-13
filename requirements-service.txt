@@ -1,0 +1,10 @@
+# The production service (service/) and hybrid retrieval (relay/dense.py). The research pipeline and all
+# load/eval scripts need only requirements.txt. Each line: why it is here.
+-r requirements.txt
+fastembed==0.9.1          # embeddings + cross-encoder rerank on ONNX Runtime, CPU, no torch (~60 MB vs ~2 GB)
+numpy==2.5.4              # vector search over ~1,800 child pieces: a matrix product, no vector DB needed at this size
+fastapi==0.162.5          # HTTP API, request validation, SSE via StreamingResponse
+uvicorn[standard]==0.54.0 # ASGI server
+redis==8.1.0              # cache, single-flight locks, fleet-wide token buckets (Lua), job queue (Streams)
+prometheus-client==0.26.0 # /metrics
+httpx==0.28.1             # FastAPI's TestClient in the service tests

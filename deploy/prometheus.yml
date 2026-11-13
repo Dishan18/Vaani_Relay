@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 10s
+scrape_configs:
+  - job_name: relay-api
+    dns_sd_configs:                 # every API replica, found through Docker's DNS
+      - names: [api]
+        type: A
+        port: 8000
