@@ -1,0 +1,370 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>The Relay v2</title><style>
+@page { size: A4; margin: 14mm 14mm 14mm 14mm; }
+:root { --ink:#1b1f24; --muted:#5b6470; --accent:#1f5fae; --line:#d6dbe1; --soft:#eef3fa; }
+body { font-family: "Segoe UI", system-ui, Arial, sans-serif; color: var(--ink); font-size: 9.6pt; line-height: 1.45;
+       margin: 0; background: #fff; }
+h1 { font-size: 18pt; color: var(--accent); margin: 0 0 6px; }
+h2 { font-size: 12.5pt; color: var(--accent); border-bottom: 1.5px solid var(--accent); padding-bottom: 2px;
+     margin: 16px 0 7px; page-break-after: avoid; }
+p { margin: 4px 0 7px; }
+ul, ol { margin: 3px 0 7px; padding-left: 18px; }
+table { border-collapse: collapse; width: 100%; margin: 5px 0 10px; font-size: 8.6pt; page-break-inside: avoid; }
+th, td { border: 1px solid var(--line); padding: 3px 5px; text-align: left; vertical-align: top; }
+th { background: var(--soft); }
+code { font-family: Consolas, monospace; font-size: 8.4pt; background: #f2f4f7; padding: 0 2px; border-radius: 2px; }
+pre { background: #f4f6f9; border: 1px solid var(--line); border-radius: 5px; padding: 6px 8px; white-space: pre-wrap;
+      font-size: 8.2pt; page-break-inside: avoid; }
+pre code { background: none; padding: 0; }
+</style></head><body><h1>The Relay, v2: resubmission</h1>
+<p><strong>In short:</strong> I added embeddings to retrieval, moved citations into metadata, made answers stream so
+the first sentence arrives sooner, and turned the pipeline into a service with a Redis cache. I also
+wrote down the constraints I had only implied in the first submission.</p>
+<p>The first submission is unchanged: tag <code>submission-2026-11-12</code>, folder <code>submission/</code>. This document
+covers what changed after the interview, why, and what each change measured, including what didn't
+improve. Every number here comes from a file a script produced:</p>
+<ul>
+<li><code>results_v2.csv</code> and <code>tables_v2.md</code> (<code>scripts/build_results_v2.py</code>);</li>
+<li><code>data/retrieval/v2.md</code> (<code>scripts/eval_retrieval_v2.py</code>).</li>
+</ul>
+<h2>1. What the review found, and what changed</h2>
+<table>
+<thead>
+<tr>
+<th>Feedback</th>
+<th>Change</th>
+<th>Measured</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No embeddings; BM25 alone</td>
+<td>Hybrid retrieval: BM25 + bge-small-en-v1.5 embeddings, merged by reciprocal rank fusion; the router writes a hypothetical answer (HyDE) to steer the embedding search</td>
+<td>On plain-wording questions the answer is retrieved <strong>78%</strong> of the time (BM25: <strong>50%</strong>)</td>
+</tr>
+<tr>
+<td>No hierarchical chunking</td>
+<td>Small-to-big: search 600-char children, give the drafter their 2400-char parent section</td>
+<td>Part of the row above; see section 3</td>
+</tr>
+<tr>
+<td>Constraints not stated</td>
+<td>Written out with numbers (section 2)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Why parse citations instead of carrying metadata?</td>
+<td>The drafter returns <code>{text, sources, quote}</code> per sentence; the system writes the citations</td>
+<td>All citation-parsing failures gone; see section 4</td>
+</tr>
+<tr>
+<td>First token = total time</td>
+<td>Each sentence is released as soon as its check passes</td>
+<td>First verified sentence p50 <strong>1.46 s</strong></td>
+</tr>
+<tr>
+<td>A script, not a service</td>
+<td>FastAPI + Redis (cache, single-flight, fleet-wide rate limits, job queue), worker, Prometheus, Docker</td>
+<td>20 requests over 4 distinct questions cost <strong>4</strong> drafts</td>
+</tr>
+</tbody>
+</table>
+<h2>2. The constraints, inferred from the brief</h2>
+<table>
+<thead>
+<tr>
+<th>Goal</th>
+<th>Constraint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Never wrong</td>
+<td>No sentence is sent unless it is backed by text in a cited source (its quote is found there, its numbers too). If the papers don't answer, say so; never guess.</td>
+</tr>
+<tr>
+<td>Fast</td>
+<td>First sentence ≤ ~3 s at p50 when budget allows; no one waits more than 15 s for budget; every request finishes within 30 s.</td>
+</tr>
+<tr>
+<td>Nobody turned away</td>
+<td>Every request gets a full answer, a shorter one, or cited passages. Never an error or a hang.</td>
+</tr>
+<tr>
+<td>Cheap</td>
+<td>$0 on the free tier; ≤ ~$2 per 1,000 answers at paid prices; ≤ ~3,500 tokens per answer.</td>
+</tr>
+<tr>
+<td>Inside provider limits</td>
+<td>Never above the measured per-minute and per-day limits of each model, <strong>counted across all servers</strong>; no retry storms.</td>
+</tr>
+<tr>
+<td>Honest under load</td>
+<td>A weaker answer says it is weaker and why; no wait time is promised that can't be backed up.</td>
+</tr>
+</tbody>
+</table>
+<h2>3. Retrieval: embeddings, hybrid, small-to-big</h2>
+<p><strong>The test set was biased.</strong> My 14 original questions used the papers' own words, so BM25 retrieved
+the answer for 93% of them. I added 32 questions phrased the way an engineer would ask
+(<code>data/retrieval/dev_questions.jsonl</code>). On those, the submitted BM25 retrieved only 50%.</p>
+<p>Measured with no model calls, raw question as the query, 46 answerable questions:</p>
+<table>
+<thead>
+<tr>
+<th>Retrieval</th>
+<th>Pieces read</th>
+<th>All 46</th>
+<th>Original 14 (hit / fact recall)</th>
+<th>Plain-wording 32</th>
+<th>Context</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BM25, submitted</td>
+<td>3</td>
+<td>63%</td>
+<td>93% / 84%</td>
+<td>50%</td>
+<td>5.6k chars</td>
+</tr>
+<tr>
+<td>Embeddings only</td>
+<td>3</td>
+<td>67%</td>
+<td>71% / 50%</td>
+<td>66%</td>
+<td>5.3k</td>
+</tr>
+<tr>
+<td>Small-to-big hybrid</td>
+<td>3</td>
+<td>76%</td>
+<td>71% / 66%</td>
+<td>78%</td>
+<td>5.9k</td>
+</tr>
+<tr>
+<td>Hybrid + cross-encoder rerank</td>
+<td>3</td>
+<td>80%</td>
+<td>86% / 77%</td>
+<td>78%</td>
+<td>1.8 s/query on CPU</td>
+</tr>
+<tr>
+<td><strong>Chosen: BM25 top 3 kept + small-to-big hybrid</strong></td>
+<td><strong>5</strong></td>
+<td><strong>83%</strong></td>
+<td><strong>93% / 88%</strong></td>
+<td><strong>78%</strong></td>
+<td>9.3k</td>
+</tr>
+</tbody>
+</table>
+<p>With only three slots, fusion pushed out passages BM25 had ranked 2nd or 3rd, and those held exact-term
+facts (Q11, Q16). The chosen setting keeps BM25's top three and lets fusion fill up to five. It loses
+nothing on the original questions and gains 28 points on plain wording, at the cost of about 900 more
+prompt tokens per draft.</p>
+<p>The reranker is off by default because it costs ~1.7 s per query on a CPU; on a GPU host it should be on.
+Q14 ("where does H-Net cut the byte stream?") is still not retrieved by any variant: its gold passage
+was extracted as equation fragments (section 7).</p>
+<h2>4. Citations carried as metadata</h2>
+<p>The drafter now answers in JSON Lines and never writes citation markup:</p>
+<pre><code>{&quot;text&quot;: &quot;The base model uses a dropout rate of 0.1.&quot;, &quot;sources&quot;: [1], &quot;quote&quot;: &quot;For the base model, we use a rate of P_drop = 0.1&quot;}
+</code></pre>
+<p>Each claim is checked with string operations as soon as its line arrives:</p>
+<ul>
+<li>the sources it names were given;</li>
+<li>its quote occurs in a cited source;</li>
+<li>its numbers appear there.</li>
+</ul>
+<p><strong>What this removes:</strong> every real failure of the v1 citation check was a <em>parsing</em> failure (<code>【S3】</code>,
+zero-width spaces in <code>[S1]</code>, formulas split into uncited lines, <code>{0,1}</code> read as one number). With
+metadata there's nothing to parse. A bad claim is also withheld on its own instead of failing the
+whole answer.</p>
+<p><strong>What it doesn't remove:</strong> checking. A model can attach the wrong source, or a real quote that doesn't
+support its sentence. The quote turns the first case into a free check; the second still needs the LLM
+verifier, which runs when the answer isn't streamed.</p>
+<h2>5. Speed: streaming verified sentences</h2>
+<p>Each claim is released the moment it passes its check: over Server-Sent Events from the API, or straight
+into text-to-speech in a voice product. Real Groq, gpt-oss-20b, p50 excluding budget wait:</p>
+<table>
+<thead>
+<tr>
+<th>Pipeline</th>
+<th>First sentence p50 / p95</th>
+<th>Complete p50 / p95</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v2 claims (streams)</td>
+<td><strong>1,459 / 3,319 ms</strong></td>
+<td>1,648 / 3,320 ms</td>
+</tr>
+<tr>
+<td>v2 retrieval + prose (buffered)</td>
+<td>1,795 / 2,926 ms</td>
+<td>1,795 / 2,926 ms</td>
+</tr>
+</tbody>
+</table>
+<p>The trade-off: the LLM verifier needs the whole answer, so a streamed answer relies on the per-claim
+quote check, and the reply says so.</p>
+<h2>6. The service</h2>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API (FastAPI)</td>
+<td><code>/v1/ask</code>, <code>/v1/ask/stream</code> (SSE), <code>/v1/jobs</code>, <code>/healthz</code>, <code>/readyz</code>, <code>/metrics</code>; API keys and a per-client rate limit</td>
+</tr>
+<tr>
+<td>Redis cache + single-flight</td>
+<td>The same question (normalised) is answered once: later requests get the cached answer; requests that arrive while it's being drafted wait for it</td>
+</tr>
+<tr>
+<td>Fleet-wide rate limit</td>
+<td>One token bucket per model in Redis (atomic Lua script), from the measured limits. Every server must take its share before calling Groq, so two replicas can't each spend the whole budget</td>
+</tr>
+<tr>
+<td>Job queue</td>
+<td>Redis Streams with consumer groups; a crashed worker's jobs are redelivered</td>
+</tr>
+<tr>
+<td>Metrics</td>
+<td>Prometheus: first-token and total latency, cache hits, model calls by status, tokens, withheld claims</td>
+</tr>
+<tr>
+<td>Deployment</td>
+<td>Docker Compose: Redis, 2 API replicas behind nginx, worker, stand-in model, optional Prometheus</td>
+</tr>
+</tbody>
+</table>
+<p>Kafka isn't used: the service needs a cache, counters, locks and a small queue, and Redis does all
+four. Kafka fits a high-volume event log replayed by many consumers; the events stream is shaped so it
+can be mirrored to Kafka later.</p>
+<p><strong>Measured on the running stack</strong> (stand-in model, so speed and behaviour, not answer quality):</p>
+<ul>
+<li>20 simultaneous requests over 4 distinct questions → 4 drafts, 16 shared.</li>
+<li>Repeats served from the cache in under 1 ms.</li>
+<li>The worker survived a Redis restart.</li>
+</ul>
+<p><strong>Two bugs found only by running it:</strong></p>
+<ul>
+<li>The embedding model wasn't actually in the image, so each replica downloaded it on its first request:
+  16–18 s. Fixed; the first request is now 1.1–1.8 s.</li>
+<li>An idle worker crashed on a Redis read timeout. Fixed with timeouts and back-off.</li>
+</ul>
+<h2>7. Answer quality: honest results</h2>
+<p>Real Groq, the same 18 graded questions as the first submission, auto-grades, verifier off. One
+question = 5.6 points.</p>
+<table>
+<thead>
+<tr>
+<th>Pipeline</th>
+<th>Drafter</th>
+<th>Correct + cited</th>
+<th>Wrong</th>
+<th>Correctly refused</th>
+<th>Tokens/answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>First submission (auto-grades)</td>
+<td>gpt-oss-20b</td>
+<td>44.4%</td>
+<td>33.3%</td>
+<td>22.2%</td>
+<td>–</td>
+</tr>
+<tr>
+<td>v2 retrieval + prose</td>
+<td>gpt-oss-20b</td>
+<td><strong>50.0%</strong></td>
+<td>27.8%</td>
+<td>22.2%</td>
+<td>3,797</td>
+</tr>
+<tr>
+<td><strong>v2 claims (default)</strong></td>
+<td>gpt-oss-20b</td>
+<td>44.4%</td>
+<td>33.3%</td>
+<td>22.2%</td>
+<td><strong>2,935</strong></td>
+</tr>
+<tr>
+<td>First submission (Table 3)</td>
+<td>gpt-oss-120b</td>
+<td>72.2% (auto 66.7%)</td>
+<td>5.6%</td>
+<td>22.2%</td>
+<td>1,948</td>
+</tr>
+<tr>
+<td>v2 claims, before the fixes below</td>
+<td>gpt-oss-120b</td>
+<td>16.7% → 33.3%</td>
+<td>—</td>
+<td>22.2%</td>
+<td>~3,000</td>
+</tr>
+</tbody>
+</table>
+<p><strong>What this shows:</strong> on these 18 questions, answer accuracy is <strong>on par, not better</strong>; the differences
+are one question either way. The 18 are mostly in the papers' own words, where BM25 was already
+strong, so the retrieval gain shows up on the plain-wording questions instead, which don't have graded
+answers yet. Claims mode streams and uses 23% fewer tokens than prose, for one question less.</p>
+<p><strong>How the first 120b runs went wrong, and how I found it:</strong></p>
+<ul>
+<li>Answers were grounded but incomplete. Raw drafts showed true claims being withheld because the PDF
+  extraction glues words together ("whereF represents"), so correct quotes failed a word-by-word match.</li>
+<li>gpt-oss-20b also wrote several JSON objects on one line, and quoted tables skipping cells.</li>
+</ul>
+<p>All three are fixed and covered by tests. <strong>gpt-oss-120b wasn't re-run after the fixes</strong> (daily budget),
+so its two numbers measure the bugs, not the final design. <code>[draft] format = "text"</code> switches to prose
+in one line.</p>
+<h2>8. What I'm unsure about, and what's next</h2>
+<ul>
+<li><strong>Least certain:</strong> whether claims mode matches prose with gpt-oss-120b. I couldn't re-measure it
+  today. If it doesn't, the switch is one line in <code>config/production.toml</code>.</li>
+<li><strong>Next, in order:</strong><ol>
+<li>A layout-aware PDF parser. Equations and tables come out as fragments; that's the root of Q14 and
+   of the quote-matching problems.</li>
+<li>Graded answers for the plain-wording questions, written by someone who hasn't seen the passages.</li>
+<li>The reranker on GPU.</li>
+<li>A router in JSON mode, and paper selection without a model call.</li>
+</ol>
+</li>
+</ul>
+<h2>9. How to run and reproduce</h2>
+<pre><code>docker compose up --build                      API on http://localhost:8080 (no key: stand-in model)
+python -m unittest discover -s tests           197 tests, no key, no network, no Redis
+python scripts/eval_retrieval_v2.py            retrieval tables (no model calls)
+python scripts/eval_v2_quality.py --real       answer quality on real Groq (spends budget)
+python scripts/build_results_v2.py             results_v2.csv and tables_v2.md from the saved runs
+python ask.py &quot;your question&quot; --real --stream  one question from the terminal
+</code></pre>
+<p>Design and full critique of every step: <code>docs/V2_DESIGN.md</code>. Code: <code>code_v2.zip</code>, or
+https://github.com/Dishan18/Vaani_Relay (main). The first submission: tag <code>submission-2026-11-12</code>.</p>
+<h2>10. How I worked with the assistant</h2>
+<p>The v2 work was done with Claude Code after the interview. I set the direction:</p>
+<ul>
+<li>address each point of the review;</li>
+<li>carry citations as metadata (the reviewer's question);</li>
+<li>make it production-shaped, with Redis and whatever else was needed;</li>
+<li>rethink every step, not just retrieval.</li>
+</ul>
+<p>The assistant measured before changing defaults, and found the quality regressions on real Groq runs
+rather than the stand-in. They were traced through the raw drafts to PDF extraction artifacts, a number
+check that split "0.1" into two numbers, and parsing assumptions, and each one is now a test. What it
+couldn't do was re-run gpt-oss-120b after the fixes, so that result is open. Every run is reported,
+including the bad ones: the results are "on par, not better", and that is what this document says.</p></body></html>

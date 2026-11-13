@@ -217,10 +217,10 @@ One question = 5.6 points.
 | Pipeline | Correct + cited | Wrong (incl. wrongly refused) | Correctly refused | Tokens/answer | First sentence p50* | Complete p50* | Claims withheld |
 |---|---|---|---|---|---|---|---|
 | submitted (BM25 k=3, prose + gate), auto-grades | 44.4% | 33.3% | 22.2% | – | = complete | – | – |
-| new retrieval + prose + gate | **50.0%** | 27.8% | 22.2% | 3,797 | 1,872 ms | 1,872 ms | – |
-| **production: new retrieval + claims** | 44.4% | 33.3% (1 wrongly refused) | 22.2% | **2,935** | **1,526 ms** | 1,701 ms | 5 |
+| new retrieval + prose + gate | **50.0%** | 27.8% | 22.2% | 3,797 | 1,795 ms | 1,795 ms | – |
+| **production: new retrieval + claims** | 44.4% | 33.3% (1 wrongly refused) | 22.2% | **2,935** | **1,459 ms** | 1,648 ms | 5 |
 
-\* Excluding budget wait (the eval waits on purpose), so this is router + retrieval + draft + checks.
+\* p50, nearest-rank, excluding budget wait (the eval waits on purpose): router + retrieval + draft + checks.
 
 **What this does and doesn't show.**
 - **Answer quality is on par, not better, on these 18 questions.** The differences are one question
@@ -230,7 +230,7 @@ One question = 5.6 points.
     grading yet. Grading answers on them is the next measurement.
 - **Claims vs prose (same retrieval, same day):** claims got one question fewer right (Q1 too terse,
   Q16 wrongly refused; Q15 was right only with claims). In exchange:
-  - the first sentence arrives ~350 ms sooner and the answer streams;
+  - the first sentence arrives ~340 ms sooner and the answer streams;
   - it uses 23% fewer tokens (no citation-format redrafts);
   - there's no citation parsing left to break;
   - single bad claims are withheld instead of the whole answer.
